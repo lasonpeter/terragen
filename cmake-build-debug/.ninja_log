@@ -1,0 +1,8 @@
+# ninja log v6
+127	355	7652279836365706	untitled4.exe	6a006b6bb230fec9
+2	113	7652282712750270	CMakeFiles/terragen.dir/main.cpp.obj.ddi	9716b0c5aaac2eae
+114	150	7652282714203512	CMakeFiles/terragen.dir/CXX.dd	b6692be79c7fec5c
+114	150	7652282714203512	C:/Users/xenu/CLionProjects/terragen/cmake-build-debug/CMakeFiles/terragen.dir/CXXModules.json	b6692be79c7fec5c
+114	150	7652282714203512	CMakeFiles/terragen.dir/main.cpp.obj.modmap	b6692be79c7fec5c
+156	668	7652282714291405	CMakeFiles/terragen.dir/main.cpp.obj	274f2dac1f1b5079
+669	1014	7652282719422894	terragen.exe	4b1a3af6ad5823bd
