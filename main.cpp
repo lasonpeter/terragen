@@ -1,5 +1,7 @@
 ﻿#include "raylib.h"
 #define RAYGUI_IMPLEMENTATION
+#include <iostream>
+
 #include "raymath.h"
 #include "raygui.h"
 #include "FastNoise/FastNoise.h"
@@ -25,6 +27,37 @@ int main(void)
     float movement_speed = 0.2f;
     Vector3 camera_position = {0, 0, 0};
 
+
+
+    auto fnSimplex = FastNoise::New<FastNoise::Simplex>();
+    auto fnFractal = FastNoise::New<FastNoise::FractalFBm>();
+    fnFractal->SetSource( fnSimplex );
+    fnFractal->SetOctaveCount( 5 );
+    const int ATLAS_SIZE=256;
+    std::vector<float> noiseOutput(ATLAS_SIZE * ATLAS_SIZE );
+    // Generate a 16 x 16 x 16 area of noise
+    //FastNoise::SmartNode<> fnGenerator = FastNoise::NewFromEncodedNodeTree( "EwDNzEw+GQAbAA0ABAAAAAAAAEAHAAAK1yM/AAAAAAAA16MQQAEJAA==" );
+    fnFractal->GenUniformGrid2D(noiseOutput.data(), 0, 0, ATLAS_SIZE, ATLAS_SIZE, 0.021f, 342342346);
+    int index = 0;
+    //image.data = noiseOutput.data();
+    Color* noisePixels = new Color[ATLAS_SIZE*ATLAS_SIZE];
+
+    for (int y = 0; y < ATLAS_SIZE; y++)
+    {
+        for (int x = 0; x < ATLAS_SIZE; x++)
+        {
+            //std::cout<<noiseOutput[y*ATLAS_SIZE + x] <<" ";
+            noisePixels[ATLAS_SIZE*y + x] = Color((noiseOutput[y*ATLAS_SIZE + x]+1)*127,0,0,255);
+        }
+    }
+    Image image = Image(noisePixels,ATLAS_SIZE, ATLAS_SIZE);
+    image.data=noisePixels;
+    image.width = ATLAS_SIZE;
+    image.height = ATLAS_SIZE;
+    image.format= PIXELFORMAT_UNCOMPRESSED_R8G8B8A8;
+    image.mipmaps = 1;
+
+    Texture2D texture = LoadTextureFromImage(image);
 
     SetExitKey(KEY_NULL);
     HideCursor();
@@ -91,6 +124,7 @@ int main(void)
         BeginMode3D(camera);
         DrawCube( Vector3{0,0,0}, .5f, .5f, .5f,BLACK);
         EndMode3D();
+        DrawTexture(texture, screenWidth - texture.width - 20, 20, WHITE);
 
         DrawCubeWires( Vector3{0,0,0}, .5f, .5f, .5f,BLACK);
         DrawText("Congrats! You created your first window!", 190, 200, 20, LIGHTGRAY);
