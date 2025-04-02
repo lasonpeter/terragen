@@ -2,5 +2,5 @@
 # To keep your changes, remove these comment lines, but the plugin won't be able to modify your requirements
 
 requirements:
+  - "raylib/5.5"
   - "fastnoise2/0.10.0-alpha"
-  - "raylib/4.0.0"
