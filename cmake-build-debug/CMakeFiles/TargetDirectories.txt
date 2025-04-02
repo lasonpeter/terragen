@@ -1,3 +1,0 @@
-C:/Users/xenu/CLionProjects/terragen/cmake-build-debug/CMakeFiles/terragen.dir
-C:/Users/xenu/CLionProjects/terragen/cmake-build-debug/CMakeFiles/edit_cache.dir
-C:/Users/xenu/CLionProjects/terragen/cmake-build-debug/CMakeFiles/rebuild_cache.dir
