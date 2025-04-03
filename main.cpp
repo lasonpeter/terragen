@@ -5,6 +5,7 @@
 #include "raymath.h"
 #include "raygui.h"
 #include "FastNoise/FastNoise.h"
+#include "procedural/terrain/BiomeGeneration.h"
 //------------------------------------------------------------------------------------
 // Program main entry point
 //------------------------------------------------------------------------------------
@@ -40,6 +41,10 @@ int main(void)
     fnFractal->GenUniformGrid3D(noiseOutput.data(), 0,0, 0, ATLAS_SIZE, ATLAS_SIZE,ATLAS_SIZE, 0.021f, 342342346);
     int index = 0;
     //image.data = noiseOutput.data();
+
+    BiomeGeneration biome_generation= BiomeGeneration(12312);
+    biome_generation.generate(noiseOutput.data(),ATLAS_SIZE,0,0);
+
     Color* noisePixels = new Color[ATLAS_SIZE*ATLAS_SIZE];
 
     for (int y = 0; y < ATLAS_SIZE; y++)
