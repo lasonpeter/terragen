@@ -13,6 +13,8 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
     include_directories(${CMAKE_SOURCE_DIR}/include)
     #link_directories(${CMAKE_SOURCE_DIR}/lib)
 endif ()
-add_executable(terragen main.cpp)
+add_executable(terragen main.cpp
+        procedural/terrain/height_map_gen.cpp
+        procedural/terrain/height_map_gen.h)
 
 target_link_libraries(terragen raylib FastNoise2::FastNoise)

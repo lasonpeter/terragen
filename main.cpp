@@ -33,11 +33,11 @@ int main(void)
     auto fnFractal = FastNoise::New<FastNoise::FractalFBm>();
     fnFractal->SetSource( fnSimplex );
     fnFractal->SetOctaveCount( 5 );
-    const int ATLAS_SIZE=256;
-    std::vector<float> noiseOutput(ATLAS_SIZE * ATLAS_SIZE );
+    const int ATLAS_SIZE=64;
+    std::vector<float> noiseOutput(ATLAS_SIZE * ATLAS_SIZE *ATLAS_SIZE);
     // Generate a 16 x 16 x 16 area of noise
     //FastNoise::SmartNode<> fnGenerator = FastNoise::NewFromEncodedNodeTree( "EwDNzEw+GQAbAA0ABAAAAAAAAEAHAAAK1yM/AAAAAAAA16MQQAEJAA==" );
-    fnFractal->GenUniformGrid2D(noiseOutput.data(), 0, 0, ATLAS_SIZE, ATLAS_SIZE, 0.021f, 342342346);
+    fnFractal->GenUniformGrid3D(noiseOutput.data(), 0,0, 0, ATLAS_SIZE, ATLAS_SIZE,ATLAS_SIZE, 0.021f, 342342346);
     int index = 0;
     //image.data = noiseOutput.data();
     Color* noisePixels = new Color[ATLAS_SIZE*ATLAS_SIZE];
@@ -50,6 +50,7 @@ int main(void)
             noisePixels[ATLAS_SIZE*y + x] = Color((noiseOutput[y*ATLAS_SIZE + x]+1)*127,0,0,255);
         }
     }
+
     Image image = Image(noisePixels,ATLAS_SIZE, ATLAS_SIZE);
     image.data=noisePixels;
     image.width = ATLAS_SIZE;
@@ -106,7 +107,7 @@ int main(void)
 
     Texture2D texture = LoadTextureFromImage(image);
 
-    SetExitKey(KEY_NULL);
+    SetExitKey(KEY_ESCAPE);
     HideCursor();
 
     SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
@@ -115,7 +116,6 @@ int main(void)
     // Main game loop
     while (!WindowShouldClose())    // Detect window close button or ESC key
     {
-
         ///
         ///TEMPORARY CAMERA MOVEMENT
         ///
@@ -173,6 +173,21 @@ int main(void)
         Model model= LoadModelFromMesh(mesh);
         model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = texturechecked;
         DrawModel(model, Vector3{0, 0, 0}, 1.0f, WHITE);
+
+        /*for (int z = 0; z < ATLAS_SIZE; z++){
+            for (int y = 0; y < ATLAS_SIZE; y++)
+            {
+                for (int x = 0; x < ATLAS_SIZE; x++)
+                {
+                    //std::cout<<noiseOutput[y*ATLAS_SIZE + x] <<" ";
+                    if (noiseOutput[z*ATLAS_SIZE+y*ATLAS_SIZE + x] > 0.0f)
+                    {
+                        DrawCubeWires( Vector3(x, y, z), .5f, .5f, .5f,BLACK);
+                    }
+
+                }
+            }
+        }*/
         EndMode3D();
         DrawTexture(texture, screenWidth - texture.width - 20, 20, WHITE);
 
