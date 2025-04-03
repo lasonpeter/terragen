@@ -4,12 +4,12 @@
 
 #ifndef HEIGHT_MAP_GEN_H
 #define HEIGHT_MAP_GEN_H
-
+#include <vector>
 
 
 class height_map_gen {
     public:
-    height_map_gen();
+    std::vector<float> height_map_ge(int size_);
 };
 
 

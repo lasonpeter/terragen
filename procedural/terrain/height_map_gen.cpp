@@ -7,9 +7,9 @@
 #include <FastNoise/FastNoise.h>
 
 const float BIOME_JITTER = 0.980f;
-height_map_gen::height_map_gen()
+std::vector<float> height_map_gen::height_map_gen(const int size_)
 {
-    /*FastNoise::SmartNode<FastNoise::Cellular> biomeNoise = FastNoise::New<FastNoise::Cellular>();
+    auto biomeNoise =FastNoise::New<FastNoise::CellularDistance>();
     biomeNoise->SetJitterModifier(BIOME_JITTER);
-    biomeNoise->SetDistanceFunction(FastNoise::DistanceFunction::Hybrid);*/
+    biomeNoise->SetDistanceFunction(FastNoise::DistanceFunction::Hybrid);
 }
