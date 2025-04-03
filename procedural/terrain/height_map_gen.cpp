@@ -9,7 +9,7 @@
 const float BIOME_JITTER = 0.980f;
 height_map_gen::height_map_gen()
 {
-    FastNoise::SmartNode<FastNoise::Cellular> biomeNoise = FastNoise::New<FastNoise::Cellular>();
+    /*FastNoise::SmartNode<FastNoise::Cellular> biomeNoise = FastNoise::New<FastNoise::Cellular>();
     biomeNoise->SetJitterModifier(BIOME_JITTER);
-    biomeNoise->SetDistanceFunction(FastNoise::DistanceFunction::Hybrid);
+    biomeNoise->SetDistanceFunction(FastNoise::DistanceFunction::Hybrid);*/
 }
