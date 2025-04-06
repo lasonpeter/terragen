@@ -6,6 +6,8 @@
 
 #include <FastNoise/FastNoise_Config.h>
 #include <FastNoise/Generators/Cellular.h>
+#include <FastNoise/Generators/Fractal.h>
+#include <FastNoise/Generators/Simplex.h>
 
 
 BiomeGeneration::BiomeGeneration(int seed_)
@@ -13,10 +15,10 @@ BiomeGeneration::BiomeGeneration(int seed_)
     seed = seed_;
 }
 
-void BiomeGeneration::generate(float* buffer,int size,int x,int y)
+void BiomeGeneration::generateNoise(float* buffer,int size,int x,int y)
 {
-    auto biomeNoise =FastNoise::New<FastNoise::CellularValue>();
-    biomeNoise->SetJitterModifier(BIOME_JITTER);
-    biomeNoise->SetDistanceFunction(FastNoise::DistanceFunction::Hybrid);
-    biomeNoise->GenUniformGrid2D(buffer,x,y,size,size,frequency,seed);
+    auto cellural = FastNoise::New<FastNoise::CellularValue>();
+    cellural->SetJitterModifier(BIOME_JITTER);
+    cellural->SetDistanceFunction(FastNoise::DistanceFunction::Hybrid);
+    cellural->GenUniformGrid2D(buffer,x,y,size,size,frequency,seed);
 }

@@ -6,6 +6,7 @@
 #include "raygui.h"
 #include "FastNoise/FastNoise.h"
 #include "procedural/terrain/BiomeGeneration.h"
+#include "rendering/StaticRenderer.h"
 //------------------------------------------------------------------------------------
 // Program main entry point
 //------------------------------------------------------------------------------------
@@ -30,20 +31,20 @@ int main(void)
 
 
 
-    auto fnSimplex = FastNoise::New<FastNoise::Simplex>();
+    auto fnSimplex = FastNoise::New<FastNoise::CellularValue>();
     auto fnFractal = FastNoise::New<FastNoise::FractalFBm>();
+
     fnFractal->SetSource( fnSimplex );
     fnFractal->SetOctaveCount( 5 );
-    const int ATLAS_SIZE=64;
+    const int ATLAS_SIZE=256;
     std::vector<float> noiseOutput(ATLAS_SIZE * ATLAS_SIZE *ATLAS_SIZE);
     // Generate a 16 x 16 x 16 area of noise
     //FastNoise::SmartNode<> fnGenerator = FastNoise::NewFromEncodedNodeTree( "EwDNzEw+GQAbAA0ABAAAAAAAAEAHAAAK1yM/AAAAAAAA16MQQAEJAA==" );
-    fnFractal->GenUniformGrid3D(noiseOutput.data(), 0,0, 0, ATLAS_SIZE, ATLAS_SIZE,ATLAS_SIZE, 0.021f, 342342346);
     int index = 0;
     //image.data = noiseOutput.data();
 
     BiomeGeneration biome_generation= BiomeGeneration(12312);
-    biome_generation.generate(noiseOutput.data(),ATLAS_SIZE,0,0);
+    biome_generation.generateNoise(noiseOutput.data(),ATLAS_SIZE,0,0);
 
     Color* noisePixels = new Color[ATLAS_SIZE*ATLAS_SIZE];
 
@@ -69,12 +70,67 @@ int main(void)
 
 
     Mesh mesh = { 0 };
-    mesh.triangleCount = 1;
+    mesh.triangleCount = 2;
+    mesh. = new float[mesh.vertexCount*3];
     mesh.vertexCount = mesh.triangleCount*3;
-    mesh.vertices = (float *)MemAlloc(mesh.vertexCount*3*sizeof(float));    // 3 vertices, 3 coordinates each (x, y, z)
-    mesh.texcoords = (float *)MemAlloc(mesh.vertexCount*2*sizeof(float));   // 3 vertices, 2 coordinates each (x, y)
-    mesh.normals = (float *)MemAlloc(mesh.vertexCount*3*sizeof(float));     // 3 vertices, 3 coordinates each (x, y, z)
+    mesh.vertices = new float[mesh.vertexCount*3];    // 3 vertices, 3 coordinates each (x, y, z)
+    mesh.texcoords = new float[mesh.vertexCount*2];   // 3 vertices, 2 coordinates each (x, y)
+    mesh.normals = new float[mesh.vertexCount*3];     // 3 vertices, 3 coordinates each (x, y, z)
+    mesh.indices = new unsigned short[mesh.triangleCount*3];
+    //BOTTOM FACE
 
+    // 0 [0,0,0)
+    StaticRenderer::SetVertice(0, 0,0,0, mesh.vertices);
+    // 1 [0,1,0]
+    StaticRenderer::SetVertice(1, 1,0, 0,mesh.vertices);
+    // 3 [0,1,1]
+    StaticRenderer::SetVertice(2, 1,0, 1,mesh.vertices);
+    // 2 [0,0,1]
+    StaticRenderer::SetVertice(3, 0,0, 1,mesh.vertices);
+
+    // BOTTOM FACE INDICIES
+
+    //RIGHT TRIANGLE
+    mesh.indices[0] = 0;
+    mesh.indices[1] = 1;
+    mesh.indices[2] = 3;
+    //LEFT TRIANGLE
+    mesh.indices[3] = 0;
+    mesh.indices[4] = 3;
+    mesh.indices[5] = 2;
+
+    //TEXTURES
+    mesh.texcoords[0] = 0; //X
+    mesh.texcoords[1] = 0; //Y
+
+    mesh.texcoords[2] = 1; //X
+    mesh.texcoords[3] = 0; //Y
+
+    mesh.texcoords[4] = 1; //X
+    mesh.texcoords[5] = 1; //Y
+
+    //LEFT TRIANGLE
+    mesh.texcoords[6] = 0; //X
+    mesh.texcoords[7] = 0; //Y
+
+    mesh.texcoords[8] = 1; //X
+    mesh.texcoords[9] = 1; //Y
+
+    mesh.texcoords[10] = 0; //X
+    mesh.texcoords[11] = 1; //Y
+
+    //NORMALS
+    for (int i = 0; i <= mesh.vertexCount; i=i+3) {
+        std::cout<<i<<std::endl;
+        mesh.normals[i] = 0;
+        mesh.normals[i+1] = 1;
+        mesh.normals[i+2] = 0;
+    }
+
+
+
+
+    /*
     // Vertex at (0, 0, 0)
     mesh.vertices[0] = 0;
     mesh.vertices[1] = 0;
@@ -103,7 +159,7 @@ int main(void)
     mesh.normals[7] = 1;
     mesh.normals[8] = 0;
     mesh.texcoords[4] = 1;
-    mesh.texcoords[5] =0;
+    mesh.texcoords[5] =0;*/
 
     // Upload mesh data from CPU (RAM) to GPU (VRAM) memory
     UploadMesh(&mesh, false);

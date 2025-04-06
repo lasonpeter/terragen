@@ -9,13 +9,13 @@
 
 class BiomeGeneration {
     const float BIOME_JITTER = 0.980f;
-    const float FREQUENCY = 0.980f;
+    const float FREQUENCY = 0.0980f;
     private:
     int seed = 0;
     float frequency = FREQUENCY;
 public:
     explicit BiomeGeneration(int seed_);
-    void generate(float* buffer, int size, int x, int y);
+    void generateNoise(float* buffer, int size, int x, int y);
 };
 
 

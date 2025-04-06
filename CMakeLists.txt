@@ -15,6 +15,17 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 endif ()
 add_executable(terragen main.cpp
         procedural/terrain/BiomeGeneration.cpp
-        procedural/terrain/BiomeGeneration.h)
+        procedural/terrain/BiomeGeneration.h
+        procedural/terrain/BiomeType.h
+        procedural/terrain/generators/plains/Plains.cpp
+        procedural/terrain/generators/plains/Plains.h
+        procedural/terrain/generators/TerrainGenerator.h
+        rendering/StaticRenderer.cpp
+        rendering/StaticRenderer.h
+        procedural/Chunk.h
+        procedural/Block.cpp
+        procedural/Block.h
+        procedural/BlockType.h
+)
 
 target_link_libraries(terragen raylib FastNoise2::FastNoise)
