@@ -8,7 +8,7 @@
 
 void StaticRenderer::render(std::vector<Chunk> *chunks) {
     Mesh mesh = { 0 };
-    mesh.indices = new unsigned short[10];
+   // mesh.indices = new unsigned short[10];
 
 
     // MUST BE SET
@@ -23,99 +23,98 @@ void StaticRenderer::render(std::vector<Chunk> *chunks) {
     // Vertex at (0, 0, 0)
 
     Chunk* chunk = chunks[0].data();
+    int indiciesCounter = 0;
+    int textureCounter = 0;
+    int vertexCounter = 0;
     for (int y =0; y < 256; y++) {
         for (int z =0; z < 16; z++) {
             for (int x =0; x < 16; x++) {
                 if (chunk->blocks[y*256+x*16+z*16].blockType == AIR  ) {
                     continue;
                 }
-                Block* block = &chunk->blocks[y*256+x*16+z*16];
+                Block* block = &chunk->blocks[y*256+z*16+x];
                 if (block->blockType== AIR)
                     continue;
                 //CCW FACE RENDER
+                {
+                    if(x<15)
+                    {
+                        if (chunk->blocks[y*256+z*16+x+1].isTransparent)
+                        {
+                            //RENDER RIGHT FACE
 
 
-                //BOTTOM FACE
+                        }
+                    }
+                    if (x>0)
+                    {
+                        if (chunk->blocks[y*256+z*16+x-1].isTransparent)
+                        {
+                            //RENDER LEFT FACE
+                        }
+                    }
+                    if(z<15)
+                    {
+                        if (chunk->blocks[y*256+(z+1)*16+x].isTransparent)
+                        {
+                            //RENDER FRONT FACE
+                        }
+                    }
+                    if (z>0)
+                    {
+                        if (chunk->blocks[y*256+(z-1)*16+x].isTransparent)
+                        {
+                            //RENDER BACK FACE
+                        }
+                    }
+                    if(y<15)
+                    {
+                        if (chunk->blocks[(y+1)*256+z*16+x].isTransparent)
+                        {
+                            //RENDER TOP FACE
+                        }
+                    }
+                    if (y>0)
+                    {
+                        if (chunk->blocks[(y-1)*256+z*16+x].isTransparent)
+                        {
+                            //RENDER BOTTOM FACE
+                        }
+                    }
+                }
 
-                // 0 [0,0,0)
-                SetVertice(0, 0,0,0, mesh.vertices);
-                // 1 [0,1,0]
-                SetVertice(1, 1,0, 0,mesh.vertices);
-                // 3 [0,1,1]
-                SetVertice(2, 1,0, 1,mesh.vertices);
-                // 2 [0,0,1]
-                SetVertice(3, 0,0, 1,mesh.vertices);
+                //TOP FACE
+                SetVertice(vertexCounter++, 0,1, 0,mesh.vertices);
+                SetVertice(vertexCounter++, 1,1,0, mesh.vertices);
+                SetVertice(vertexCounter++, 0,1, 1,mesh.vertices);
+                SetVertice(vertexCounter++, 1,1, 1,mesh.vertices);
 
-                // BOTTOM FACE INDICIES
-
-                //RIGHT FACE
-                mesh.indices[0] = 0;
+                //RIGHT TRIANGLE
+                mesh.indices[0] = 3;
                 mesh.indices[1] = 1;
-                mesh.indices[2] = 3;
-                //LEFT FACE
-                mesh.indices[3] = 0;
+                mesh.indices[2] = 0;
+
+                //LEFT TRIANGLE
+                mesh.indices[3] = 2;
                 mesh.indices[4] = 3;
-                mesh.indices[5] = 2;
+                mesh.indices[5] = 0;
 
+                //TEXTURES
+                mesh.texcoords[textureCounter++] = 1; //X
+                mesh.texcoords[textureCounter++] = 0; //Y
 
+                mesh.texcoords[textureCounter++] = 0; //X
+                mesh.texcoords[textureCounter++] = 0; //Y
 
-                mesh.vertices[y*256+x*16+z+0] = x+0; //X
-                mesh.vertices[1] = y+0; //Y
-                mesh.vertices[2] = z+0; //Z
+                mesh.texcoords[textureCounter++] = 1; //X
+                mesh.texcoords[textureCounter++] = 1; //Y
 
-                mesh.normals[0] = 0; //X
-                mesh.normals[1] = 1; //Y
-                mesh.normals[2] = 0; //Z
+                mesh.texcoords[textureCounter++] = 0; //X
+                mesh.texcoords[textureCounter++] = 1; //Y
 
-                // 3 [1,0,1)
-                mesh.vertices[0] = x+1; //X
-                mesh.vertices[1] = y+0; //Y
-                mesh.vertices[2] = z+1; //Z
-
-                mesh.normals[0] = 0; //X
-                mesh.normals[1] = 1; //Y
-                mesh.normals[2] = 0; //Z
-
-                // 1 [1,0,0)
-                mesh.vertices[0] = x+1; //X
-                mesh.vertices[1] = y+0; //Y
-                mesh.vertices[2] = z+0; //Z
-
-                mesh.normals[0] = 0; //X
-                mesh.normals[1] = 1; //Y
-                mesh.normals[2] = 0; //Z
             }
         }
     }
-    mesh.vertices[0] = 0; //X
-    mesh.vertices[1] = 0; //Y
-    mesh.vertices[2] = 0; //Z
-    mesh.normals[0] = 0; //X
-    mesh.normals[1] = 1; //Y
-    mesh.normals[2] = 0; //Z
-
-    mesh.texcoords[0] = 0;
-    mesh.texcoords[1] = 0;
-
-    // Vertex at (1, 0, 2)
-    mesh.vertices[3] = 1;
-    mesh.vertices[4] = 0;
-    mesh.vertices[5] = 2;
-    mesh.normals[3] = 0;
-    mesh.normals[4] = 1;
-    mesh.normals[5] = 0;
-    mesh.texcoords[2] = 0.5f;
-    mesh.texcoords[3] = 1.0f;
-
-    // Vertex at (2, 0, 0)
-    mesh.vertices[6] = 2;
-    mesh.vertices[7] = 0;
-    mesh.vertices[8] = 0;
-    mesh.normals[6] = 0;
-    mesh.normals[7] = 1;
-    mesh.normals[8] = 0;
-    mesh.texcoords[4] = 1;
-    mesh.texcoords[5] =0;
 
     // Upload mesh data from CPU (RAM) to GPU (VRAM) memory
     UploadMesh(&mesh, false);

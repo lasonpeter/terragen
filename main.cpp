@@ -76,6 +76,7 @@ int main(void)
     mesh.texcoords = new float[mesh.vertexCount*2];   // 3 vertices, 2 coordinates each (x, y)
     mesh.normals = new float[mesh.vertexCount*3];     // 3 vertices, 3 coordinates each (x, y, z)
     mesh.indices = new unsigned short[mesh.triangleCount*3];
+
     //TOP FACE
     StaticRenderer::SetVertice(0, 0,1, 0,mesh.vertices);
     StaticRenderer::SetVertice(1, 1,1,0, mesh.vertices);
@@ -102,6 +103,7 @@ int main(void)
 
     mesh.texcoords[6] = 0; //X
     mesh.texcoords[7] = 1; //Y
+
 
 
     //BOTTOM FACE
