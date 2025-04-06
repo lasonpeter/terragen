@@ -71,24 +71,44 @@ int main(void)
 
     Mesh mesh = { 0 };
     mesh.triangleCount = 2;
-    mesh. = new float[mesh.vertexCount*3];
-    mesh.vertexCount = mesh.triangleCount*3;
+    mesh.vertexCount = 4;
     mesh.vertices = new float[mesh.vertexCount*3];    // 3 vertices, 3 coordinates each (x, y, z)
     mesh.texcoords = new float[mesh.vertexCount*2];   // 3 vertices, 2 coordinates each (x, y)
     mesh.normals = new float[mesh.vertexCount*3];     // 3 vertices, 3 coordinates each (x, y, z)
     mesh.indices = new unsigned short[mesh.triangleCount*3];
+    //TOP FACE
+    StaticRenderer::SetVertice(0, 0,1, 0,mesh.vertices);
+    StaticRenderer::SetVertice(1, 1,1,0, mesh.vertices);
+    StaticRenderer::SetVertice(2, 0,1, 1,mesh.vertices);
+    StaticRenderer::SetVertice(3, 1,1, 1,mesh.vertices);
+
+    //RIGHT TRIANGLE
+    mesh.indices[2] = 0;
+    mesh.indices[1] = 1;
+    mesh.indices[0] = 3;
+    //LEFT TRIANGLE
+    mesh.indices[5] = 0;
+    mesh.indices[4] = 3;
+    mesh.indices[3] = 2;
+    //TEXTURES
+    mesh.texcoords[0] = 1; //X
+    mesh.texcoords[1] = 0; //Y
+
+    mesh.texcoords[2] = 0; //X
+    mesh.texcoords[3] = 0; //Y
+
+    mesh.texcoords[4] = 1; //X
+    mesh.texcoords[5] = 1; //Y
+
+    mesh.texcoords[6] = 0; //X
+    mesh.texcoords[7] = 1; //Y
+
+
     //BOTTOM FACE
-
-    // 0 [0,0,0)
-    StaticRenderer::SetVertice(0, 0,0,0, mesh.vertices);
-    // 1 [0,1,0]
-    StaticRenderer::SetVertice(1, 1,0, 0,mesh.vertices);
-    // 3 [0,1,1]
-    StaticRenderer::SetVertice(2, 1,0, 1,mesh.vertices);
-    // 2 [0,0,1]
-    StaticRenderer::SetVertice(3, 0,0, 1,mesh.vertices);
-
-    // BOTTOM FACE INDICIES
+    StaticRenderer::SetVertice(0, 0,0, 0,mesh.vertices);
+    StaticRenderer::SetVertice(1, 1,0,0, mesh.vertices);
+    StaticRenderer::SetVertice(2, 0,0, 1,mesh.vertices);
+    StaticRenderer::SetVertice(3, 1,0, 1,mesh.vertices);
 
     //RIGHT TRIANGLE
     mesh.indices[0] = 0;
@@ -98,26 +118,18 @@ int main(void)
     mesh.indices[3] = 0;
     mesh.indices[4] = 3;
     mesh.indices[5] = 2;
-
     //TEXTURES
-    mesh.texcoords[0] = 0; //X
+    mesh.texcoords[0] = 1; //X
     mesh.texcoords[1] = 0; //Y
 
-    mesh.texcoords[2] = 1; //X
+    mesh.texcoords[2] = 0; //X
     mesh.texcoords[3] = 0; //Y
 
     mesh.texcoords[4] = 1; //X
     mesh.texcoords[5] = 1; //Y
 
-    //LEFT TRIANGLE
     mesh.texcoords[6] = 0; //X
-    mesh.texcoords[7] = 0; //Y
-
-    mesh.texcoords[8] = 1; //X
-    mesh.texcoords[9] = 1; //Y
-
-    mesh.texcoords[10] = 0; //X
-    mesh.texcoords[11] = 1; //Y
+    mesh.texcoords[7] = 1; //Y
 
     //NORMALS
     for (int i = 0; i <= mesh.vertexCount; i=i+3) {
@@ -230,11 +242,20 @@ int main(void)
         BeginDrawing();
         ClearBackground(RAYWHITE);
         BeginMode3D(camera);
-        DrawCube( Vector3{0,0,0}, .5f, .5f, .5f,BLACK);
         Model model= LoadModelFromMesh(mesh);
         model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = texturechecked;
         DrawModel(model, Vector3{0, 0, 0}, 1.0f, WHITE);
 
+        // 0 [0,0,0)
+        DrawCubeWires({0,0,0},0.2f, .2f, .2f,YELLOW);
+        // 1 [1,0,0]            2     2     2
+        DrawCubeWires({1,0,0},0.2f, .2f, .2f,ORANGE);
+        // 3 [1,0,1]            2     2     2
+        DrawCubeWires({1,0,1},0.2f, .2f, .2f,BLUE);
+        // 2 [0,0,1]            2     2     2
+        DrawCubeWires({0,0,1},0.2f, .2f, .2f,RED);
+
+        DrawCubeWires({0,1,0},0.2f, .2f, .2f,VIOLET);
         /*for (int z = 0; z < ATLAS_SIZE; z++){
             for (int y = 0; y < ATLAS_SIZE; y++)
             {

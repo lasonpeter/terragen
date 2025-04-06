@@ -122,9 +122,9 @@ void StaticRenderer::render(std::vector<Chunk> *chunks) {
 }
 
 void StaticRenderer::SetVertice(int verticePositionIndex,float x, float y, float z,float* vertice) {
-    vertice[verticePositionIndex+0] = x;
-    vertice[verticePositionIndex+1] = y;
-    vertice[verticePositionIndex+2] = z;
+    vertice[verticePositionIndex*3+0] = x;
+    vertice[verticePositionIndex*3+1] = y;
+    vertice[verticePositionIndex*3+2] = z;
 }
 
 
