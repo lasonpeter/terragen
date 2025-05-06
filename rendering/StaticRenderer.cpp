@@ -22,18 +22,18 @@ void StaticRenderer::render(std::vector<Chunk> *chunks) {
 
     // Vertex at (0, 0, 0)
 
-    Chunk* chunk = chunks[0].data();
+    /*Chunk* chunk = chunks[0].data();
     int indiciesCounter = 0;
     int textureCounter = 0;
     int vertexCounter = 0;
     for (int y =0; y < 256; y++) {
         for (int z =0; z < 16; z++) {
             for (int x =0; x < 16; x++) {
-                if (chunk->blocks[y*256+x*16+z*16].blockType == AIR  ) {
+                if (chunk->blocks[y*256+x*16+z*16].blockType == BlockType::AIR  ) {
                     continue;
                 }
                 Block* block = &chunk->blocks[y*256+z*16+x];
-                if (block->blockType== AIR)
+                if (block->blockType== BlockType::AIR)
                     continue;
                 //CCW FACE RENDER
                 {
@@ -83,7 +83,7 @@ void StaticRenderer::render(std::vector<Chunk> *chunks) {
                     }
                 }
 
-               /* //TOP FACE
+               *//* //TOP FACE
                 SetVertice(vertexCounter++, 0,1, 0,vertex_buffer);
                 SetVertice(vertexCounter++, 1,1,0, vertex_buffer);
                 SetVertice(vertexCounter++, 0,1, 1,vertex_buffer);
@@ -111,10 +111,10 @@ void StaticRenderer::render(std::vector<Chunk> *chunks) {
 
                 texture_buffer[textureCounter++] = 0; //X
                 texture_buffer[textureCounter++] = 1; //Y
-*/
+*//*
             }
         }
-    }
+    }*/
 
     // Upload mesh data from CPU (RAM) to GPU (VRAM) memory
     UploadMesh(&mesh, false);

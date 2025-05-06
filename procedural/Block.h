@@ -11,9 +11,10 @@
 
 class Block {
 public:
-    bool isTransparent = true;
     BlockType blockType = BlockType::AIR;
     Block() = default;
+
+    explicit Block(BlockType block_type);
 };
 
 

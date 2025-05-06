@@ -16,8 +16,8 @@ int main(void)
 {
     // Initialization
     //--------------------------------------------------------------------------------------
-    const int screenWidth = 800;
-    const int screenHeight = 450;
+    const int screenWidth = 800*1.5;
+    const int screenHeight = 450*1.5;
     InitWindow(screenWidth, screenHeight, "terragen");
     Camera3D camera = {0};
     camera.position = Vector3{1.0f, 1.0f, 1.0f}; // Camera position
@@ -29,13 +29,12 @@ int main(void)
     //movement and such
     float speed = 0.05f;
     float movement_speed = 0.2f;
-    Vector3 camera_position = {0, 0, 0};
-
+    Vector3 camera_position = {1, 1, 1};
 
 
     auto fnSimplex = FastNoise::New<FastNoise::CellularValue>();
     auto fnFractal = FastNoise::New<FastNoise::FractalFBm>();
-    auto somethin = FastNoise::NewFromEncodedNodeTree("EQACAAAAAAAgQBAAAAAAQBkAEwDD9Sg/DQAEAAAAAAAgQAkAAGZmJj8AAAAAPwEEAAAAAAAAAEBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAM3MTD4AMzMzPwAAAAA/");
+    //auto somethin = FastNoise::NewFromEncodedNodeTree("GQAbABMAuB5FQAcAARMAj8LlQAcAAI/CdT4=");
 
     /*fnFractal->SetSource( fnSimplex );
     fnFractal->SetOctaveCount( 5 );*/
@@ -73,86 +72,54 @@ int main(void)
     UnloadImage(checked);
 
 
+
+
+     uint8_t face_mask{};
+     face_mask = face_mask+ FaceMask::Top;
+     face_mask = face_mask+ FaceMask::Bottom;
+     face_mask = face_mask+ FaceMask::Left;
+     //face_mask = face_mask+ FaceMask::Right;
+     //face_mask = face_mask+ FaceMask::Front;
+     face_mask = face_mask+ FaceMask::Back;
+     std::bitset<8> b(face_mask);
+
+    std::cout<<b<<std::endl;
+     int face_count{};
+
+     Chunk chunk = Chunk(Int2{0,0});
+     chunk.blocks[0] = Block(BlockType::AIR);
+    chunk.blocks[1] = Block(BlockType::DIRT);
+    chunk.blocks[2] = Block(BlockType::DIRT);
+    chunk.blocks[16] = Block(BlockType::DIRT);
+    chunk.blocks[3] = Block(BlockType::DIRT);
+    chunk.blocks[65535] = Block(BlockType::DIRT);
+
+    int *amount_of_faces = new int;
+    *amount_of_faces = 0;
+    uint8_t* chunkFaceMasks = Chunk::generateChunkFaceMasks(&chunk,amount_of_faces);
     Mesh mesh = { 0 };
-    mesh.triangleCount = 12;
-    mesh.vertexCount = 4*6;
+    mesh.triangleCount = (*amount_of_faces)*2;
+    mesh.vertexCount = (*amount_of_faces)*4;
     mesh.vertices = new float[mesh.vertexCount*3];    // 3 vertices, 3 coordinates each (x, y, z)
     mesh.texcoords = new float[mesh.vertexCount*2];   // 3 vertices, 2 coordinates each (x, y)
     mesh.normals = new float[mesh.vertexCount*3];     // 3 vertices, 3 coordinates each (x, y, z)
     mesh.indices = new unsigned short[mesh.triangleCount*3];
+    //face_count =StaticRenderer::RenderCube(face_mask, mesh.vertices,mesh.indices,mesh.texcoords,mesh.normals,new Int3{0,0,0},face_count);
+    for (int y = 0; y < 256; ++y) {
+        for (int x = 0; x < 16; ++x) {
+            for (int z = 0; z < 16; ++z) {
+                if(is_transparent(chunk.blocks[y*256+x*16+z].blockType)){
+                    continue;
+                }
+                std::bitset<8> a(chunkFaceMasks[y*256+x*16+z]);
 
- /*   //TOP FACE
-    StaticRenderer::SetVertice(0, 0,1, 0,mesh.vertices);
-    StaticRenderer::SetVertice(1, 1,1, 0,mesh.vertices);
-    StaticRenderer::SetVertice(2, 0,1, 1,mesh.vertices);
-    StaticRenderer::SetVertice(3, 1,1, 1,mesh.vertices);
-
-    //RIGHT TRIANGLE
-    mesh.indices[0] = 3;
-    mesh.indices[1] = 1;
-    mesh.indices[2] = 0;
-
-    //LEFT TRIANGLE
-    mesh.indices[3] = 2;
-    mesh.indices[4] = 3;
-    mesh.indices[5] = 0;
-    //TEXTURES
-    mesh.texcoords[0] = 1; //X
-    mesh.texcoords[1] = 0; //Y
-
-    mesh.texcoords[2] = 0; //X
-    mesh.texcoords[3] = 0; //Y
-
-    mesh.texcoords[4] = 1; //X
-    mesh.texcoords[5] = 1; //Y
-
-    mesh.texcoords[6] = 0; //X
-    mesh.texcoords[7] = 1; //Y
-    
-    //BOTTOM FACE
-    StaticRenderer::SetVertice(0+4, 0,0, 0,mesh.vertices);
-    StaticRenderer::SetVertice(1+4, 1,0, 0,mesh.vertices);
-    StaticRenderer::SetVertice(2+4, 0,0, 1,mesh.vertices);
-    StaticRenderer::SetVertice(3+4, 1,0, 1,mesh.vertices);
-
-    //RIGHT TRIANGLE
-    mesh.indices[0+6] = 0+4;
-    mesh.indices[1+6] = 1+4;
-    mesh.indices[2+6] = 3+4;
-    //LEFT TRIANGLE
-    mesh.indices[3+6] = 0+4;
-    mesh.indices[4+6] = 3+4;
-    mesh.indices[5+6] = 2+4;
-    //TEXTURES
-    mesh.texcoords[0+8] = 1; //X
-    mesh.texcoords[1+8] = 0; //Y
-
-    mesh.texcoords[2+8] = 0; //X
-    mesh.texcoords[3+8] = 0; //Y
-
-    mesh.texcoords[4+8] = 1; //X
-    mesh.texcoords[5+8] = 1; //Y
-
-    mesh.texcoords[6+8] = 0; //X
-    mesh.texcoords[7+8] = 1; //Y
-*/
-
- uint8_t face_mask{};
- face_mask = face_mask+ FaceMask::Top;
- face_mask = face_mask+ FaceMask::Bottom;
- face_mask = face_mask+ FaceMask::Left;
- face_mask = face_mask+ FaceMask::Right;
- face_mask = face_mask+ FaceMask::Front;
- face_mask = face_mask+ FaceMask::Back;
- std::bitset<8> b(face_mask);
-
-    std::cout<<b<<std::endl;
- int face_count{};
- face_count =StaticRenderer::RenderCube(face_mask, mesh.vertices,mesh.indices,mesh.texcoords,mesh.normals,new Int3{0,0,0},face_count);
- face_count =StaticRenderer::RenderCube(face_mask, mesh.vertices,mesh.indices,mesh.texcoords,mesh.normals,new Int3{1,0,0},face_count);
- face_count =StaticRenderer::RenderCube(face_mask, mesh.vertices,mesh.indices,mesh.texcoords,mesh.normals,new Int3{1,0,1},face_count);
- mesh.triangleCount = face_count*2;
- mesh.vertexCount = face_count*4;
+                std::cout<<a<<std::endl;
+                face_count =StaticRenderer::RenderCube(chunkFaceMasks[y*256+x*16+z], mesh.vertices,mesh.indices,mesh.texcoords,mesh.normals,new Int3{x,y,z},face_count);
+            }
+        }
+    }
+    // face_count =StaticRenderer::RenderCube(face_mask, mesh.vertices,mesh.indices,mesh.texcoords,mesh.normals,new Int3{1,0,0},face_count);
+     //face_count =StaticRenderer::RenderCube(face_mask, mesh.vertices,mesh.indices,mesh.texcoords,mesh.normals,new Int3{1,0,1},face_count);
     //NORMALS
     for (int i = 0; i <= mesh.vertexCount; i=i+3) {
         std::cout<<i<<std::endl;
@@ -161,7 +128,6 @@ int main(void)
         mesh.normals[i+2] = 0;
     }
 
-
     // Upload mesh data from CPU (RAM) to GPU (VRAM) memory
     UploadMesh(&mesh, false);
 
@@ -169,7 +135,7 @@ int main(void)
 
     Texture2D texture = LoadTextureFromImage(image);
 
-    SetExitKey(KEY_ESCAPE);
+    SetExitKey(KEY_NULL);
     HideCursor();
 
     SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
@@ -245,6 +211,13 @@ int main(void)
         DrawCubeWires({0,0,1},0.2f, .2f, .2f,RED);
 
         DrawCubeWires({0,1,0},0.2f, .2f, .2f,VIOLET);
+
+
+
+
+        DrawLine3D({0,0,0},{0,5,0}, BLUE);
+        DrawLine3D({0,0,0},{0,0,5}, GREEN);
+        DrawLine3D({0,0,0},{5,0,0}, RED);
         /*for (int z = 0; z < ATLAS_SIZE; z++){
             for (int y = 0; y < ATLAS_SIZE; y++)
             {

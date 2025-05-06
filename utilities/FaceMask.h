@@ -37,4 +37,16 @@ inline uint8_t operator-(uint8_t bitmask, FaceMask face) {
     // Performs bitwise AND with the complement to clear the flag
     return bitmask & ~static_cast<uint8_t>(face);
 }
+
+// Adds the flag to the bitmask
+inline uint8_t& operator+=(uint8_t& bitmask, FaceMask face) {
+    bitmask |= static_cast<uint8_t>(face);
+    return bitmask;
+}
+
+// Removes the flag from the bitmask
+inline uint8_t& operator-=(uint8_t& bitmask, FaceMask face) {
+    bitmask &= ~static_cast<uint8_t>(face);
+    return bitmask;
+}
 #endif //TERRAGEN_FACEMASK_H

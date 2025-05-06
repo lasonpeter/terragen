@@ -7,11 +7,6 @@
 
 #include "../procedural/Chunk.h"
 
-typedef struct Int3 {
-    int x;
-    int y;
-    int z;
-} Int3;
 
 enum FaceSide{
     TOP,

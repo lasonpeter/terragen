@@ -9,7 +9,7 @@
 
 class BiomeGeneration {
     const float BIOME_JITTER = 0.980f;
-    const float FREQUENCY = 0.0980f;
+    const float FREQUENCY = 0.01980f;
     private:
     int seed = 0;
     float frequency = FREQUENCY;

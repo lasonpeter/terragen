@@ -3,3 +3,7 @@
 //
 
 #include "Block.h"
+
+Block::Block(BlockType block_type) {
+    blockType = block_type;
+}

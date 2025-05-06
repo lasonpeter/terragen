@@ -6,11 +6,13 @@
 #define BLOCKTYPE_H
 
 
-enum class BlockType {
-    AIR,
-    GRASS,
-    DIRT,
-    STONE
+#include <cstdint>
+
+enum class BlockType : uint8_t{
+    AIR =0,
+    GRASS =1,
+    DIRT =2,
+    STONE =3
 };
 
 inline const char *to_string(BlockType e) {
@@ -20,6 +22,15 @@ inline const char *to_string(BlockType e) {
         case BlockType::DIRT: return "DIRT";
         case BlockType::STONE: return "STONE";
         default: return "unknown";
+    }
+}
+inline const bool is_transparent(BlockType e) {
+    switch (e) {
+        case BlockType::AIR: return true;
+        case BlockType::GRASS: return false;
+        case BlockType::DIRT: return false;
+        case BlockType::STONE: return false;
+        default: return true;
     }
 }
 #endif //BLOCKTYPE_H
