@@ -4,10 +4,13 @@
 
 #include "BiomeGeneration.h"
 
+#include <stdexcept>
 #include <FastNoise/FastNoise_Config.h>
 #include <FastNoise/Generators/Cellular.h>
 #include <FastNoise/Generators/Fractal.h>
 #include <FastNoise/Generators/Simplex.h>
+#include <FastNoise/FastNoise.h>
+
 
 
 BiomeGeneration::BiomeGeneration(int seed_)
@@ -15,10 +18,16 @@ BiomeGeneration::BiomeGeneration(int seed_)
     seed = seed_;
 }
 
-void BiomeGeneration::generateNoise(float* buffer,int size,int x,int y)
+void BiomeGeneration::generateNoise(float *buffer, int size, int x, int y)
 {
-    auto cellural = FastNoise::New<FastNoise::CellularValue>();
-    cellural->SetJitterModifier(BIOME_JITTER);
-    cellural->SetDistanceFunction(FastNoise::DistanceFunction::Hybrid);
-    cellural->GenUniformGrid2D(buffer,x,y,size,size,frequency,seed);
+    auto fn = FastNoise::NewFromEncodedNodeTree(encodedNodeTree);
+
+    if (fn)
+    {
+        fn->GenUniformGrid2D(buffer, x, y, size, size, frequency, seed);
+    }
+    else
+    {
+        throw std::runtime_error("Failed to load encoded node tree");
+    }
 }

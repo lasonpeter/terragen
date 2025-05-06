@@ -29,3 +29,5 @@ add_executable(terragen main.cpp
 )
 
 target_link_libraries(terragen raylib FastNoise2::FastNoise)
+
+target_compile_definitions(terragen PRIVATE FASTNOISE_STATIC_LIB)

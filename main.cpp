@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include "raymath.h"
+#include <cmath>
 #include "raygui.h"
 #include "FastNoise/FastNoise.h"
 #include "procedural/terrain/BiomeGeneration.h"
@@ -29,31 +30,34 @@ int main(void)
     float movement_speed = 0.2f;
     Vector3 camera_position = {0, 0, 0};
 
-
-
-    auto fnSimplex = FastNoise::New<FastNoise::CellularValue>();
-    auto fnFractal = FastNoise::New<FastNoise::FractalFBm>();
-
-    fnFractal->SetSource( fnSimplex );
-    fnFractal->SetOctaveCount( 5 );
     const int ATLAS_SIZE=256;
     std::vector<float> noiseOutput(ATLAS_SIZE * ATLAS_SIZE *ATLAS_SIZE);
-    // Generate a 16 x 16 x 16 area of noise
-    //FastNoise::SmartNode<> fnGenerator = FastNoise::NewFromEncodedNodeTree( "EwDNzEw+GQAbAA0ABAAAAAAAAEAHAAAK1yM/AAAAAAAA16MQQAEJAA==" );
+
     int index = 0;
-    //image.data = noiseOutput.data();
+    int half = ATLAS_SIZE/2;
 
-    BiomeGeneration biome_generation= BiomeGeneration(12312);
-    biome_generation.generateNoise(noiseOutput.data(),ATLAS_SIZE,0,0);
+    BiomeGeneration biome_generation(1337);
+    const char *myEncodedTree = "EQACAAAAAAAgQBAAAAAAQBkAGQATAClcjz4IAAETAMP1KD8NAAQAAAAAACBACQAAZmYmPwAAAAA/AQQAAAAAAAAAQEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAzcxMPgAzMzM/AAAAAD8=";
+    biome_generation.setEncodedNodeTree(myEncodedTree);
 
-    Color* noisePixels = new Color[ATLAS_SIZE*ATLAS_SIZE];
+    biome_generation.generateNoise(noiseOutput.data(),ATLAS_SIZE,-half,-half);
+
+    auto* noisePixels = new Color[ATLAS_SIZE*ATLAS_SIZE];
 
     for (int y = 0; y < ATLAS_SIZE; y++)
     {
         for (int x = 0; x < ATLAS_SIZE; x++)
         {
-            //std::cout<<noiseOutput[y*ATLAS_SIZE + x] <<" ";
-            noisePixels[ATLAS_SIZE*y + x] = Color((noiseOutput[y*ATLAS_SIZE + x]+1)*127,0,0,255);
+            float val = noiseOutput[y * ATLAS_SIZE + x];
+            float mapped = (val + 1.0f) * 0.5f;
+            mapped = 1.0f - mapped;
+
+            int rounded = std::lround( mapped * 255.0f );
+            if (rounded < 0)   rounded = 0;
+            if (rounded > 255) rounded = 255;
+
+            auto v = static_cast<uint8_t>( rounded );
+            noisePixels[y * ATLAS_SIZE + x] = Color{ v, v, v, 255 };
         }
     }
 
@@ -181,6 +185,7 @@ int main(void)
 
 
     Texture2D texture = LoadTextureFromImage(image);
+    UnloadImage(image);
 
     SetExitKey(KEY_ESCAPE);
     HideCursor();
@@ -247,6 +252,10 @@ int main(void)
         Model model= LoadModelFromMesh(mesh);
         model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = texturechecked;
         DrawModel(model, Vector3{0, 0, 0}, 1.0f, WHITE);
+
+        DrawLine3D({0,0,0}, {1,0,0}, RED);   // +X na czerwono
+        DrawLine3D({0,0,0}, {0,1,0}, GREEN); // +Y na zielono
+        DrawLine3D({0,0,0}, {0,0,1}, BLUE);  // +Z na niebiesko
 
         // 0 [0,0,0)
         DrawCubeWires({0,0,0},0.2f, .2f, .2f,YELLOW);
