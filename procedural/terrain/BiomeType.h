@@ -18,7 +18,7 @@ inline const char *to_string(BiomeType e) {
     case FORREST: return "FORREST";
     case OCEAN: return "OCEAN";
     case DESERT: return "DESERT";
-    default: return "unknown";
+    default: return "PLAINS";
   }
 }
 

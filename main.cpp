@@ -1,7 +1,9 @@
 ﻿#define RAYGUI_IMPLEMENTATION
 #include "raylib.h"
 #include <iostream>
+#include <bitset>
 
+#include "utilities/FaceMask.h"
 #include "raymath.h"
 #include "raygui.h"
 #include "FastNoise/FastNoise.h"
@@ -33,9 +35,11 @@ int main(void)
 
     auto fnSimplex = FastNoise::New<FastNoise::CellularValue>();
     auto fnFractal = FastNoise::New<FastNoise::FractalFBm>();
+    auto somethin = FastNoise::NewFromEncodedNodeTree("EQACAAAAAAAgQBAAAAAAQBkAEwDD9Sg/DQAEAAAAAAAgQAkAAGZmJj8AAAAAPwEEAAAAAAAAAEBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAM3MTD4AMzMzPwAAAAA/");
 
-    fnFractal->SetSource( fnSimplex );
-    fnFractal->SetOctaveCount( 5 );
+    /*fnFractal->SetSource( fnSimplex );
+    fnFractal->SetOctaveCount( 5 );*/
+
     const int ATLAS_SIZE=256;
     std::vector<float> noiseOutput(ATLAS_SIZE * ATLAS_SIZE *ATLAS_SIZE);
     // Generate a 16 x 16 x 16 area of noise
@@ -70,27 +74,28 @@ int main(void)
 
 
     Mesh mesh = { 0 };
-    mesh.triangleCount = 2;
-    mesh.vertexCount = 4;
+    mesh.triangleCount = 12;
+    mesh.vertexCount = 4*6;
     mesh.vertices = new float[mesh.vertexCount*3];    // 3 vertices, 3 coordinates each (x, y, z)
     mesh.texcoords = new float[mesh.vertexCount*2];   // 3 vertices, 2 coordinates each (x, y)
     mesh.normals = new float[mesh.vertexCount*3];     // 3 vertices, 3 coordinates each (x, y, z)
     mesh.indices = new unsigned short[mesh.triangleCount*3];
 
-    //TOP FACE
+ /*   //TOP FACE
     StaticRenderer::SetVertice(0, 0,1, 0,mesh.vertices);
-    StaticRenderer::SetVertice(1, 1,1,0, mesh.vertices);
+    StaticRenderer::SetVertice(1, 1,1, 0,mesh.vertices);
     StaticRenderer::SetVertice(2, 0,1, 1,mesh.vertices);
     StaticRenderer::SetVertice(3, 1,1, 1,mesh.vertices);
 
     //RIGHT TRIANGLE
-    mesh.indices[2] = 0;
-    mesh.indices[1] = 1;
     mesh.indices[0] = 3;
+    mesh.indices[1] = 1;
+    mesh.indices[2] = 0;
+
     //LEFT TRIANGLE
-    mesh.indices[5] = 0;
-    mesh.indices[4] = 3;
     mesh.indices[3] = 2;
+    mesh.indices[4] = 3;
+    mesh.indices[5] = 0;
     //TEXTURES
     mesh.texcoords[0] = 1; //X
     mesh.texcoords[1] = 0; //Y
@@ -103,36 +108,51 @@ int main(void)
 
     mesh.texcoords[6] = 0; //X
     mesh.texcoords[7] = 1; //Y
-
-
-
+    
     //BOTTOM FACE
-    StaticRenderer::SetVertice(0, 0,0, 0,mesh.vertices);
-    StaticRenderer::SetVertice(1, 1,0,0, mesh.vertices);
-    StaticRenderer::SetVertice(2, 0,0, 1,mesh.vertices);
-    StaticRenderer::SetVertice(3, 1,0, 1,mesh.vertices);
+    StaticRenderer::SetVertice(0+4, 0,0, 0,mesh.vertices);
+    StaticRenderer::SetVertice(1+4, 1,0, 0,mesh.vertices);
+    StaticRenderer::SetVertice(2+4, 0,0, 1,mesh.vertices);
+    StaticRenderer::SetVertice(3+4, 1,0, 1,mesh.vertices);
 
     //RIGHT TRIANGLE
-    mesh.indices[0] = 0;
-    mesh.indices[1] = 1;
-    mesh.indices[2] = 3;
+    mesh.indices[0+6] = 0+4;
+    mesh.indices[1+6] = 1+4;
+    mesh.indices[2+6] = 3+4;
     //LEFT TRIANGLE
-    mesh.indices[3] = 0;
-    mesh.indices[4] = 3;
-    mesh.indices[5] = 2;
+    mesh.indices[3+6] = 0+4;
+    mesh.indices[4+6] = 3+4;
+    mesh.indices[5+6] = 2+4;
     //TEXTURES
-    mesh.texcoords[0] = 1; //X
-    mesh.texcoords[1] = 0; //Y
+    mesh.texcoords[0+8] = 1; //X
+    mesh.texcoords[1+8] = 0; //Y
 
-    mesh.texcoords[2] = 0; //X
-    mesh.texcoords[3] = 0; //Y
+    mesh.texcoords[2+8] = 0; //X
+    mesh.texcoords[3+8] = 0; //Y
 
-    mesh.texcoords[4] = 1; //X
-    mesh.texcoords[5] = 1; //Y
+    mesh.texcoords[4+8] = 1; //X
+    mesh.texcoords[5+8] = 1; //Y
 
-    mesh.texcoords[6] = 0; //X
-    mesh.texcoords[7] = 1; //Y
+    mesh.texcoords[6+8] = 0; //X
+    mesh.texcoords[7+8] = 1; //Y
+*/
 
+ uint8_t face_mask{};
+ face_mask = face_mask+ FaceMask::Top;
+ face_mask = face_mask+ FaceMask::Bottom;
+ face_mask = face_mask+ FaceMask::Left;
+ face_mask = face_mask+ FaceMask::Right;
+ face_mask = face_mask+ FaceMask::Front;
+ face_mask = face_mask+ FaceMask::Back;
+ std::bitset<8> b(face_mask);
+
+    std::cout<<b<<std::endl;
+ int face_count{};
+ face_count =StaticRenderer::RenderCube(face_mask, mesh.vertices,mesh.indices,mesh.texcoords,mesh.normals,new Int3{0,0,0},face_count);
+ face_count =StaticRenderer::RenderCube(face_mask, mesh.vertices,mesh.indices,mesh.texcoords,mesh.normals,new Int3{1,0,0},face_count);
+ face_count =StaticRenderer::RenderCube(face_mask, mesh.vertices,mesh.indices,mesh.texcoords,mesh.normals,new Int3{1,0,1},face_count);
+ mesh.triangleCount = face_count*2;
+ mesh.vertexCount = face_count*4;
     //NORMALS
     for (int i = 0; i <= mesh.vertexCount; i=i+3) {
         std::cout<<i<<std::endl;
@@ -141,39 +161,6 @@ int main(void)
         mesh.normals[i+2] = 0;
     }
 
-
-
-
-    /*
-    // Vertex at (0, 0, 0)
-    mesh.vertices[0] = 0;
-    mesh.vertices[1] = 0;
-    mesh.vertices[2] = 0;
-    mesh.normals[0] = 0;
-    mesh.normals[1] = 1;
-    mesh.normals[2] = 0;
-    mesh.texcoords[0] = 0;
-    mesh.texcoords[1] = 0;
-
-    // Vertex at (1, 0, 2)
-    mesh.vertices[3] = 1;
-    mesh.vertices[4] = 0;
-    mesh.vertices[5] = 2;
-    mesh.normals[3] = 0;
-    mesh.normals[4] = 1;
-    mesh.normals[5] = 0;
-    mesh.texcoords[2] = 0.5f;
-    mesh.texcoords[3] = 1.0f;
-
-    // Vertex at (2, 0, 0)
-    mesh.vertices[6] = 2;
-    mesh.vertices[7] = 0;
-    mesh.vertices[8] = 0;
-    mesh.normals[6] = 0;
-    mesh.normals[7] = 1;
-    mesh.normals[8] = 0;
-    mesh.texcoords[4] = 1;
-    mesh.texcoords[5] =0;*/
 
     // Upload mesh data from CPU (RAM) to GPU (VRAM) memory
     UploadMesh(&mesh, false);
@@ -214,23 +201,23 @@ int main(void)
 
         Vector3 camera_move = {0, 0, 0};
 
-            camera_move = {
+        camera_move = {
                 GetMouseDelta().x * speed, // Rotation: yaw
                 GetMouseDelta().y * speed, // Rotation: pitch
                 0.0f // Rotation: roll
-            };
-            SetMousePosition(GetRenderWidth() / 2, GetRenderHeight() / 2);
+        };
+        SetMousePosition(GetRenderWidth() / 2, GetRenderHeight() / 2);
         ClearBackground(WHITE);
         Vector3Scale(camera_change, speed);
         camera_position = Vector3Add(camera_position, camera_change);
         UpdateCameraPro(&camera,
                         Vector3{
-                            (IsKeyDown(KEY_W) || IsKeyDown(KEY_UP)) * movement_speed - // Move forward-backward
-                            (IsKeyDown(KEY_S) || IsKeyDown(KEY_DOWN)) * movement_speed,
-                            (IsKeyDown(KEY_D) || IsKeyDown(KEY_RIGHT)) * movement_speed - // Move right-left
-                            (IsKeyDown(KEY_A) || IsKeyDown(KEY_LEFT)) * movement_speed,
-                            -(IsKeyDown(KEY_C)) * movement_speed + (IsKeyDown(KEY_SPACE)) * movement_speed
-                            // Move up-down
+                                (IsKeyDown(KEY_W) || IsKeyDown(KEY_UP)) * movement_speed - // Move forward-backward
+                                (IsKeyDown(KEY_S) || IsKeyDown(KEY_DOWN)) * movement_speed,
+                                (IsKeyDown(KEY_D) || IsKeyDown(KEY_RIGHT)) * movement_speed - // Move right-left
+                                (IsKeyDown(KEY_A) || IsKeyDown(KEY_LEFT)) * movement_speed,
+                                -(IsKeyDown(KEY_C)) * movement_speed + (IsKeyDown(KEY_SPACE)) * movement_speed
+                                // Move up-down
                         }, camera_move,
                         GetMouseWheelMove() * 2.0f);
 

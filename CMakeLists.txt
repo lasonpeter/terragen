@@ -26,6 +26,7 @@ add_executable(terragen main.cpp
         procedural/Block.cpp
         procedural/Block.h
         procedural/BlockType.h
+        utilities/FaceMask.h
 )
 
 target_link_libraries(terragen raylib FastNoise2::FastNoise)

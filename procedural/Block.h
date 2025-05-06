@@ -11,15 +11,9 @@
 
 class Block {
 public:
-    Vector3 position{};
     bool isTransparent = true;
-    BlockType blockType = AIR;
-    Block() {
-        position = Vector3(0, 0, 0);
-    }
-    explicit Block(Vector3 position_t) {
-        this->position = position_t;
-    }
+    BlockType blockType = BlockType::AIR;
+    Block() = default;
 };
 
 

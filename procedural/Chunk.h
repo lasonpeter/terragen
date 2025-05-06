@@ -7,10 +7,10 @@
 #include "Block.h"
 
 //
+
 class Chunk{
     public:
     Block blocks[65536] = {};
 };
-
 
 #endif //CHUNK_H

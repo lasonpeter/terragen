@@ -6,7 +6,7 @@
 #define BLOCKTYPE_H
 
 
-enum BlockType {
+enum class BlockType {
     AIR,
     GRASS,
     DIRT,
@@ -15,10 +15,10 @@ enum BlockType {
 
 inline const char *to_string(BlockType e) {
     switch (e) {
-        case AIR: return "AIR";
-        case GRASS: return "GRASS";
-        case DIRT: return "DIRT";
-        case STONE: return "STONE";
+        case BlockType::AIR: return "AIR";
+        case BlockType::GRASS: return "GRASS";
+        case BlockType::DIRT: return "DIRT";
+        case BlockType::STONE: return "STONE";
         default: return "unknown";
     }
 }
