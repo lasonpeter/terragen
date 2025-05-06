@@ -34,18 +34,10 @@ int main(void)
 
     auto fnSimplex = FastNoise::New<FastNoise::CellularValue>();
     auto fnFractal = FastNoise::New<FastNoise::FractalFBm>();
-    //auto somethin = FastNoise::NewFromEncodedNodeTree("GQAbABMAuB5FQAcAARMAj8LlQAcAAI/CdT4=");
 
-    /*fnFractal->SetSource( fnSimplex );
-    fnFractal->SetOctaveCount( 5 );*/
-
-    const int ATLAS_SIZE=256;
+    const int ATLAS_SIZE=32;
     std::vector<float> noiseOutput(ATLAS_SIZE * ATLAS_SIZE *ATLAS_SIZE);
-    // Generate a 16 x 16 x 16 area of noise
-    //FastNoise::SmartNode<> fnGenerator = FastNoise::NewFromEncodedNodeTree( "EwDNzEw+GQAbAA0ABAAAAAAAAEAHAAAK1yM/AAAAAAAA16MQQAEJAA==" );
     int index = 0;
-    //image.data = noiseOutput.data();
-
     BiomeGeneration biome_generation= BiomeGeneration(12312);
     biome_generation.generateNoise(noiseOutput.data(),ATLAS_SIZE,0,0);
 
@@ -71,20 +63,7 @@ int main(void)
     Texture2D texturechecked = LoadTextureFromImage(checked);
     UnloadImage(checked);
 
-
-
-
-     uint8_t face_mask{};
-     face_mask = face_mask+ FaceMask::Top;
-     face_mask = face_mask+ FaceMask::Bottom;
-     face_mask = face_mask+ FaceMask::Left;
-     //face_mask = face_mask+ FaceMask::Right;
-     //face_mask = face_mask+ FaceMask::Front;
-     face_mask = face_mask+ FaceMask::Back;
-     std::bitset<8> b(face_mask);
-
-    std::cout<<b<<std::endl;
-     int face_count{};
+    int face_count{};
 
      Chunk chunk = Chunk(Int2{0,0});
      chunk.blocks[0] = Block(BlockType::AIR);
@@ -104,7 +83,6 @@ int main(void)
     mesh.texcoords = new float[mesh.vertexCount*2];   // 3 vertices, 2 coordinates each (x, y)
     mesh.normals = new float[mesh.vertexCount*3];     // 3 vertices, 3 coordinates each (x, y, z)
     mesh.indices = new unsigned short[mesh.triangleCount*3];
-    //face_count =StaticRenderer::RenderCube(face_mask, mesh.vertices,mesh.indices,mesh.texcoords,mesh.normals,new Int3{0,0,0},face_count);
     for (int y = 0; y < 256; ++y) {
         for (int x = 0; x < 16; ++x) {
             for (int z = 0; z < 16; ++z) {
@@ -118,9 +96,7 @@ int main(void)
             }
         }
     }
-    // face_count =StaticRenderer::RenderCube(face_mask, mesh.vertices,mesh.indices,mesh.texcoords,mesh.normals,new Int3{1,0,0},face_count);
-     //face_count =StaticRenderer::RenderCube(face_mask, mesh.vertices,mesh.indices,mesh.texcoords,mesh.normals,new Int3{1,0,1},face_count);
-    //NORMALS
+
     for (int i = 0; i <= mesh.vertexCount; i=i+3) {
         std::cout<<i<<std::endl;
         mesh.normals[i] = 0;
@@ -218,20 +194,7 @@ int main(void)
         DrawLine3D({0,0,0},{0,5,0}, BLUE);
         DrawLine3D({0,0,0},{0,0,5}, GREEN);
         DrawLine3D({0,0,0},{5,0,0}, RED);
-        /*for (int z = 0; z < ATLAS_SIZE; z++){
-            for (int y = 0; y < ATLAS_SIZE; y++)
-            {
-                for (int x = 0; x < ATLAS_SIZE; x++)
-                {
-                    //std::cout<<noiseOutput[y*ATLAS_SIZE + x] <<" ";
-                    if (noiseOutput[z*ATLAS_SIZE+y*ATLAS_SIZE + x] > 0.0f)
-                    {
-                        DrawCubeWires( Vector3(x, y, z), .5f, .5f, .5f,BLACK);
-                    }
 
-                }
-            }
-        }*/
         EndMode3D();
         DrawTexture(texture, screenWidth - texture.width - 20, 20, WHITE);
 
