@@ -22,10 +22,13 @@ add_executable(terragen main.cpp
         procedural/terrain/generators/TerrainGenerator.h
         rendering/StaticRenderer.cpp
         rendering/StaticRenderer.h
-        procedural/Chunk.h
         procedural/Block.cpp
         procedural/Block.h
         procedural/BlockType.h
+        utilities/FaceMask.h
+        utilities/Mathf.h
+        procedural/Chunk.cpp
+        procedural/Chunk.h
 )
 
 target_link_libraries(terragen raylib FastNoise2::FastNoise)

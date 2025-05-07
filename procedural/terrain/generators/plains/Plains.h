@@ -15,5 +15,4 @@ class Plains : TerrainGenerator{
 };
 
 
-
 #endif //PLAINS_H

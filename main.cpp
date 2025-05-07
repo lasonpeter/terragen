@@ -1,9 +1,10 @@
 ﻿#define RAYGUI_IMPLEMENTATION
 #include "raylib.h"
 #include <iostream>
+#include <bitset>
 
+#include "utilities/FaceMask.h"
 #include "raymath.h"
-#include <cmath>
 #include "raygui.h"
 #include "FastNoise/FastNoise.h"
 #include "procedural/terrain/BiomeGeneration.h"
@@ -11,12 +12,12 @@
 //------------------------------------------------------------------------------------
 // Program main entry point
 //------------------------------------------------------------------------------------
-int main(void)
+int main()
 {
     // Initialization
     //--------------------------------------------------------------------------------------
-    const int screenWidth = 800;
-    const int screenHeight = 450;
+    const int screenWidth = 800*1.5;
+    const int screenHeight = 450*1.5;
     InitWindow(screenWidth, screenHeight, "terragen");
     Camera3D camera = {0};
     camera.position = Vector3{1.0f, 1.0f, 1.0f}; // Camera position
@@ -28,38 +29,30 @@ int main(void)
     //movement and such
     float speed = 0.05f;
     float movement_speed = 0.2f;
-    Vector3 camera_position = {0, 0, 0};
+    Vector3 camera_position = {1, 1, 1};
 
-    const int ATLAS_SIZE=256;
-    std::vector<float> noiseOutput(ATLAS_SIZE * ATLAS_SIZE *ATLAS_SIZE);
 
+    auto fnSimplex = FastNoise::New<FastNoise::CellularValue>();
+    auto fnFractal = FastNoise::New<FastNoise::FractalFBm>();
+
+    const int ATLAS_SIZE=32;
+    std::vector<float> noiseOutput(16 * 16 *256);
     int index = 0;
-    int half = ATLAS_SIZE/2;
+    BiomeGeneration biome_generation= BiomeGeneration(12312);
+    biome_generation.generateNoise(noiseOutput.data(),ATLAS_SIZE,0,0);
 
-    BiomeGeneration biome_generation(1337);
-    const char *myEncodedTree = "EQACAAAAAAAgQBAAAAAAQBkAGQATAClcjz4IAAETAMP1KD8NAAQAAAAAACBACQAAZmYmPwAAAAA/AQQAAAAAAAAAQEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAzcxMPgAzMzM/AAAAAD8=";
-    biome_generation.setEncodedNodeTree(myEncodedTree);
-
-    biome_generation.generateNoise(noiseOutput.data(),ATLAS_SIZE,-half,-half);
-
-    auto* noisePixels = new Color[ATLAS_SIZE*ATLAS_SIZE];
+    Color* noisePixels = new Color[ATLAS_SIZE*ATLAS_SIZE];
 
     for (int y = 0; y < ATLAS_SIZE; y++)
     {
         for (int x = 0; x < ATLAS_SIZE; x++)
         {
-            float val = noiseOutput[y * ATLAS_SIZE + x];
-            float mapped = (val + 1.0f) * 0.5f;
-            mapped = 1.0f - mapped;
-
-            int rounded = std::lround( mapped * 255.0f );
-            if (rounded < 0)   rounded = 0;
-            if (rounded > 255) rounded = 255;
-
-            auto v = static_cast<uint8_t>( rounded );
-            noisePixels[y * ATLAS_SIZE + x] = Color{ v, v, v, 255 };
+            //std::cout<<noiseOutput[y*ATLAS_SIZE + x] <<" ";
+            noisePixels[ATLAS_SIZE*y + x] = Color((noiseOutput[y*ATLAS_SIZE + x]+1)*127,0,0,255);
         }
     }
+
+
 
     Image image = Image(noisePixels,ATLAS_SIZE, ATLAS_SIZE);
     image.data=noisePixels;
@@ -72,112 +65,56 @@ int main(void)
     Texture2D texturechecked = LoadTextureFromImage(checked);
     UnloadImage(checked);
 
+    int face_count{};
 
+     auto chunk = Chunk(Int2{0,0});
+    for (int y = 0; y < 256; ++y) {
+        for (int x = 0; x < 16; ++x) {
+            for (int z = 0; z < 16; ++z) {
+                if(noiseOutput[y*256+x*16+z]*255 > 150)
+                {
+                    chunk.blocks[y*256+x*16+z] = Block(BlockType::DIRT);
+                }
+            }
+        }
+    }
+     chunk.blocks[0] = Block(BlockType::AIR);
+    chunk.blocks[1] = Block(BlockType::DIRT);
+    chunk.blocks[2] = Block(BlockType::DIRT);
+    chunk.blocks[16] = Block(BlockType::DIRT);
+    chunk.blocks[3] = Block(BlockType::DIRT);
+    chunk.blocks[65535] = Block(BlockType::DIRT);
+
+    int *amount_of_faces = new int;
+    *amount_of_faces = 0;
+    uint8_t* chunkFaceMasks = Chunk::generateChunkFaceMasks(&chunk,amount_of_faces);
     Mesh mesh = { 0 };
-    mesh.triangleCount = 2;
-    mesh.vertexCount = 4;
+    mesh.triangleCount = (*amount_of_faces)*2;
+    mesh.vertexCount = (*amount_of_faces)*4;
     mesh.vertices = new float[mesh.vertexCount*3];    // 3 vertices, 3 coordinates each (x, y, z)
     mesh.texcoords = new float[mesh.vertexCount*2];   // 3 vertices, 2 coordinates each (x, y)
     mesh.normals = new float[mesh.vertexCount*3];     // 3 vertices, 3 coordinates each (x, y, z)
     mesh.indices = new unsigned short[mesh.triangleCount*3];
+    for (int y = 0; y < 256; ++y) {
+        for (int x = 0; x < 16; ++x) {
+            for (int z = 0; z < 16; ++z) {
+                if(is_transparent(chunk.blocks[y*256+x*16+z].blockType)){
+                    continue;
+                }
+                //std::bitset<8> a(chunkFaceMasks[y*256+x*16+z]);
 
-    //TOP FACE
-    StaticRenderer::SetVertice(0, 0,1, 0,mesh.vertices);
-    StaticRenderer::SetVertice(1, 1,1,0, mesh.vertices);
-    StaticRenderer::SetVertice(2, 0,1, 1,mesh.vertices);
-    StaticRenderer::SetVertice(3, 1,1, 1,mesh.vertices);
+                //std::cout<<a<<std::endl;
+                face_count =StaticRenderer::RenderCube(chunkFaceMasks[y*256+x*16+z], mesh.vertices,mesh.indices,mesh.texcoords,mesh.normals,new Int3{x,y,z},face_count);
+            }
+        }
+    }
 
-    //RIGHT TRIANGLE
-    mesh.indices[2] = 0;
-    mesh.indices[1] = 1;
-    mesh.indices[0] = 3;
-    //LEFT TRIANGLE
-    mesh.indices[5] = 0;
-    mesh.indices[4] = 3;
-    mesh.indices[3] = 2;
-    //TEXTURES
-    mesh.texcoords[0] = 1; //X
-    mesh.texcoords[1] = 0; //Y
-
-    mesh.texcoords[2] = 0; //X
-    mesh.texcoords[3] = 0; //Y
-
-    mesh.texcoords[4] = 1; //X
-    mesh.texcoords[5] = 1; //Y
-
-    mesh.texcoords[6] = 0; //X
-    mesh.texcoords[7] = 1; //Y
-
-
-
-    //BOTTOM FACE
-    StaticRenderer::SetVertice(0, 0,0, 0,mesh.vertices);
-    StaticRenderer::SetVertice(1, 1,0,0, mesh.vertices);
-    StaticRenderer::SetVertice(2, 0,0, 1,mesh.vertices);
-    StaticRenderer::SetVertice(3, 1,0, 1,mesh.vertices);
-
-    //RIGHT TRIANGLE
-    mesh.indices[0] = 0;
-    mesh.indices[1] = 1;
-    mesh.indices[2] = 3;
-    //LEFT TRIANGLE
-    mesh.indices[3] = 0;
-    mesh.indices[4] = 3;
-    mesh.indices[5] = 2;
-    //TEXTURES
-    mesh.texcoords[0] = 1; //X
-    mesh.texcoords[1] = 0; //Y
-
-    mesh.texcoords[2] = 0; //X
-    mesh.texcoords[3] = 0; //Y
-
-    mesh.texcoords[4] = 1; //X
-    mesh.texcoords[5] = 1; //Y
-
-    mesh.texcoords[6] = 0; //X
-    mesh.texcoords[7] = 1; //Y
-
-    //NORMALS
     for (int i = 0; i <= mesh.vertexCount; i=i+3) {
-        std::cout<<i<<std::endl;
+        //std::cout<<i<<std::endl;
         mesh.normals[i] = 0;
         mesh.normals[i+1] = 1;
         mesh.normals[i+2] = 0;
     }
-
-
-
-
-    /*
-    // Vertex at (0, 0, 0)
-    mesh.vertices[0] = 0;
-    mesh.vertices[1] = 0;
-    mesh.vertices[2] = 0;
-    mesh.normals[0] = 0;
-    mesh.normals[1] = 1;
-    mesh.normals[2] = 0;
-    mesh.texcoords[0] = 0;
-    mesh.texcoords[1] = 0;
-
-    // Vertex at (1, 0, 2)
-    mesh.vertices[3] = 1;
-    mesh.vertices[4] = 0;
-    mesh.vertices[5] = 2;
-    mesh.normals[3] = 0;
-    mesh.normals[4] = 1;
-    mesh.normals[5] = 0;
-    mesh.texcoords[2] = 0.5f;
-    mesh.texcoords[3] = 1.0f;
-
-    // Vertex at (2, 0, 0)
-    mesh.vertices[6] = 2;
-    mesh.vertices[7] = 0;
-    mesh.vertices[8] = 0;
-    mesh.normals[6] = 0;
-    mesh.normals[7] = 1;
-    mesh.normals[8] = 0;
-    mesh.texcoords[4] = 1;
-    mesh.texcoords[5] =0;*/
 
     // Upload mesh data from CPU (RAM) to GPU (VRAM) memory
     UploadMesh(&mesh, false);
@@ -185,9 +122,8 @@ int main(void)
 
 
     Texture2D texture = LoadTextureFromImage(image);
-    UnloadImage(image);
 
-    SetExitKey(KEY_ESCAPE);
+    SetExitKey(KEY_NULL);
     HideCursor();
 
     SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
@@ -219,23 +155,23 @@ int main(void)
 
         Vector3 camera_move = {0, 0, 0};
 
-            camera_move = {
+        camera_move = {
                 GetMouseDelta().x * speed, // Rotation: yaw
                 GetMouseDelta().y * speed, // Rotation: pitch
                 0.0f // Rotation: roll
-            };
-            SetMousePosition(GetRenderWidth() / 2, GetRenderHeight() / 2);
+        };
+        SetMousePosition(GetRenderWidth() / 2, GetRenderHeight() / 2);
         ClearBackground(WHITE);
         Vector3Scale(camera_change, speed);
         camera_position = Vector3Add(camera_position, camera_change);
         UpdateCameraPro(&camera,
                         Vector3{
-                            (IsKeyDown(KEY_W) || IsKeyDown(KEY_UP)) * movement_speed - // Move forward-backward
-                            (IsKeyDown(KEY_S) || IsKeyDown(KEY_DOWN)) * movement_speed,
-                            (IsKeyDown(KEY_D) || IsKeyDown(KEY_RIGHT)) * movement_speed - // Move right-left
-                            (IsKeyDown(KEY_A) || IsKeyDown(KEY_LEFT)) * movement_speed,
-                            -(IsKeyDown(KEY_C)) * movement_speed + (IsKeyDown(KEY_SPACE)) * movement_speed
-                            // Move up-down
+                                (IsKeyDown(KEY_W) || IsKeyDown(KEY_UP)) * movement_speed - // Move forward-backward
+                                (IsKeyDown(KEY_S) || IsKeyDown(KEY_DOWN)) * movement_speed,
+                                (IsKeyDown(KEY_D) || IsKeyDown(KEY_RIGHT)) * movement_speed - // Move right-left
+                                (IsKeyDown(KEY_A) || IsKeyDown(KEY_LEFT)) * movement_speed,
+                                -(IsKeyDown(KEY_C)) * movement_speed + (IsKeyDown(KEY_SPACE)) * movement_speed
+                                // Move up-down
                         }, camera_move,
                         GetMouseWheelMove() * 2.0f);
 
@@ -253,10 +189,6 @@ int main(void)
         model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = texturechecked;
         DrawModel(model, Vector3{0, 0, 0}, 1.0f, WHITE);
 
-        DrawLine3D({0,0,0}, {1,0,0}, RED);   // +X na czerwono
-        DrawLine3D({0,0,0}, {0,1,0}, GREEN); // +Y na zielono
-        DrawLine3D({0,0,0}, {0,0,1}, BLUE);  // +Z na niebiesko
-
         // 0 [0,0,0)
         DrawCubeWires({0,0,0},0.2f, .2f, .2f,YELLOW);
         // 1 [1,0,0]            2     2     2
@@ -267,20 +199,14 @@ int main(void)
         DrawCubeWires({0,0,1},0.2f, .2f, .2f,RED);
 
         DrawCubeWires({0,1,0},0.2f, .2f, .2f,VIOLET);
-        /*for (int z = 0; z < ATLAS_SIZE; z++){
-            for (int y = 0; y < ATLAS_SIZE; y++)
-            {
-                for (int x = 0; x < ATLAS_SIZE; x++)
-                {
-                    //std::cout<<noiseOutput[y*ATLAS_SIZE + x] <<" ";
-                    if (noiseOutput[z*ATLAS_SIZE+y*ATLAS_SIZE + x] > 0.0f)
-                    {
-                        DrawCubeWires( Vector3(x, y, z), .5f, .5f, .5f,BLACK);
-                    }
 
-                }
-            }
-        }*/
+
+
+
+        DrawLine3D({0,0,0},{0,5,0}, BLUE);
+        DrawLine3D({0,0,0},{0,0,5}, GREEN);
+        DrawLine3D({0,0,0},{5,0,0}, RED);
+
         EndMode3D();
         DrawTexture(texture, screenWidth - texture.width - 20, 20, WHITE);
 
