@@ -12,7 +12,7 @@
 //------------------------------------------------------------------------------------
 // Program main entry point
 //------------------------------------------------------------------------------------
-int main(void)
+int main()
 {
     // Initialization
     //--------------------------------------------------------------------------------------
@@ -36,7 +36,7 @@ int main(void)
     auto fnFractal = FastNoise::New<FastNoise::FractalFBm>();
 
     const int ATLAS_SIZE=32;
-    std::vector<float> noiseOutput(ATLAS_SIZE * ATLAS_SIZE *ATLAS_SIZE);
+    std::vector<float> noiseOutput(16 * 16 *256);
     int index = 0;
     BiomeGeneration biome_generation= BiomeGeneration(12312);
     biome_generation.generateNoise(noiseOutput.data(),ATLAS_SIZE,0,0);
@@ -52,6 +52,8 @@ int main(void)
         }
     }
 
+
+
     Image image = Image(noisePixels,ATLAS_SIZE, ATLAS_SIZE);
     image.data=noisePixels;
     image.width = ATLAS_SIZE;
@@ -65,7 +67,17 @@ int main(void)
 
     int face_count{};
 
-     Chunk chunk = Chunk(Int2{0,0});
+     auto chunk = Chunk(Int2{0,0});
+    for (int y = 0; y < 256; ++y) {
+        for (int x = 0; x < 16; ++x) {
+            for (int z = 0; z < 16; ++z) {
+                if(noiseOutput[y*256+x*16+z]*255 > 150)
+                {
+                    chunk.blocks[y*256+x*16+z] = Block(BlockType::DIRT);
+                }
+            }
+        }
+    }
      chunk.blocks[0] = Block(BlockType::AIR);
     chunk.blocks[1] = Block(BlockType::DIRT);
     chunk.blocks[2] = Block(BlockType::DIRT);
@@ -89,16 +101,16 @@ int main(void)
                 if(is_transparent(chunk.blocks[y*256+x*16+z].blockType)){
                     continue;
                 }
-                std::bitset<8> a(chunkFaceMasks[y*256+x*16+z]);
+                //std::bitset<8> a(chunkFaceMasks[y*256+x*16+z]);
 
-                std::cout<<a<<std::endl;
+                //std::cout<<a<<std::endl;
                 face_count =StaticRenderer::RenderCube(chunkFaceMasks[y*256+x*16+z], mesh.vertices,mesh.indices,mesh.texcoords,mesh.normals,new Int3{x,y,z},face_count);
             }
         }
     }
 
     for (int i = 0; i <= mesh.vertexCount; i=i+3) {
-        std::cout<<i<<std::endl;
+        //std::cout<<i<<std::endl;
         mesh.normals[i] = 0;
         mesh.normals[i+1] = 1;
         mesh.normals[i+2] = 0;

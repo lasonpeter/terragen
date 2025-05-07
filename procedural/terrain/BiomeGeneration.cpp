@@ -18,6 +18,6 @@ BiomeGeneration::BiomeGeneration(int seed_)
 
 void BiomeGeneration::generateNoise(float* buffer,int size,int x,int y)
 {
-    auto cellular = FastNoise::NewFromEncodedNodeTree("EQAEAAAA9igcQBAAAAAAQBkAEwDD9Sg/DQAEAAAAAAAgQAkAAGZmJj8AAAAAPwEEAAAAAAAAAEBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAM3MTD4AMzMzPwAAAAA/");
-    cellular->GenUniformGrid2D(buffer,x,y,size,size,frequency,seed);
+    auto cellular = FastNoise::NewFromEncodedNodeTree("GQAbABMAuB5FQAcAARMAj8LlQAcAAI/CdT4=");
+    cellular->GenUniformGrid3D(buffer,0,x,y,16,256,16,frequency,seed);
 }
