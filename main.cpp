@@ -32,25 +32,37 @@ int main()
     Vector3 camera_position = {1, 1, 1};
 
 
-    auto fnSimplex = FastNoise::New<FastNoise::CellularValue>();
-    auto fnFractal = FastNoise::New<FastNoise::FractalFBm>();
+    const int ATLAS_SIZE=256;
+    std::vector<float> noiseOutput(ATLAS_SIZE * ATLAS_SIZE/* *ATLAS_SIZE*/);
 
-    const int ATLAS_SIZE=32;
-    std::vector<float> noiseOutput(16 * 16 *256);
     int index = 0;
-    BiomeGeneration biome_generation= BiomeGeneration(12312);
-    biome_generation.generateNoise(noiseOutput.data(),ATLAS_SIZE,0,0);
+    int half = ATLAS_SIZE/2;
 
-    Color* noisePixels = new Color[ATLAS_SIZE*ATLAS_SIZE];
+    BiomeGeneration biome_generation(1337);
+    const char *myEncodedTree = "GQATAClcjz4IAAETAMP1KD8NAAQAAAAAACBACQAAZmYmPwAAAAA/";
+    biome_generation.setEncodedNodeTree(myEncodedTree);
+
+    biome_generation.generateNoise(noiseOutput.data(),ATLAS_SIZE,-half,-half);
+
+    auto* noisePixels = new Color[ATLAS_SIZE*ATLAS_SIZE];
 
     for (int y = 0; y < ATLAS_SIZE; y++)
     {
         for (int x = 0; x < ATLAS_SIZE; x++)
         {
-            //std::cout<<noiseOutput[y*ATLAS_SIZE + x] <<" ";
-            noisePixels[ATLAS_SIZE*y + x] = Color((noiseOutput[y*ATLAS_SIZE + x]+1)*127,0,0,255);
+            float val = noiseOutput[y * ATLAS_SIZE + x];
+            /*std::cout<<val<<std::endl;*/
+            auto v = std::clamp(val, -1.0f, 1.0f);
+            float norm = (v + 1.0f)*0.5f;
+            int rounded = std::lround( norm * 255.0f );
+            if (rounded < 0)   rounded = 0;
+            if (rounded > 255) rounded = 255;
+
+            auto c = static_cast<uint8_t>( rounded );
+            noisePixels[(ATLAS_SIZE-1-y)*ATLAS_SIZE + x] = Color{ c, c, c, 255 };
         }
     }
+
 
 
 
@@ -67,23 +79,55 @@ int main()
 
     int face_count{};
 
-     auto chunk = Chunk(Int2{0,0});
-    for (int y = 0; y < 256; ++y) {
+    auto chunk = Chunk(Int2{0,0});
+
+    constexpr int chunk_size = 16;
+
+    std::vector<float> heightMap(chunk_size * chunk_size);
+
+    for (int chunk_x = 0; chunk_x < 8; chunk_x++)
+    {
+        for (int chunk_y = 0; chunk_y < 8; chunk_y++)
+        {
+            int worldX0 = chunk.position.x * chunk_size;
+            int worldZ0 = chunk.position.y * chunk_size;
+
+            biome_generation.generateNoise(heightMap.data(), chunk_size, worldX0, worldZ0);
+
+            for (int x = 0; x < chunk_size; x++) {
+                for (int z = 0; z < chunk_size; z++) {
+                    constexpr int max_height = 256;
+
+                    float v = heightMap[z * chunk_size + x];
+                    v = std::clamp(v, -1.0f, 1.0f);
+                    float norm = (v + 1.0f)*0.5f;
+                    int h = static_cast<int>(norm * (max_height - 1));
+
+                    for (int y = 0; y < max_height; ++y) {
+                        if (y <= h) chunk.blocks[(y*chunk_size + z)*chunk_size + x] = Block(BlockType::DIRT);
+                        else chunk.blocks[(y*chunk_size + z)*chunk_size + x] = Block(BlockType::AIR);
+                        /*chunk.blocks[(y*chunk_size + z)*chunk_size + x] = (y <= h ? BlockType::DIRT : BlockType::AIR);*/
+                    }
+                }
+            }
+        }
+    }
+    /*for (int y = 0; y < 256; ++y) {
         for (int x = 0; x < 16; ++x) {
             for (int z = 0; z < 16; ++z) {
-                if(noiseOutput[y*256+x*16+z]*255 > 150)
+                if(noiseOutput[y*256+x*16+z]*255 < 150)
                 {
                     chunk.blocks[y*256+x*16+z] = Block(BlockType::DIRT);
                 }
             }
         }
-    }
-     chunk.blocks[0] = Block(BlockType::AIR);
+    }*/
+     /*chunk.blocks[0] = Block(BlockType::AIR);
     chunk.blocks[1] = Block(BlockType::DIRT);
     chunk.blocks[2] = Block(BlockType::DIRT);
     chunk.blocks[16] = Block(BlockType::DIRT);
     chunk.blocks[3] = Block(BlockType::DIRT);
-    chunk.blocks[65535] = Block(BlockType::DIRT);
+    chunk.blocks[65535] = Block(BlockType::DIRT);*/
 
     int *amount_of_faces = new int;
     *amount_of_faces = 0;
