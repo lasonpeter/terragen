@@ -23,7 +23,7 @@ class StaticRenderer {
 
         static void SetVertice(int verticePositionIndex, float x, float y, float z, float *vertice);
 
-    static int RenderCube(uint8_t bit_mask, float *vertex_buffer, unsigned short *indicies_buffer, float *texture_buffer, float *normals_buffer, Int3 *position,int face_count);
+        static int RenderCube(uint8_t bit_mask, float *vertex_buffer, unsigned short *indicies_buffer, float *texture_buffer, float *normals_buffer, Int3 *position,int face_count);
 };
 
 #endif //STATICRENDERER_H

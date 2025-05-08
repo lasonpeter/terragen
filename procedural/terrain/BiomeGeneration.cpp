@@ -18,13 +18,14 @@ BiomeGeneration::BiomeGeneration(int seed_)
     seed = seed_;
 }
 
+
 void BiomeGeneration::generateNoise(float *buffer, int size, int x, int y)
 {
     auto fn = FastNoise::NewFromEncodedNodeTree(encodedNodeTree);
 
     if (fn)
     {
-        fn->GenUniformGrid2D(buffer, x, y, size, size, frequency, seed);
+        fn->GenUniformGrid2D(buffer, x*size, y*size, size, size, frequency, seed);
     }
     else
     {

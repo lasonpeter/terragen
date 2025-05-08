@@ -9,6 +9,9 @@
 #include "FastNoise/FastNoise.h"
 #include "procedural/terrain/BiomeGeneration.h"
 #include "rendering/StaticRenderer.h"
+#include "procedural/ChunkGovernor.h"
+#include "rendering/chunks/ChunkRenderer.h"
+
 //------------------------------------------------------------------------------------
 // Program main entry point
 //------------------------------------------------------------------------------------
@@ -20,7 +23,7 @@ int main()
     const int screenHeight = 450*1.5;
     InitWindow(screenWidth, screenHeight, "terragen");
     Camera3D camera = {0};
-    camera.position = Vector3{1.0f, 1.0f, 1.0f}; // Camera position
+    camera.position = Vector3{1.0f, 200.0f, 1.0f}; // Camera position
     camera.target = Vector3{0.0f, 0.0f, 0.0f}; // Camera looking at point
     camera.up = Vector3{0.0f, 1.0f, 0.0f}; // Camera up vector (rotation towards target)
     camera.fovy = 70.0f; // Camera field-of-view Y
@@ -31,18 +34,12 @@ int main()
     float movement_speed = 0.2f;
     Vector3 camera_position = {1, 1, 1};
 
-
+    ChunkGovernor chunkGovernor = ChunkGovernor();
     const int ATLAS_SIZE=256;
     std::vector<float> noiseOutput(ATLAS_SIZE * ATLAS_SIZE/* *ATLAS_SIZE*/);
 
     int index = 0;
-    int half = ATLAS_SIZE/2;
 
-    BiomeGeneration biome_generation(1337);
-    const char *myEncodedTree = "GQATAClcjz4IAAETAMP1KD8NAAQAAAAAACBACQAAZmYmPwAAAAA/";
-    biome_generation.setEncodedNodeTree(myEncodedTree);
-
-    biome_generation.generateNoise(noiseOutput.data(),ATLAS_SIZE,-half,-half);
 
     auto* noisePixels = new Color[ATLAS_SIZE*ATLAS_SIZE];
 
@@ -63,8 +60,7 @@ int main()
         }
     }
 
-
-
+    chunkGovernor.GenerateChunks();
 
     Image image = Image(noisePixels,ATLAS_SIZE, ATLAS_SIZE);
     image.data=noisePixels;
@@ -77,91 +73,11 @@ int main()
     Texture2D texturechecked = LoadTextureFromImage(checked);
     UnloadImage(checked);
 
-    int face_count{};
-
-    auto chunk = Chunk(Int2{0,0});
-
-    constexpr int chunk_size = 16;
-
-    std::vector<float> heightMap(chunk_size * chunk_size);
-
-    for (int chunk_x = 0; chunk_x < 8; chunk_x++)
-    {
-        for (int chunk_y = 0; chunk_y < 8; chunk_y++)
-        {
-            int worldX0 = chunk.position.x * chunk_size;
-            int worldZ0 = chunk.position.y * chunk_size;
-
-            biome_generation.generateNoise(heightMap.data(), chunk_size, worldX0, worldZ0);
-
-            for (int x = 0; x < chunk_size; x++) {
-                for (int z = 0; z < chunk_size; z++) {
-                    constexpr int max_height = 256;
-
-                    float v = heightMap[z * chunk_size + x];
-                    v = std::clamp(v, -1.0f, 1.0f);
-                    float norm = (v + 1.0f)*0.5f;
-                    int h = static_cast<int>(norm * (max_height - 1));
-
-                    for (int y = 0; y < max_height; ++y) {
-                        if (y <= h) chunk.blocks[(y*chunk_size + z)*chunk_size + x] = Block(BlockType::DIRT);
-                        else chunk.blocks[(y*chunk_size + z)*chunk_size + x] = Block(BlockType::AIR);
-                        /*chunk.blocks[(y*chunk_size + z)*chunk_size + x] = (y <= h ? BlockType::DIRT : BlockType::AIR);*/
-                    }
-                }
-            }
-        }
-    }
-    /*for (int y = 0; y < 256; ++y) {
-        for (int x = 0; x < 16; ++x) {
-            for (int z = 0; z < 16; ++z) {
-                if(noiseOutput[y*256+x*16+z]*255 < 150)
-                {
-                    chunk.blocks[y*256+x*16+z] = Block(BlockType::DIRT);
-                }
-            }
-        }
-    }*/
-     /*chunk.blocks[0] = Block(BlockType::AIR);
-    chunk.blocks[1] = Block(BlockType::DIRT);
-    chunk.blocks[2] = Block(BlockType::DIRT);
-    chunk.blocks[16] = Block(BlockType::DIRT);
-    chunk.blocks[3] = Block(BlockType::DIRT);
-    chunk.blocks[65535] = Block(BlockType::DIRT);*/
-
-    int *amount_of_faces = new int;
-    *amount_of_faces = 0;
-    uint8_t* chunkFaceMasks = Chunk::generateChunkFaceMasks(&chunk,amount_of_faces);
-    Mesh mesh = { 0 };
-    mesh.triangleCount = (*amount_of_faces)*2;
-    mesh.vertexCount = (*amount_of_faces)*4;
-    mesh.vertices = new float[mesh.vertexCount*3];    // 3 vertices, 3 coordinates each (x, y, z)
-    mesh.texcoords = new float[mesh.vertexCount*2];   // 3 vertices, 2 coordinates each (x, y)
-    mesh.normals = new float[mesh.vertexCount*3];     // 3 vertices, 3 coordinates each (x, y, z)
-    mesh.indices = new unsigned short[mesh.triangleCount*3];
-    for (int y = 0; y < 256; ++y) {
-        for (int x = 0; x < 16; ++x) {
-            for (int z = 0; z < 16; ++z) {
-                if(is_transparent(chunk.blocks[y*256+x*16+z].blockType)){
-                    continue;
-                }
-                //std::bitset<8> a(chunkFaceMasks[y*256+x*16+z]);
-
-                //std::cout<<a<<std::endl;
-                face_count =StaticRenderer::RenderCube(chunkFaceMasks[y*256+x*16+z], mesh.vertices,mesh.indices,mesh.texcoords,mesh.normals,new Int3{x,y,z},face_count);
-            }
-        }
-    }
-
-    for (int i = 0; i <= mesh.vertexCount; i=i+3) {
-        //std::cout<<i<<std::endl;
-        mesh.normals[i] = 0;
-        mesh.normals[i+1] = 1;
-        mesh.normals[i+2] = 0;
-    }
+    ChunkRenderer chunkRenderer= ChunkRenderer{};
+    chunkRenderer.addChunksToBeRendered(&chunkGovernor.chunks_);
+    chunkRenderer.uploadMeshes();
 
     // Upload mesh data from CPU (RAM) to GPU (VRAM) memory
-    UploadMesh(&mesh, false);
 
 
 
@@ -229,9 +145,10 @@ int main()
         BeginDrawing();
         ClearBackground(RAYWHITE);
         BeginMode3D(camera);
-        Model model= LoadModelFromMesh(mesh);
+        chunkRenderer.renderChunks();
+        /*Model model= LoadModelFromMesh(mesh);
         model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = texturechecked;
-        DrawModel(model, Vector3{0, 0, 0}, 1.0f, WHITE);
+        DrawModel(model, Vector3{0, 0, 0}, 1.0f, WHITE);*/
 
         // 0 [0,0,0)
         DrawCubeWires({0,0,0},0.2f, .2f, .2f,YELLOW);

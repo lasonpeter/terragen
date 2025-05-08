@@ -10,14 +10,16 @@
 #include "../utilities/Mathf.h"
 //
 
-class Chunk{
+class Chunk {
 public:
     Int2 position{};
     Block blocks[65536] = {};
-    explicit Chunk(Int2 position_t){
+
+    explicit Chunk(Int2 position_t) {
         position = position_t;
     }
-    static uint8_t* generateChunkFaceMasks(Chunk *chunk,int* face_count);
+
+    static uint8_t *generateChunkFaceMasks(Chunk *chunk, int *face_count);
 };
 
 #endif //CHUNK_H

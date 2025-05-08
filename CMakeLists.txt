@@ -29,6 +29,10 @@ add_executable(terragen main.cpp
         utilities/Mathf.h
         procedural/Chunk.cpp
         procedural/Chunk.h
+        procedural/ChunkGovernor.cpp
+        procedural/ChunkGovernor.h
+        rendering/chunks/ChunkRenderer.cpp
+        rendering/chunks/ChunkRenderer.h
 )
 
 target_link_libraries(terragen raylib FastNoise2::FastNoise)
