@@ -3,79 +3,81 @@
 //
 
 #include "Chunk.h"
+
+#include "ChunkGovernor.h"
 #include "../utilities/FaceMask.h"
 uint8_t *Chunk::generateChunkFaceMasks(Chunk *chunk,int* face_count) {
-        auto* masks = new uint8_t[256 * 16 * 16]{};
-        for (int y = 0; y < 256; ++y) {
-            for (int x = 0; x < 16; ++x) {
-                for (int z = 0; z < 16; ++z) {
-                    if(is_transparent((chunk->blocks[y * 256 + x * 16 + z]).blockType)){
+        auto* masks = new uint8_t[ChunkGovernor::CHUNK_HEIGHT * ChunkGovernor::CHUNK_SIZE * ChunkGovernor::CHUNK_SIZE]{};
+        for (int y = 0; y < ChunkGovernor::CHUNK_HEIGHT; ++y) {
+            for (int x = 0; x < ChunkGovernor::CHUNK_SIZE; ++x) {
+                for (int z = 0; z < ChunkGovernor::CHUNK_SIZE; ++z) {
+                    if(is_transparent((chunk->blocks[y * ChunkGovernor::CHUNK_HEIGHT + x * ChunkGovernor::CHUNK_SIZE + z]).blockType)){
                         continue;
                     }
                     //ON Z AXIS
                     if(z<15) {
-                        if (is_transparent((chunk->blocks[y * 256 + x * 16 + z + 1]).blockType)) {
-                            masks[y * 256 + x * 16 + z]+=FaceMask::Front;
+                        if (is_transparent((chunk->blocks[y * ChunkGovernor::CHUNK_HEIGHT + x * ChunkGovernor::CHUNK_SIZE + z + 1]).blockType)) {
+                            masks[y * ChunkGovernor::CHUNK_HEIGHT + x * ChunkGovernor::CHUNK_SIZE + z]+=FaceMask::Front;
                             (*face_count)++;
                         }
                     }
                     else{
                         //LETS ASSUME FOR NOW THAT THOSE WILL ALSO BE RENDERED
-                        masks[y * 256 + x * 16 + z]+=FaceMask::Front;
+                        masks[y * ChunkGovernor::CHUNK_HEIGHT + x * ChunkGovernor::CHUNK_SIZE + z]+=FaceMask::Front;
                         (*face_count)++;
                     }
                     if(z>1){
-                        if (is_transparent(chunk->blocks[y * 256 + x * 16 + z - 1].blockType)) {
-                            masks[y * 256 + x * 16 + z]+=FaceMask::Back;
+                        if (is_transparent(chunk->blocks[y * ChunkGovernor::CHUNK_HEIGHT + x * ChunkGovernor::CHUNK_SIZE + z - 1].blockType)) {
+                            masks[y * ChunkGovernor::CHUNK_HEIGHT + x * ChunkGovernor::CHUNK_SIZE + z]+=FaceMask::Back;
                             (*face_count)++;
                         }
                     }else{
                         //LETS ASSUME FOR NOW THAT THOSE WILL ALSO BE RENDERED
-                        masks[y * 256 + x * 16 + z]+=FaceMask::Back;
+                        masks[y * ChunkGovernor::CHUNK_HEIGHT + x * ChunkGovernor::CHUNK_SIZE + z]+=FaceMask::Back;
                         (*face_count)++;
                     }
                     //ON X AXIS
                     if(x<15) {
-                        if (is_transparent(chunk->blocks[y * 256 + x * 16 + z + 16].blockType)) {
-                            masks[y * 256 + x * 16 + z]+=FaceMask::Right;
+                        if (is_transparent(chunk->blocks[y * ChunkGovernor::CHUNK_HEIGHT + x * ChunkGovernor::CHUNK_SIZE + z + ChunkGovernor::CHUNK_SIZE].blockType)) {
+                            masks[y * ChunkGovernor::CHUNK_HEIGHT + x * ChunkGovernor::CHUNK_SIZE + z]+=FaceMask::Right;
                             (*face_count)++;
                         }
                     }
                     else{
                         //LETS ASSUME FOR NOW THAT THOSE WILL ALSO BE RENDERED
-                        masks[y * 256 + x * 16 + z]+=FaceMask::Right;
+                        masks[y * ChunkGovernor::CHUNK_HEIGHT + x * ChunkGovernor::CHUNK_SIZE + z]+=FaceMask::Right;
                         (*face_count)++;
                     }
                     if(x>1){
-                        if (is_transparent(chunk->blocks[y * 256 + x * 16 + z - 16].blockType)) {
-                            masks[y * 256 + x * 16 + z]+=FaceMask::Left;
+                        if (is_transparent(chunk->blocks[y * ChunkGovernor::CHUNK_HEIGHT + x * ChunkGovernor::CHUNK_SIZE + z - ChunkGovernor::CHUNK_SIZE].blockType)) {
+                            masks[y * ChunkGovernor::CHUNK_HEIGHT + x * ChunkGovernor::CHUNK_SIZE + z]+=FaceMask::Left;
                             (*face_count)++;
                         }
                     }else{
                         //LETS ASSUME FOR NOW THAT THOSE WILL ALSO BE RENDERED
-                        masks[y * 256 + x * 16 + z]+=FaceMask::Left;
+                        masks[y * ChunkGovernor::CHUNK_HEIGHT + x * ChunkGovernor::CHUNK_SIZE + z]+=FaceMask::Left;
                         (*face_count)++;
                     }
                     //ON Y AXIS
                     if(y<255) {
-                        if (is_transparent(chunk->blocks[y * 256 + x * 16 + z + 256].blockType)) {
-                            masks[y * 256 + x * 16 + z]+=FaceMask::Top;
+                        if (is_transparent(chunk->blocks[y * ChunkGovernor::CHUNK_HEIGHT + x * ChunkGovernor::CHUNK_SIZE + z + ChunkGovernor::CHUNK_HEIGHT].blockType)) {
+                            masks[y * ChunkGovernor::CHUNK_HEIGHT + x * ChunkGovernor::CHUNK_SIZE + z]+=FaceMask::Top;
                             (*face_count)++;
                         }
                     }
                     else{
                         //LETS ASSUME FOR NOW THAT THOSE WILL ALSO BE RENDERED
-                        masks[y * 256 + x * 16 + z]+=FaceMask::Top;
+                        masks[y * ChunkGovernor::CHUNK_HEIGHT + x * ChunkGovernor::CHUNK_SIZE + z]+=FaceMask::Top;
                         (*face_count)++;
                     }
                     if(y>1){
-                        if (is_transparent(chunk->blocks[y * 256 + x * 16 + z - 256].blockType)) {
-                            masks[y * 256 + x * 16 + z]+=FaceMask::Bottom;
+                        if (is_transparent(chunk->blocks[y * ChunkGovernor::CHUNK_HEIGHT + x * ChunkGovernor::CHUNK_SIZE + z - ChunkGovernor::CHUNK_HEIGHT].blockType)) {
+                            masks[y * ChunkGovernor::CHUNK_HEIGHT + x * ChunkGovernor::CHUNK_SIZE + z]+=FaceMask::Bottom;
                             (*face_count)++;
                         }
                     }else{
                         //LETS ASSUME FOR NOW THAT THOSE WILL ALSO BE RENDERED
-                        masks[y * 256 + x * 16 + z]+=FaceMask::Bottom;
+                        masks[y * ChunkGovernor::CHUNK_HEIGHT + x * ChunkGovernor::CHUNK_SIZE + z]+=FaceMask::Bottom;
                         (*face_count)++;
                     }
                 }

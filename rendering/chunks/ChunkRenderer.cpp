@@ -20,13 +20,13 @@ void ChunkRenderer::addChunksToBeRendered(std::vector<Chunk*> *chunks) {
         mesh.texcoords = new float[mesh.vertexCount*2];   // 3 vertices, 2 coordinates each (x, y)
         mesh.normals = new float[mesh.vertexCount*3];     // 3 vertices, 3 coordinates each (x, y, z)
         mesh.indices = new unsigned short[mesh.triangleCount*3];
-        for (int y = 0; y < 256; ++y) {
-            for (int x = 0; x < 16; ++x) {
-                for (int z = 0; z < 16; ++z) {
-                    if(is_transparent(chunk->blocks[y*256+x*16+z].blockType)){
+        for (int y = 0; y < ChunkGovernor::CHUNK_HEIGHT; ++y) {
+            for (int x = 0; x < ChunkGovernor::CHUNK_SIZE; ++x) {
+                for (int z = 0; z < ChunkGovernor::CHUNK_SIZE; ++z) {
+                    if(is_transparent(chunk->blocks[y*ChunkGovernor::CHUNK_HEIGHT+x*ChunkGovernor::CHUNK_SIZE+z].blockType)){
                         continue;
                     }
-                    face_count =StaticRenderer::RenderCube(chunkFaceMasks[y*256+x*16+z], mesh.vertices,mesh.indices,mesh.texcoords,mesh.normals,new Int3{x,y,z},face_count);
+                    face_count =StaticRenderer::RenderCube(chunkFaceMasks[y*ChunkGovernor::CHUNK_HEIGHT+x*ChunkGovernor::CHUNK_SIZE+z], mesh.vertices,mesh.indices,mesh.texcoords,mesh.normals,new Int3{x,y,z},face_count);
                 }
             }
         }

@@ -7,11 +7,10 @@
 #include "raymath.h"
 #include "raygui.h"
 #include "FastNoise/FastNoise.h"
+#include "procedural/ChunkGovernor.h"
 #include "procedural/terrain/BiomeGeneration.h"
 #include "rendering/StaticRenderer.h"
-#include "procedural/ChunkGovernor.h"
 #include "rendering/chunks/ChunkRenderer.h"
-
 //------------------------------------------------------------------------------------
 // Program main entry point
 //------------------------------------------------------------------------------------
@@ -23,7 +22,7 @@ int main()
     const int screenHeight = 450*1.5;
     InitWindow(screenWidth, screenHeight, "terragen");
     Camera3D camera = {0};
-    camera.position = Vector3{1.0f, 200.0f, 1.0f}; // Camera position
+    camera.position = Vector3{1.0f, 150.0f, 1.0f}; // Camera position
     camera.target = Vector3{0.0f, 0.0f, 0.0f}; // Camera looking at point
     camera.up = Vector3{0.0f, 1.0f, 0.0f}; // Camera up vector (rotation towards target)
     camera.fovy = 70.0f; // Camera field-of-view Y
@@ -38,25 +37,17 @@ int main()
     const int ATLAS_SIZE=256;
     std::vector<float> noiseOutput(ATLAS_SIZE * ATLAS_SIZE/* *ATLAS_SIZE*/);
 
-    int index = 0;
+    auto fnSimplex = FastNoise::New<FastNoise::CellularValue>();
+    auto fnFractal = FastNoise::New<FastNoise::FractalFBm>();
 
-
-    auto* noisePixels = new Color[ATLAS_SIZE*ATLAS_SIZE];
+    Color* noisePixels = new Color[ATLAS_SIZE*ATLAS_SIZE];
 
     for (int y = 0; y < ATLAS_SIZE; y++)
     {
         for (int x = 0; x < ATLAS_SIZE; x++)
         {
-            float val = noiseOutput[y * ATLAS_SIZE + x];
-            /*std::cout<<val<<std::endl;*/
-            auto v = std::clamp(val, -1.0f, 1.0f);
-            float norm = (v + 1.0f)*0.5f;
-            int rounded = std::lround( norm * 255.0f );
-            if (rounded < 0)   rounded = 0;
-            if (rounded > 255) rounded = 255;
-
-            auto c = static_cast<uint8_t>( rounded );
-            noisePixels[(ATLAS_SIZE-1-y)*ATLAS_SIZE + x] = Color{ c, c, c, 255 };
+            //std::cout<<noiseOutput[y*ATLAS_SIZE + x] <<" ";
+            noisePixels[ATLAS_SIZE*y + x] = Color((noiseOutput[y*ATLAS_SIZE + x]+1)*127,0,0,255);
         }
     }
 
