@@ -20,10 +20,10 @@ void ChunkGovernor::GenerateChunks() {
                     constexpr int max_height = 256;
 
                     float v = heightMap[z * CHUNK_SIZE + x];
-                    v = std::clamp(v, -1.0f, 1.0f);
+                    //v = std::clamp(v, -1.0f, 1.0f);
                     float norm = (v + 1.0f)*0.52f;
                     int h = static_cast<int>(norm * (max_height - 1));
-                    h = std::clamp(h, 0, max_height -1) -120;
+
 
                     for (int y = 0; y < max_height; ++y) {
                         if (y <= h)

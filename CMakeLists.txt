@@ -33,6 +33,7 @@ add_executable(terragen main.cpp
         procedural/ChunkGovernor.h
         rendering/chunks/ChunkRenderer.cpp
         rendering/chunks/ChunkRenderer.h
+        rendering/chunks/QuantumChunk.h
 )
 
 target_link_libraries(terragen raylib FastNoise2::FastNoise)

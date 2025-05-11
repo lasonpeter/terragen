@@ -268,12 +268,6 @@ int StaticRenderer::RenderCube(uint8_t bit_mask, float *vertex_buffer, unsigned 
         indicies_buffer[4 + (6 * face_count)] = 3 + (4 * face_count); // V3
         indicies_buffer[5 + (6 * face_count)] = 2 + (4 * face_count); // V2
 
-        // --- Alternatively, you could reverse the second triangle differently, e.g., 3, 2, 1 ---
-        // indicies_buffer[3 + (6 * face_count)] = 3 + (4 * face_count); // V3
-        // indicies_buffer[4 + (6 * face_count)] = 2 + (4 * face_count); // V2
-        // indicies_buffer[5 + (6 * face_count)] = 1 + (4 * face_count); // V1
-        // --- Either reversal pair should fix the "inside out" issue ---
-
 
         assignTextureCoords(face_count);
         face_count++;

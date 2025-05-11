@@ -10,8 +10,8 @@
 
 struct ChunkMesh{
     Int2 chunkPosition;
-    uint8_t chunkFaceMasks[ChunkGovernor::CHUNK_HEIGHT*ChunkGovernor::CHUNK_SIZE*ChunkGovernor::CHUNK_SIZE];
-    Mesh mesh = {0};
+    uint8_t chunkFaceMasks[ChunkGovernor::CHUNK_HEIGHT*ChunkGovernor::CHUNK_SIZE*ChunkGovernor::CHUNK_SIZE]{};
+    std::vector<Mesh> chunkMeshes{};
 };
 
 class ChunkRenderer{
