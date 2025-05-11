@@ -6,7 +6,7 @@
 
 #include "ChunkGovernor.h"
 #include "../utilities/FaceMask.h"
-uint8_t *Chunk::generateChunkFaceMasks(Chunk *chunk,int* face_count, const int chunkIndex) {
+uint8_t *Chunk::generateChunkFaceMasks(Chunk *chunk,int* face_count,int chunkIndex) {
         auto* masks = new uint8_t[ChunkGovernor::CHUNK_SIZE * ChunkGovernor::CHUNK_SIZE * ChunkGovernor::CHUNK_SIZE]{};
         for (int y = 0; y < ChunkGovernor::CHUNK_SIZE; ++y) {
             for (int x = 0; x < ChunkGovernor::CHUNK_SIZE; ++x) {
@@ -83,7 +83,6 @@ uint8_t *Chunk::generateChunkFaceMasks(Chunk *chunk,int* face_count, const int c
                         (*face_count)++;
                     }
                 }
-
             }
         }
         return masks;
