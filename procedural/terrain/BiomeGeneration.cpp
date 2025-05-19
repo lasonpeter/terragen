@@ -19,13 +19,27 @@ BiomeGeneration::BiomeGeneration(int seed_)
 }
 
 
-void BiomeGeneration::generateNoise(float *buffer, int size, int x, int y)
+void BiomeGeneration::generateNoise2D(float *buffer, int size, int x, int y)
 {
-    auto fn = FastNoise::NewFromEncodedNodeTree(encodedNodeTree);
+    auto fn = FastNoise::NewFromEncodedNodeTree(encodedNodeTree2D);
 
     if (fn)
     {
         fn->GenUniformGrid2D(buffer, x*size, y*size, size, size, frequency, seed);
+    }
+    else
+    {
+        throw std::runtime_error("Failed to load encoded node tree");
+    }
+}
+
+void BiomeGeneration::generateNoise3D(float* buffer, int size, int size_height, int x, int y, int z)
+{
+    auto fn = FastNoise::NewFromEncodedNodeTree(encodedNodeTree2D);
+
+    if (fn)
+    {
+        fn->GenUniformGrid3D(buffer, x*size, y*size, z*size_height, size, size, size_height, frequency, seed);
     }
     else
     {

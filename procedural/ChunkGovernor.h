@@ -17,7 +17,7 @@ public:
     ChunkGovernor(){
         chunks_ ={};
     }
-    void GenerateChunks(int seed, const char *myEncodedTree);
+    void GenerateChunks(int seed, const char *myEncodedTree2D, const char *myEncodedTree3D);
 
     static const int CHUNK_SIZE=16;
     static const int CHUNK_HEIGHT=256;
