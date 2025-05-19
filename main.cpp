@@ -36,34 +36,21 @@ int main()
 
     const int ATLAS_SIZE=256;
     const int seed = 1337;
-    const char *myEncodedTree = "GQAHAAENAAQAAAAAACBABwAAZmYmPwAAAAA/";
-    /*const char *myEncodedTree = "GQATAClcjz4IAAETAMP1KD8NAAQAAAAAACBACQAAZmYmPwAAAAA/";*/
+    const char *myEncodedTree2D = "GQAHAAENAAQAAAAAACBABwAAZmYmPwAAAAA/";
+    const char *myEncodedTree3D = "EwCamZk+GgABEQACAAAAAADgQBAAAACIQR8AFgABAAAACwADAAAAAgAAAAMAAAAEAAAAAAAAAD8BFAD//wAAAAAAAD8AAAAAPwAAAAA/AAAAAD8BFwAAAIC/AACAPz0KF0BSuB5AEwAAAKBABgAAj8J1PACamZk+AAAAAAAA4XoUPw==";
 
     ChunkGovernor chunkGovernor = ChunkGovernor();
-    chunkGovernor.GenerateChunks(seed, myEncodedTree);
+    chunkGovernor.GenerateChunks(seed, myEncodedTree2D, myEncodedTree3D);
 
-    TerrainImage terrainImage = TerrainImage(seed, myEncodedTree);
-
-    Image image = Image(terrainImage.getNoisePixels(),ATLAS_SIZE, ATLAS_SIZE);
-    image.data=terrainImage.getNoisePixels();
-    image.width = ATLAS_SIZE;
-    image.height = ATLAS_SIZE;
-    image.format= PIXELFORMAT_UNCOMPRESSED_R8G8B8A8;
-    image.mipmaps = 1;
-
-    Image checked = GenImageChecked(2, 2, 1, 1, RED, GREEN);
+    /*Image checked = GenImageChecked(2, 2, 1, 1, RED, GREEN);
     Texture2D texturechecked = LoadTextureFromImage(checked);
-    UnloadImage(checked);
+    UnloadImage(checked);*/
 
     ChunkRenderer chunkRenderer= ChunkRenderer{};
     chunkRenderer.addChunksToBeRendered(&chunkGovernor.chunks_);
     chunkRenderer.uploadMeshes();
 
     // Upload mesh data from CPU (RAM) to GPU (VRAM) memory
-
-
-
-    Texture2D texture = LoadTextureFromImage(image);
 
     SetExitKey(KEY_NULL);
     HideCursor();
@@ -151,7 +138,6 @@ int main()
         DrawLine3D({0,0,0},{5,0,0}, RED);
 
         EndMode3D();
-        DrawTexture(texture, screenWidth - texture.width - 20, 20, WHITE);
 
         DrawCubeWires( Vector3{0,0,0}, .5f, .5f, .5f,BLACK);
         DrawText("Congrats! You created your first window!", 190, 200, 20, LIGHTGRAY);

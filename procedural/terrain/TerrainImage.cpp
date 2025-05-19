@@ -22,12 +22,12 @@ biome_generation.setEncodedNodeTree(myEncodedTree);
 TerrainImage::TerrainImage(int seed, const char *myEncodedTree) : noiseOutput(ATLAS_SIZE*ATLAS_SIZE)
 {
     biome_generation.setSeed(seed);
-    biome_generation.setEncodedNodeTree(myEncodedTree);
+    /*biome_generation.setEncodedNodeTree(myEncodedTree);*/
 }
 
 Color* TerrainImage::getNoisePixels()
 {
-    biome_generation.generateNoise(noiseOutput.data(),ATLAS_SIZE,-half,-half);
+    biome_generation.generateNoise2D(noiseOutput.data(),ATLAS_SIZE,-half,-half);
 
     auto* noisePixels = new Color[ATLAS_SIZE*ATLAS_SIZE];
 
@@ -48,4 +48,5 @@ Color* TerrainImage::getNoisePixels()
         }
     }
     return  noisePixels;
+
 }
