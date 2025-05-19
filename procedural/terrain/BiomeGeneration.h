@@ -17,6 +17,7 @@ private:
 
 public:
     void setEncodedNodeTree(const char* tree) { encodedNodeTree = tree; }
+    void setSeed(int seed_) { seed = seed_; }
     explicit BiomeGeneration(int seed_);
     ///
     /// \param buffer
