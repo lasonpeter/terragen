@@ -9,6 +9,7 @@
 #include "FastNoise/FastNoise.h"
 #include "procedural/ChunkGovernor.h"
 #include "procedural/terrain/BiomeGeneration.h"
+#include "procedural/terrain/TerrainImage.h"
 #include "rendering/StaticRenderer.h"
 #include "rendering/chunks/ChunkRenderer.h"
 //------------------------------------------------------------------------------------
@@ -33,28 +34,18 @@ int main()
     float movement_speed = 0.2f;
     Vector3 camera_position = {1, 1, 1};
 
-    ChunkGovernor chunkGovernor = ChunkGovernor();
     const int ATLAS_SIZE=256;
-    std::vector<float> noiseOutput(ATLAS_SIZE * ATLAS_SIZE/* *ATLAS_SIZE*/);
+    const int seed = 1337;
+    const char *myEncodedTree = "GQAHAAENAAQAAAAAACBABwAAZmYmPwAAAAA/";
+    /*const char *myEncodedTree = "GQATAClcjz4IAAETAMP1KD8NAAQAAAAAACBACQAAZmYmPwAAAAA/";*/
 
-    auto fnSimplex = FastNoise::New<FastNoise::CellularValue>();
-    auto fnFractal = FastNoise::New<FastNoise::FractalFBm>();
+    ChunkGovernor chunkGovernor = ChunkGovernor();
+    chunkGovernor.GenerateChunks(seed, myEncodedTree);
 
-    Color* noisePixels = new Color[ATLAS_SIZE*ATLAS_SIZE];
+    TerrainImage terrainImage = TerrainImage(seed, myEncodedTree);
 
-    for (int y = 0; y < ATLAS_SIZE; y++)
-    {
-        for (int x = 0; x < ATLAS_SIZE; x++)
-        {
-            //std::cout<<noiseOutput[y*ATLAS_SIZE + x] <<" ";
-            noisePixels[ATLAS_SIZE*y + x] = Color((noiseOutput[y*ATLAS_SIZE + x]+1)*127,0,0,255);
-        }
-    }
-
-    chunkGovernor.GenerateChunks();
-
-    Image image = Image(noisePixels,ATLAS_SIZE, ATLAS_SIZE);
-    image.data=noisePixels;
+    Image image = Image(terrainImage.getNoisePixels(),ATLAS_SIZE, ATLAS_SIZE);
+    image.data=terrainImage.getNoisePixels();
     image.width = ATLAS_SIZE;
     image.height = ATLAS_SIZE;
     image.format= PIXELFORMAT_UNCOMPRESSED_R8G8B8A8;
