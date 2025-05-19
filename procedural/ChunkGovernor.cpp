@@ -39,7 +39,7 @@ void ChunkGovernor::GenerateChunks(int seed, const char *myEncodedTree2D, const 
             float* heightMap = new float[CHUNK_SIZE * CHUNK_SIZE];
             float* caveMap = new float[CHUNK_SIZE * CHUNK_SIZE* CHUNK_HEIGHT];
             biome_generation.generateNoise2D(heightMap, CHUNK_SIZE, chunk_x, chunk_y);
-            biome_generation.generateNoise3D(caveMap, CHUNK_SIZE,  CHUNK_HEIGHT, chunk_x, chunk_y, 0);
+            biome_generation.generateNoise3D(caveMap, CHUNK_SIZE,  CHUNK_HEIGHT, chunk_x, chunk_y);
 
             for (int x = 0; x < CHUNK_SIZE; ++x) {
                 for (int z = 0; z < CHUNK_SIZE; ++z) {
@@ -53,7 +53,7 @@ void ChunkGovernor::GenerateChunks(int seed, const char *myEncodedTree2D, const 
 
                     for (int y = 0; y < max_height; ++y) {
                         /*std::cout<<caveMap[(y * CHUNK_SIZE + z) * CHUNK_SIZE + x]<<std::endl;*/
-                        if (y <= h&&caveMap[(y * CHUNK_SIZE + z) * CHUNK_SIZE + x]>-0.5f)
+                        if ((y <= h)&&(caveMap[(y * CHUNK_SIZE + z) * CHUNK_SIZE + x]<0.0f))
                             chunk->blocks[(y * CHUNK_SIZE + z) * CHUNK_SIZE + x] = Block(BlockType::DIRT);
                         else
                             chunk->blocks[(y * CHUNK_SIZE + z) * CHUNK_SIZE + x] = Block(BlockType::AIR);

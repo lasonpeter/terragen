@@ -33,13 +33,13 @@ void BiomeGeneration::generateNoise2D(float *buffer, int size, int x, int y)
     }
 }
 
-void BiomeGeneration::generateNoise3D(float* buffer, int size, int size_height, int x, int y, int z)
+void BiomeGeneration::generateNoise3D(float* buffer, int size, int size_height, int x, int y)
 {
-    auto fn = FastNoise::NewFromEncodedNodeTree(encodedNodeTree2D);
+    auto fn = FastNoise::NewFromEncodedNodeTree(encodedNodeTree3D);
 
     if (fn)
     {
-        fn->GenUniformGrid3D(buffer, x*size, y*size, z*size_height, size, size, size_height, frequency, seed);
+        fn->GenUniformGrid3D(buffer, x*size, y*size, 0, size, size, size_height, frequency, seed);
     }
     else
     {
