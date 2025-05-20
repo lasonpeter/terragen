@@ -57,7 +57,6 @@ void ChunkRenderer::addChunksToBeRendered(std::vector<Chunk*> *chunks) {
         chunkMesh->chunkPosition = chunk->position;
         chunkMeshesCache.push_back(chunkMesh);
     }
-
 }
 
 void ChunkRenderer::renderChunks() {

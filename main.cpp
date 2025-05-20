@@ -1,15 +1,9 @@
 ﻿#define RAYGUI_IMPLEMENTATION
 #include "raylib.h"
-#include <iostream>
-#include <bitset>
 
-#include "utilities/FaceMask.h"
 #include "raymath.h"
-#include "raygui.h"
 #include "FastNoise/FastNoise.h"
 #include "procedural/ChunkGovernor.h"
-#include "procedural/terrain/BiomeGeneration.h"
-#include "rendering/StaticRenderer.h"
 #include "rendering/chunks/ChunkRenderer.h"
 //------------------------------------------------------------------------------------
 // Program main entry point
