@@ -1,16 +1,9 @@
 ﻿#define RAYGUI_IMPLEMENTATION
 #include "raylib.h"
-#include <iostream>
-#include <bitset>
 
-#include "utilities/FaceMask.h"
 #include "raymath.h"
-#include "raygui.h"
 #include "FastNoise/FastNoise.h"
 #include "procedural/ChunkGovernor.h"
-#include "procedural/terrain/BiomeGeneration.h"
-#include "procedural/terrain/TerrainImage.h"
-#include "rendering/StaticRenderer.h"
 #include "rendering/chunks/ChunkRenderer.h"
 //------------------------------------------------------------------------------------
 // Program main entry point
@@ -34,23 +27,46 @@ int main()
     float movement_speed = 0.2f;
     Vector3 camera_position = {1, 1, 1};
 
-    const int ATLAS_SIZE=256;
-    const int seed = 1337;
-    const char *myEncodedTree2D = "GQAHAAENAAQAAAAAACBABwAAZmYmPwAAAAA/";
-    const char *myEncodedTree3D = "EwCamZk+GgABEQACAAAAAADgQBAAAACIQR8AFgABAAAACwADAAAAAgAAAAMAAAAEAAAAAAAAAD8BFAD//wAAAAAAAD8AAAAAPwAAAAA/AAAAAD8BFwAAAIC/AACAPz0KF0BSuB5AEwAAAKBABgAAj8J1PACamZk+AAAAAAAA4XoUPw==";
-
     ChunkGovernor chunkGovernor = ChunkGovernor();
-    chunkGovernor.GenerateChunks(seed, myEncodedTree2D, myEncodedTree3D);
+    const int ATLAS_SIZE=256;
+    std::vector<float> noiseOutput(ATLAS_SIZE * ATLAS_SIZE/* *ATLAS_SIZE*/);
 
-    /*Image checked = GenImageChecked(2, 2, 1, 1, RED, GREEN);
+    auto fnSimplex = FastNoise::New<FastNoise::CellularValue>();
+    auto fnFractal = FastNoise::New<FastNoise::FractalFBm>();
+
+    Color* noisePixels = new Color[ATLAS_SIZE*ATLAS_SIZE];
+
+    for (int y = 0; y < ATLAS_SIZE; y++)
+    {
+        for (int x = 0; x < ATLAS_SIZE; x++)
+        {
+            //std::cout<<noiseOutput[y*ATLAS_SIZE + x] <<" ";
+            noisePixels[ATLAS_SIZE*y + x] = Color((noiseOutput[y*ATLAS_SIZE + x]+1)*127,0,0,255);
+        }
+    }
+
+    chunkGovernor.GenerateChunks();
+
+    Image image = Image(noisePixels,ATLAS_SIZE, ATLAS_SIZE);
+    image.data=noisePixels;
+    image.width = ATLAS_SIZE;
+    image.height = ATLAS_SIZE;
+    image.format= PIXELFORMAT_UNCOMPRESSED_R8G8B8A8;
+    image.mipmaps = 1;
+
+    Image checked = GenImageChecked(2, 2, 1, 1, RED, GREEN);
     Texture2D texturechecked = LoadTextureFromImage(checked);
-    UnloadImage(checked);*/
+    UnloadImage(checked);
 
     ChunkRenderer chunkRenderer= ChunkRenderer{};
     chunkRenderer.addChunksToBeRendered(&chunkGovernor.chunks_);
     chunkRenderer.uploadMeshes();
 
     // Upload mesh data from CPU (RAM) to GPU (VRAM) memory
+
+
+
+    Texture2D texture = LoadTextureFromImage(image);
 
     SetExitKey(KEY_NULL);
     HideCursor();
@@ -138,6 +154,7 @@ int main()
         DrawLine3D({0,0,0},{5,0,0}, RED);
 
         EndMode3D();
+        DrawTexture(texture, screenWidth - texture.width - 20, 20, WHITE);
 
         DrawCubeWires( Vector3{0,0,0}, .5f, .5f, .5f,BLACK);
         DrawText("Congrats! You created your first window!", 190, 200, 20, LIGHTGRAY);
