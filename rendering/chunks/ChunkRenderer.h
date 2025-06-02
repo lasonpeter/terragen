@@ -18,7 +18,13 @@ struct ChunkMesh {
     SubChunkMesh meshes[16]{};
 };
 
+struct SubChunkModel{
+    Model model{};
+    Vector3 position{};
+};
+
 class ChunkRenderer{
+    std::vector<SubChunkModel> modelCache{};
     std::vector<ChunkMesh*> chunkMeshesCache{};
     Texture2D textureChecked;
 public:
