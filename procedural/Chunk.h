@@ -6,6 +6,7 @@
 #define CHUNK_H
 
 #include <cstdint>
+#include <vector>
 #include "Block.h"
 #include "../utilities/Mathf.h"
 //
@@ -19,7 +20,10 @@ public:
         position = position_t;
     }
 
-    static void generateChunkFaceMasks(const Chunk *chunk, int *face_count, int chunk_index, uint8_t *chunkFaceMasks);
+    static void
+    generateChunkFaceMasks(const Chunk *chunk, int *face_count, int chunk_index, uint8_t *chunkFaceMasks,
+                           int chunk_index_x,
+                           int chunk_index_y, std::vector<Chunk *> *chunks, int renderDistance);
 };
 
 #endif //CHUNK_H
