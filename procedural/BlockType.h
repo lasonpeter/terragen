@@ -7,6 +7,14 @@
 
 
 #include <cstdint>
+#include "../data/textures/blocks/blocks.h"
+
+struct AtlasTexture{
+    float positionX;
+    float positionY;
+    float sourceWidth;
+    float sourceHeight;
+};
 
 enum class BlockType : uint8_t{
     AIR =0,
@@ -14,6 +22,7 @@ enum class BlockType : uint8_t{
     DIRT =2,
     STONE =3
 };
+
 
 inline const char *to_string(BlockType e) {
     switch (e) {
@@ -24,6 +33,7 @@ inline const char *to_string(BlockType e) {
         default: return "unknown";
     }
 }
+
 inline const bool is_transparent(BlockType e) {
     switch (e) {
         case BlockType::AIR: return true;
@@ -33,4 +43,65 @@ inline const bool is_transparent(BlockType e) {
         default: return true;
     }
 }
+
+inline const Vector4 texture_coords(BlockType e){
+    switch (e) {
+        case BlockType::DIRT:
+            return Vector4{
+                static_cast<float>(rtpDescAtlas[0].positionX),
+                static_cast<float>(rtpDescAtlas[0].positionY),
+                static_cast<float>(rtpDescAtlas[0].sourceWidth),
+                static_cast<float>(rtpDescAtlas[0].sourceHeight)
+            };
+        case BlockType::STONE:
+            return Vector4{
+                static_cast<float>(rtpDescAtlas[1].positionX),
+                static_cast<float>(rtpDescAtlas[1].positionY),
+                static_cast<float>(rtpDescAtlas[1].sourceWidth),
+                static_cast<float>(rtpDescAtlas[1].sourceHeight)
+            };
+        case BlockType::AIR:
+            return Vector4{0.0f, 0.0f, 0.0f, 0.0f};
+        case BlockType::GRASS:
+            return Vector4{
+                static_cast<float>(rtpDescAtlas[0].positionX),
+                static_cast<float>(rtpDescAtlas[0].positionY),
+                static_cast<float>(rtpDescAtlas[0].sourceWidth),
+                static_cast<float>(rtpDescAtlas[0].sourceHeight)
+            };
+        default:
+            return Vector4{0.0f, 0.0f, 0.0f, 0.0f};
+    }
+}
+
+inline const AtlasTexture uv_coords(BlockType e){
+    switch (e) {
+        case BlockType::DIRT:
+            return AtlasTexture{
+                static_cast<float>(rtpDescAtlas[0].positionX),
+                static_cast<float>(rtpDescAtlas[0].positionY),
+                static_cast<float>(rtpDescAtlas[0].sourceWidth),
+                static_cast<float>(rtpDescAtlas[0].sourceHeight)
+            };
+        case BlockType::GRASS:
+            return AtlasTexture{
+                static_cast<float>(rtpDescAtlas[0].positionX),
+                static_cast<float>(rtpDescAtlas[0].positionY),
+                static_cast<float>(rtpDescAtlas[0].sourceWidth),
+                static_cast<float>(rtpDescAtlas[0].sourceHeight)
+            };
+        case BlockType::STONE:
+            return AtlasTexture{
+                static_cast<float>(rtpDescAtlas[1].positionX),
+                static_cast<float>(rtpDescAtlas[1].positionY),
+                static_cast<float>(rtpDescAtlas[1].sourceWidth),
+                static_cast<float>(rtpDescAtlas[1].sourceHeight)
+            };
+        case BlockType::AIR:
+        default:
+            return AtlasTexture{0.0f, 0.0f, 0.0f, 0.0f};
+    }
+}
+
+
 #endif //BLOCKTYPE_H

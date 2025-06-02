@@ -12,11 +12,14 @@
 #include "procedural/terrain/TerrainImage.h"
 #include "rendering/StaticRenderer.h"
 #include "rendering/chunks/ChunkRenderer.h"
+#include "data/textures/blocks/blocks.h"
 //------------------------------------------------------------------------------------
 // Program main entry point
 //------------------------------------------------------------------------------------
 int main()
 {
+
+
     // Initialization
     //--------------------------------------------------------------------------------------
     const int screenWidth = 800*1.5;
@@ -33,7 +36,6 @@ int main()
     float speed = 0.05f;
     float movement_speed = 0.8f;
     Vector3 camera_position = {1, 1, 1};
-
     const int ATLAS_SIZE=256;
     const int seed = 767867547567;
     const char *myEncodedTree2D = "GQAHAAENAAQAAAAAACBABwAAZmYmPwAAAAA/";

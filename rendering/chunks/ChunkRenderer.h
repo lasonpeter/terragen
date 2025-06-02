@@ -26,7 +26,7 @@ struct SubChunkModel{
 class ChunkRenderer{
     std::vector<SubChunkModel> modelCache{};
     std::vector<ChunkMesh*> chunkMeshesCache{};
-    Texture2D textureChecked;
+    Texture2D textureAtlas;
 public:
     void addChunksToBeRendered(std::vector<Chunk*> *chunks, int chunkSize);
     void uploadMeshes();

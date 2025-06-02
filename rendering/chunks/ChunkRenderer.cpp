@@ -26,15 +26,13 @@ void ChunkRenderer::addChunksToBeRendered(std::vector<Chunk*> *chunks, int chunk
                 for (int y = 0; y < ChunkGovernor::CHUNK_SIZE; ++y) {
                     for (int x = 0; x < ChunkGovernor::CHUNK_SIZE; ++x) {
                         for (int z = 0; z < ChunkGovernor::CHUNK_SIZE; ++z) {
-                            if (is_transparent(chunks->at(chnk_index_x * chunkSize + chnk_index_y)->blocks[
-                                                       y * ChunkGovernor::CHUNK_HEIGHT + x * ChunkGovernor::CHUNK_SIZE +
-                                                       z].blockType)) {
+                            if (is_transparent(chunks->at(chnk_index_x * chunkSize + chnk_index_y)->blocks[y * ChunkGovernor::CHUNK_HEIGHT + x * ChunkGovernor::CHUNK_SIZE +z].blockType)) {
                                 continue;
                             }
                             face_count = StaticRenderer::RenderCube(
                                     chunkMesh.chunkFaceMasks[y * ChunkGovernor::CHUNK_HEIGHT +
                                                              x * ChunkGovernor::CHUNK_SIZE + z], mesh.vertices,
-                                    mesh.indices, mesh.texcoords, mesh.normals, new Int3{x, y, z}, face_count);
+                                    mesh.indices, mesh.texcoords, mesh.normals, new Int3{x, y, z}, face_count, chunks->at(chnk_index_x * chunkSize + chnk_index_y)->blocks[y * ChunkGovernor::CHUNK_HEIGHT + x * ChunkGovernor::CHUNK_SIZE +z].blockType);
                         }
                     }
                 }
@@ -62,7 +60,7 @@ void ChunkRenderer::renderChunks() {
                     SubChunkModel  subChunkModel = SubChunkModel();
                     subChunkModel.model =LoadModelFromMesh(chunkMesh->meshes[i].mesh);
                     subChunkModel.position = Vector3{static_cast<float>(chunkMesh->chunkPosition.y) * ChunkGovernor::CHUNK_SIZE,static_cast<float>(i * ChunkGovernor::CHUNK_SIZE),static_cast<float>(chunkMesh->chunkPosition.x) *ChunkGovernor::CHUNK_SIZE};
-                    subChunkModel.model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = textureChecked;
+                    subChunkModel.model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = textureAtlas;
                     modelCache.push_back(subChunkModel);
                     DrawModel(subChunkModel.model, Vector3{static_cast<float>(chunkMesh->chunkPosition.y) * ChunkGovernor::CHUNK_SIZE,static_cast<float>(i * ChunkGovernor::CHUNK_SIZE),static_cast<float>(chunkMesh->chunkPosition.x) *ChunkGovernor::CHUNK_SIZE}, 1.0f, WHITE);
                 }
@@ -85,8 +83,9 @@ void ChunkRenderer::uploadMeshes() {
             }
         }
     }
-    Image checked = GenImageChecked(2, 2, 1, 1, RED, GREEN);
-    textureChecked = LoadTextureFromImage(checked);
-    UnloadImage(checked);
+    Image atlasImage = LoadImage("data/textures/blocks/blocks.png");
+    textureAtlas = LoadTextureFromImage(atlasImage);
+    textureAtlas.format = PixelFormat::PIXELFORMAT_UNCOMPRESSED_R16G16B16;
+    UnloadImage(atlasImage);
 }
 
