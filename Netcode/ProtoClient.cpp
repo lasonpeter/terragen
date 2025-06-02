@@ -1,7 +1,5 @@
 ﻿#include "ProtoClient.h"
 #include <iostream>
-#include <cstring>   // dla ntohl, htonl
-#include <winsock2.h> // albo na Windows: <winsock2.h> – żeby było ntohl
 
 // ---------------------------------------------------------------------------------
 //                KONSTRUKTOR I INICJALIZACJA SOCKETÓW
@@ -140,6 +138,21 @@ void ProtoClient::handleTcpReadBody(const asio::error_code& ec, std::size_t /*by
 
     // Ponownie zaczynamy odczyt kolejnej wiadomości:
     startReceiveTcp(tcpCallback_);
+}
+
+void ProtoClient::sendTcp(const terragen::EnvelopeModel& env) {
+    std::string data;
+    if (!env.SerializeToString(&data)) {
+        std::cerr << "[ProtoClient] Nie udało się zserializować EnvelopeModel (TCP)\n";
+        return;
+    }
+
+    asio::error_code ec;
+    asio::write(tcpSocket_, asio::buffer(data), ec);
+
+    if (ec) {
+        std::cerr << "[ProtoClient] Błąd wysyłania TCP: " << ec.message() << "\n";
+    }
 }
 
 // ---------------------------------------------------------------------------------

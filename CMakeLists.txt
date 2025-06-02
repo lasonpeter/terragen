@@ -39,6 +39,8 @@ add_executable(terragen main.cpp
         procedural/terrain/TerrainImage.h
         Netcode/ProtoClient.cpp
         Netcode/ProtoClient.h
+        Netcode/generated/EnvelopeModel.pb.cc
+        Netcode/generated/LoginModel.pb.cc
 )
 
 target_link_libraries(terragen raylib FastNoise2::FastNoise protobuf::libprotobuf asio::asio)

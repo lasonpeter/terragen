@@ -1,4 +1,15 @@
-﻿#define RAYGUI_IMPLEMENTATION
+﻿#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
+#define ASIO_NO_WINDOWS_H
+#define NOUSER
+#define NOGDI
+#define NODRAWTEXT
+#define NOMCX
+#define NOSHOWWINDOW
+#define NOCLOSEWINDOW
+#define VC_EXTRALEAN
+
+#define RAYGUI_IMPLEMENTATION
 #include "raylib.h"
 #include <iostream>
 #include <bitset>
@@ -7,6 +18,7 @@
 #include "raymath.h"
 #include "raygui.h"
 #include "FastNoise/FastNoise.h"
+#include "Netcode/ProtoClient.h"
 #include "procedural/ChunkGovernor.h"
 #include "procedural/terrain/BiomeGeneration.h"
 #include "procedural/terrain/TerrainImage.h"
@@ -57,6 +69,22 @@ int main()
 
     SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
+
+
+    asio::io_context io_context;
+
+    ProtoClient client(io_context);
+
+    client.connectTcp("127.0.0.1", 7777);
+
+    terragen::LoginModel login;
+    login.set_username("Pixel");
+    login.set_version(1);
+    login.set_udpaddress("127.0.0.1");
+    login.set_udpport(7777);
+
+    client.sendMessageTcp(login, terragen::MessageType::LOGIN);
+
 
     // Main game loop
     while (!WindowShouldClose())    // Detect window close button or ESC key
