@@ -4,6 +4,8 @@ project(terragen)
 set(CMAKE_CXX_STANDARD 23)
 find_package(raylib REQUIRED)
 find_package(FastNoise2 REQUIRED)
+find_package(protobuf REQUIRED)
+find_package(asio REQUIRED)
 
 #for raygui
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
@@ -35,8 +37,10 @@ add_executable(terragen main.cpp
         rendering/chunks/ChunkRenderer.h
         procedural/terrain/TerrainImage.cpp
         procedural/terrain/TerrainImage.h
+        Netcode/ProtoClient.cpp
+        Netcode/ProtoClient.h
 )
 
-target_link_libraries(terragen raylib FastNoise2::FastNoise)
+target_link_libraries(terragen raylib FastNoise2::FastNoise protobuf::libprotobuf asio::asio)
 
 target_compile_definitions(terragen PRIVATE FASTNOISE_STATIC_LIB)
