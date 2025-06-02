@@ -47,7 +47,7 @@ int main()
     UnloadImage(checked);*/
 
     ChunkRenderer chunkRenderer= ChunkRenderer{};
-    chunkRenderer.addChunksToBeRendered(&chunkGovernor.chunks_);
+    chunkRenderer.addChunksToBeRendered(&chunkGovernor.chunks_,16);
     chunkRenderer.uploadMeshes();
 
     // Upload mesh data from CPU (RAM) to GPU (VRAM) memory

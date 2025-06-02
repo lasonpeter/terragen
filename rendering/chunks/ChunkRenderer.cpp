@@ -6,7 +6,45 @@
 #include "../StaticRenderer.h"
 
 
-void ChunkRenderer::addChunksToBeRendered(std::vector<Chunk*> *chunks) {
+void ChunkRenderer::addChunksToBeRendered(std::vector<Chunk*> *chunks, int chunkSize) {
+    for (int chnk_index = 0; chnk_index < chunkSize*chunkSize; ++chnk_index) {
+        ChunkMesh *chunk_mesh = new ChunkMesh{};
+        for (int i = 0; i < ChunkGovernor::CHUNK_SIZE; ++i) {
+            int face_count{};
+            SubChunkMesh chunkMesh = SubChunkMesh();
+            int *amount_of_faces = new int;
+            *amount_of_faces = 0;
+            Chunk::generateChunkFaceMasks(chunks->at(chnk_index),amount_of_faces, i,chunkMesh.chunkFaceMasks);
+            Mesh mesh = { 0 };
+            mesh.triangleCount = (*amount_of_faces)*2;
+            mesh.vertexCount = (*amount_of_faces)*4;
+            mesh.vertices = new float[mesh.vertexCount*3];    // 3 vertices, 3 coordinates each (x, y, z)
+            mesh.texcoords = new float[mesh.vertexCount*2];   // 3 vertices, 2 coordinates each (x, y)
+            mesh.normals = new float[mesh.vertexCount*3];     // 3 vertices, 3 coordinates each (x, y, z)
+            mesh.indices = new unsigned short[mesh.triangleCount*3];
+            for (int y = 0; y < ChunkGovernor::CHUNK_SIZE; ++y) {
+                for (int x = 0; x < ChunkGovernor::CHUNK_SIZE; ++x) {
+                    for (int z = 0; z < ChunkGovernor::CHUNK_SIZE; ++z) {
+                        if(is_transparent(chunks->at(chnk_index)->blocks[y*ChunkGovernor::CHUNK_HEIGHT+x*ChunkGovernor::CHUNK_SIZE+z].blockType)){
+                            continue;
+                        }
+                        face_count =StaticRenderer::RenderCube(chunkMesh.chunkFaceMasks[y*ChunkGovernor::CHUNK_HEIGHT+x*ChunkGovernor::CHUNK_SIZE+z], mesh.vertices,mesh.indices,mesh.texcoords,mesh.normals,new Int3{x,y,z},face_count);
+                    }
+                }
+            }
+
+            for (int z = 0; z <= mesh.vertexCount; z=z+3) {
+                //std::cout<<i<<std::endl;
+                mesh.normals[z] = 0;
+                mesh.normals[z+1] = 1;
+                mesh.normals[z+2] = 0;
+            }
+            chunkMesh.mesh = mesh;
+            chunk_mesh->meshes[i] = chunkMesh;
+        }
+        chunk_mesh->chunkPosition = chunks->at(chnk_index)->position;
+        chunkMeshesCache.push_back(chunk_mesh);
+    }
     for (auto chunk : *chunks) {
         ChunkMesh *chunk_mesh = new ChunkMesh{};
         for (int i = 0; i < ChunkGovernor::CHUNK_SIZE; ++i) {

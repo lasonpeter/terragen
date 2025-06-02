@@ -22,7 +22,7 @@ class ChunkRenderer{
     std::vector<ChunkMesh*> chunkMeshesCache{};
     Texture2D textureChecked;
 public:
-    void addChunksToBeRendered(std::vector<Chunk*> *chunks);
+    void addChunksToBeRendered(std::vector<Chunk*> *chunks, int chunkSize);
     void uploadMeshes();
     void renderChunks();
 };
