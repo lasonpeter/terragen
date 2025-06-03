@@ -51,6 +51,20 @@ int main()
     const char *myEncodedTree2D = "GQAHAAENAAQAAAAAACBABwAAZmYmPwAAAAA/";
     const char *myEncodedTree3D = "EwCamZk+GgABEQACAAAAAADgQBAAAACIQR8AFgABAAAACwADAAAAAgAAAAMAAAAEAAAAAAAAAD8BFAD//wAAAAAAAD8AAAAAPwAAAAA/AAAAAD8BFwAAAIC/AACAPz0KF0BSuB5AEwAAAKBABgAAj8J1PACamZk+AAAAAAAA4XoUPw==";
 
+    asio::io_context io_context;
+
+    ProtoClient client(io_context);
+
+    client.connectTcp("127.0.0.1", 7777);
+
+    terragen::LoginModel login;
+    login.set_username("Pixel");
+    login.set_version(1);
+    login.set_udpaddress("127.0.0.1");
+    login.set_udpport(7777);
+
+    client.sendMessageTcp(login, terragen::MessageType::LOGIN);
+
     ChunkGovernor chunkGovernor = ChunkGovernor();
     chunkGovernor.GenerateChunks(seed, myEncodedTree2D, myEncodedTree3D);
 
@@ -71,19 +85,7 @@ int main()
     //--------------------------------------------------------------------------------------
 
 
-    asio::io_context io_context;
 
-    ProtoClient client(io_context);
-
-    client.connectTcp("127.0.0.1", 7777);
-
-    terragen::LoginModel login;
-    login.set_username("Pixel");
-    login.set_version(1);
-    login.set_udpaddress("127.0.0.1");
-    login.set_udpport(7777);
-
-    client.sendMessageTcp(login, terragen::MessageType::LOGIN);
 
 
     // Main game loop
