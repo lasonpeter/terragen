@@ -21,6 +21,7 @@ public:
 
     static const int CHUNK_SIZE=16;
     static const int CHUNK_HEIGHT=256;
+    static const int TREE_MAP_SIZE=20;
 };
 
 #endif //TERRAGEN_CHUNKGOVERNOR_H

@@ -31,11 +31,11 @@ int main()
     SetTargetFPS(60);
     //movement and such
     float speed = 0.05f;
-    float movement_speed = 0.2f;
+    float movement_speed = 1.0f;
     Vector3 camera_position = {1, 1, 1};
 
     const int ATLAS_SIZE=256;
-    const int seed = 1337;
+    const int seed = 3466;
     const char *myEncodedTree2D = "GQAHAAENAAQAAAAAACBABwAAZmYmPwAAAAA/";
     const char *myEncodedTree3D = "EwCamZk+GgABEQACAAAAAADgQBAAAACIQR8AFgABAAAACwADAAAAAgAAAAMAAAAEAAAAAAAAAD8BFAD//wAAAAAAAD8AAAAAPwAAAAA/AAAAAD8BFwAAAIC/AACAPz0KF0BSuB5AEwAAAKBABgAAj8J1PACamZk+AAAAAAAA4XoUPw==";
 

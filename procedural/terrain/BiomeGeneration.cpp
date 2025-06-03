@@ -33,6 +33,19 @@ void BiomeGeneration::generateNoise2D(float *buffer, int size, int x, int y)
     }
 }
 
+void BiomeGeneration::generateNoise2D(float* buffer, int size, int x, int y, float frequency, const char* encodedTree)
+{
+    auto fn = FastNoise::NewFromEncodedNodeTree(encodedTree);
+    if (fn)
+    {
+        fn->GenUniformGrid2D(buffer, x*size, y*size, size, size, frequency, seed);
+    }
+    else
+    {
+        throw std::runtime_error("Failed to load encoded node tree");
+    }
+}
+
 void BiomeGeneration::generateNoise3D(float* buffer, int size, int size_height, int x, int y)
 {
     auto fn = FastNoise::NewFromEncodedNodeTree(encodedNodeTree3D);

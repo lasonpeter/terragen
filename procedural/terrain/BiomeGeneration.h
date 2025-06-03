@@ -24,6 +24,7 @@ public:
     /// \param x position of chunk to render
     /// \param y position of chunk to render
     void generateNoise2D(float* buffer, int size, int x, int y);
+    void generateNoise2D(float* buffer, int size, int x, int y, float frequency, const char* encodedTree);
     void generateNoise3D(float* buffer, int size, int size_height , int x, int y);
 private:
     const char* encodedNodeTree2D = nullptr; // Zakodowane drzewo
