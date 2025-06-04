@@ -2,6 +2,7 @@
 // Created by xenu on 08/05/2025.
 //
 
+#include <iostream>
 #include "ChunkRenderer.h"
 #include "../StaticRenderer.h"
 
@@ -29,6 +30,7 @@ void ChunkRenderer::addChunksToBeRendered(std::vector<Chunk*> *chunks, int chunk
                             if (is_transparent(chunks->at(chnk_index_x * chunkSize + chnk_index_y)->blocks[y * ChunkGovernor::CHUNK_HEIGHT + x * ChunkGovernor::CHUNK_SIZE +z].blockType)) {
                                 continue;
                             }
+                            //std::cout<<"block type: " << to_string(chunks->at(chnk_index_x * chunkSize + chnk_index_y)->blocks[y * ChunkGovernor::CHUNK_HEIGHT + x * ChunkGovernor::CHUNK_SIZE +z].blockType)<<std::endl;
                             face_count = StaticRenderer::RenderCube(
                                     chunkMesh.chunkFaceMasks[y * ChunkGovernor::CHUNK_HEIGHT +
                                                              x * ChunkGovernor::CHUNK_SIZE + z], mesh.vertices,
