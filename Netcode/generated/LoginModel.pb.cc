@@ -385,9 +385,7 @@ void LoginModel::InternalSwap(LoginModel* other) {
       &other->_impl_.udpaddress_, rhs_arena
   );
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(LoginModel, _impl_.udpport_)
-      + sizeof(LoginModel::_impl_.udpport_)
-      - PROTOBUF_FIELD_OFFSET(LoginModel, _impl_.version_)>(
+      sizeof(LoginModel::_impl_.version_) + sizeof(LoginModel::_impl_.udpport_)>(
           reinterpret_cast<char*>(&_impl_.version_),
           reinterpret_cast<char*>(&other->_impl_.version_));
 }

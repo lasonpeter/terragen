@@ -19,7 +19,7 @@ public:
         position = position_t;
     }
 
-    static void generateChunkFaceMasks(const Chunk *chunk, int *face_count, int chunk_index, uint8_t *chunkFaceMasks);
+    static uint8_t *generateChunkFaceMasks(Chunk *chunk, int *face_count);
 };
 
 #endif //CHUNK_H

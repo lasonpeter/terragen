@@ -8,14 +8,10 @@
 #include <cstdint>
 #include "../../procedural/ChunkGovernor.h"
 
-struct SubChunkMesh{
-    uint8_t *chunkFaceMasks = new uint8_t[ChunkGovernor::CHUNK_SIZE*ChunkGovernor::CHUNK_SIZE*ChunkGovernor::CHUNK_SIZE]{};
-    Mesh mesh = {0};
-};
-
-struct ChunkMesh {
+struct ChunkMesh{
     Int2 chunkPosition;
-    SubChunkMesh meshes[16]{};
+    uint8_t chunkFaceMasks[ChunkGovernor::CHUNK_HEIGHT*ChunkGovernor::CHUNK_SIZE*ChunkGovernor::CHUNK_SIZE];
+    Mesh mesh = {0};
 };
 
 class ChunkRenderer{
