@@ -43,6 +43,6 @@ add_executable(terragen main.cpp
         Netcode/generated/LoginModel.pb.cc
 )
 
-target_link_libraries(terragen raylib FastNoise2::FastNoise protobuf::libprotobuf asio::asio)
+target_link_libraries(terragen raylib FastNoise2::FastNoise protobuf::libprotobuf asio::asio ws2_32)
 
 target_compile_definitions(terragen PRIVATE FASTNOISE_STATIC_LIB)

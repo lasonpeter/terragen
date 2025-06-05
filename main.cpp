@@ -1,4 +1,5 @@
-﻿#define WIN32_LEAN_AND_MEAN
+﻿
+#define WIN32_LEAN_AND_MEAN
 #define NOMINMAX
 #define ASIO_NO_WINDOWS_H
 #define NOUSER
@@ -8,6 +9,7 @@
 #define NOSHOWWINDOW
 #define NOCLOSEWINDOW
 #define VC_EXTRALEAN
+
 
 #define RAYGUI_IMPLEMENTATION
 #include "raylib.h"

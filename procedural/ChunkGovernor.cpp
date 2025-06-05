@@ -91,17 +91,16 @@ void ChunkGovernor::GenerateChunks(int seed, const char *myEncodedTree2D, const 
                     int z_inner = tz - 2;
                     int y0 = heightPoints[x_inner + z_inner * CHUNK_SIZE];
 
-                    // Zmieniony warunek wysokości - drzewa generują się między y=0 a y=50
                     if (y0 < 0 || y0 > 100)
                         continue;
 
-                    // Generowanie pnia (wysokość 4 bloki)
+                    /*generowanie pnia*/
                     for (int dy = 1; dy <= 10; ++dy) {
                         int yy = y0 + dy;
                         if (yy < 0 || yy >= CHUNK_HEIGHT)
                             continue;
                         int idx = (yy * CHUNK_SIZE + z_inner) * CHUNK_SIZE + x_inner;
-                        chunk->blocks[idx] = Block(BlockType::WOOD); // Zmienione na WOOD
+                        chunk->blocks[idx] = Block(BlockType::WOOD);
                     }
 
                     /*for (int dx = -2; dx <= 2; ++dx) {
