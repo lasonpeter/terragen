@@ -37,10 +37,12 @@ add_executable(terragen main.cpp
         rendering/chunks/ChunkRenderer.h
         procedural/terrain/TerrainImage.cpp
         procedural/terrain/TerrainImage.h
-        netcode/generated/ProtoClient.cpp
-        netcode/generated/ProtoClient.h
+        Netcode/ProtoClient.cpp
+        Netcode/ProtoClient.h
+        Netcode/generated/EnvelopeModel.pb.cc
+        Netcode/generated/LoginModel.pb.cc
 )
 
-target_link_libraries(terragen raylib FastNoise2::FastNoise protobuf::protobuf asio::asio)
+target_link_libraries(terragen raylib FastNoise2::FastNoise protobuf::libprotobuf asio::asio)
 
 target_compile_definitions(terragen PRIVATE FASTNOISE_STATIC_LIB)

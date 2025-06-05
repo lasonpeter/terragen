@@ -1,4 +1,15 @@
-﻿#define RAYGUI_IMPLEMENTATION
+﻿#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
+#define ASIO_NO_WINDOWS_H
+#define NOUSER
+#define NOGDI
+#define NODRAWTEXT
+#define NOMCX
+#define NOSHOWWINDOW
+#define NOCLOSEWINDOW
+#define VC_EXTRALEAN
+
+#define RAYGUI_IMPLEMENTATION
 #include "raylib.h"
 #include <iostream>
 #include <bitset>

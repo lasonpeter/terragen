@@ -4,5 +4,5 @@
 requirements:
   - "raylib/5.5"
   - "fastnoise2/0.10.0-alpha"
-  - "protobuf/6.30.1"
+  - "protobuf/3.21.12"
   - "asio/1.34.2"
