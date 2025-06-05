@@ -4,13 +4,13 @@
 
 #ifndef TERRAGEN_MATHF_H
 #define TERRAGEN_MATHF_H
-typedef struct Int3 {
+struct Int3 {
     int x{};
     int y{};
     int z{};
 };
 
-typedef struct Int2{
+struct Int2{
     int x{};
     int y{};
 };

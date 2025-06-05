@@ -1,4 +1,15 @@
-﻿#define RAYGUI_IMPLEMENTATION
+﻿#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
+#define ASIO_NO_WINDOWS_H
+#define NOUSER
+#define NOGDI
+#define NODRAWTEXT
+#define NOMCX
+#define NOSHOWWINDOW
+#define NOCLOSEWINDOW
+#define VC_EXTRALEAN
+
+#define RAYGUI_IMPLEMENTATION
 #include "raylib.h"
 #include <iostream>
 #include <bitset>
@@ -7,8 +18,11 @@
 #include "raymath.h"
 #include "raygui.h"
 #include "FastNoise/FastNoise.h"
+#include "procedural/ChunkGovernor.h"
 #include "procedural/terrain/BiomeGeneration.h"
+#include "procedural/terrain/TerrainImage.h"
 #include "rendering/StaticRenderer.h"
+#include "rendering/chunks/ChunkRenderer.h"
 //------------------------------------------------------------------------------------
 // Program main entry point
 //------------------------------------------------------------------------------------
@@ -20,7 +34,7 @@ int main()
     const int screenHeight = 450*1.5;
     InitWindow(screenWidth, screenHeight, "terragen");
     Camera3D camera = {0};
-    camera.position = Vector3{1.0f, 1.0f, 1.0f}; // Camera position
+    camera.position = Vector3{1.0f, 150.0f, 1.0f}; // Camera position
     camera.target = Vector3{0.0f, 0.0f, 0.0f}; // Camera looking at point
     camera.up = Vector3{0.0f, 1.0f, 0.0f}; // Camera up vector (rotation towards target)
     camera.fovy = 70.0f; // Camera field-of-view Y
@@ -28,100 +42,26 @@ int main()
     SetTargetFPS(60);
     //movement and such
     float speed = 0.05f;
-    float movement_speed = 0.2f;
+    float movement_speed = 1.0f;
     Vector3 camera_position = {1, 1, 1};
 
+    const int ATLAS_SIZE=256;
+    const int seed = 3466;
+    const char *myEncodedTree2D = "GQAHAAENAAQAAAAAACBABwAAZmYmPwAAAAA/";
+    const char *myEncodedTree3D = "EwCamZk+GgABEQACAAAAAADgQBAAAACIQR8AFgABAAAACwADAAAAAgAAAAMAAAAEAAAAAAAAAD8BFAD//wAAAAAAAD8AAAAAPwAAAAA/AAAAAD8BFwAAAIC/AACAPz0KF0BSuB5AEwAAAKBABgAAj8J1PACamZk+AAAAAAAA4XoUPw==";
 
-    auto fnSimplex = FastNoise::New<FastNoise::CellularValue>();
-    auto fnFractal = FastNoise::New<FastNoise::FractalFBm>();
+    ChunkGovernor chunkGovernor = ChunkGovernor();
+    chunkGovernor.GenerateChunks(seed, myEncodedTree2D, myEncodedTree3D);
 
-    const int ATLAS_SIZE=32;
-    std::vector<float> noiseOutput(16 * 16 *256);
-    int index = 0;
-    BiomeGeneration biome_generation= BiomeGeneration(12312);
-    biome_generation.generateNoise(noiseOutput.data(),ATLAS_SIZE,0,0);
-
-    Color* noisePixels = new Color[ATLAS_SIZE*ATLAS_SIZE];
-
-    for (int y = 0; y < ATLAS_SIZE; y++)
-    {
-        for (int x = 0; x < ATLAS_SIZE; x++)
-        {
-            //std::cout<<noiseOutput[y*ATLAS_SIZE + x] <<" ";
-            noisePixels[ATLAS_SIZE*y + x] = Color((noiseOutput[y*ATLAS_SIZE + x]+1)*127,0,0,255);
-        }
-    }
-
-
-
-    Image image = Image(noisePixels,ATLAS_SIZE, ATLAS_SIZE);
-    image.data=noisePixels;
-    image.width = ATLAS_SIZE;
-    image.height = ATLAS_SIZE;
-    image.format= PIXELFORMAT_UNCOMPRESSED_R8G8B8A8;
-    image.mipmaps = 1;
-
-    Image checked = GenImageChecked(2, 2, 1, 1, RED, GREEN);
+    /*Image checked = GenImageChecked(2, 2, 1, 1, RED, GREEN);
     Texture2D texturechecked = LoadTextureFromImage(checked);
-    UnloadImage(checked);
+    UnloadImage(checked);*/
 
-    int face_count{};
-
-     auto chunk = Chunk(Int2{0,0});
-    for (int y = 0; y < 256; ++y) {
-        for (int x = 0; x < 16; ++x) {
-            for (int z = 0; z < 16; ++z) {
-                if(noiseOutput[y*256+x*16+z]*255 > 150)
-                {
-                    chunk.blocks[y*256+x*16+z] = Block(BlockType::DIRT);
-                }
-            }
-        }
-    }
-     chunk.blocks[0] = Block(BlockType::AIR);
-    chunk.blocks[1] = Block(BlockType::DIRT);
-    chunk.blocks[2] = Block(BlockType::DIRT);
-    chunk.blocks[16] = Block(BlockType::DIRT);
-    chunk.blocks[3] = Block(BlockType::DIRT);
-    chunk.blocks[65535] = Block(BlockType::DIRT);
-
-    int *amount_of_faces = new int;
-    *amount_of_faces = 0;
-    uint8_t* chunkFaceMasks = Chunk::generateChunkFaceMasks(&chunk,amount_of_faces);
-    Mesh mesh = { 0 };
-    mesh.triangleCount = (*amount_of_faces)*2;
-    mesh.vertexCount = (*amount_of_faces)*4;
-    mesh.vertices = new float[mesh.vertexCount*3];    // 3 vertices, 3 coordinates each (x, y, z)
-    mesh.texcoords = new float[mesh.vertexCount*2];   // 3 vertices, 2 coordinates each (x, y)
-    mesh.normals = new float[mesh.vertexCount*3];     // 3 vertices, 3 coordinates each (x, y, z)
-    mesh.indices = new unsigned short[mesh.triangleCount*3];
-    for (int y = 0; y < 256; ++y) {
-        for (int x = 0; x < 16; ++x) {
-            for (int z = 0; z < 16; ++z) {
-                if(is_transparent(chunk.blocks[y*256+x*16+z].blockType)){
-                    continue;
-                }
-                //std::bitset<8> a(chunkFaceMasks[y*256+x*16+z]);
-
-                //std::cout<<a<<std::endl;
-                face_count =StaticRenderer::RenderCube(chunkFaceMasks[y*256+x*16+z], mesh.vertices,mesh.indices,mesh.texcoords,mesh.normals,new Int3{x,y,z},face_count);
-            }
-        }
-    }
-
-    for (int i = 0; i <= mesh.vertexCount; i=i+3) {
-        //std::cout<<i<<std::endl;
-        mesh.normals[i] = 0;
-        mesh.normals[i+1] = 1;
-        mesh.normals[i+2] = 0;
-    }
+    ChunkRenderer chunkRenderer= ChunkRenderer{};
+    chunkRenderer.addChunksToBeRendered(&chunkGovernor.chunks_);
+    chunkRenderer.uploadMeshes();
 
     // Upload mesh data from CPU (RAM) to GPU (VRAM) memory
-    UploadMesh(&mesh, false);
-
-
-
-    Texture2D texture = LoadTextureFromImage(image);
 
     SetExitKey(KEY_NULL);
     HideCursor();
@@ -185,9 +125,10 @@ int main()
         BeginDrawing();
         ClearBackground(RAYWHITE);
         BeginMode3D(camera);
-        Model model= LoadModelFromMesh(mesh);
+        chunkRenderer.renderChunks();
+        /*Model model= LoadModelFromMesh(mesh);
         model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = texturechecked;
-        DrawModel(model, Vector3{0, 0, 0}, 1.0f, WHITE);
+        DrawModel(model, Vector3{0, 0, 0}, 1.0f, WHITE);*/
 
         // 0 [0,0,0)
         DrawCubeWires({0,0,0},0.2f, .2f, .2f,YELLOW);
@@ -208,7 +149,6 @@ int main()
         DrawLine3D({0,0,0},{5,0,0}, RED);
 
         EndMode3D();
-        DrawTexture(texture, screenWidth - texture.width - 20, 20, WHITE);
 
         DrawCubeWires( Vector3{0,0,0}, .5f, .5f, .5f,BLACK);
         DrawText("Congrats! You created your first window!", 190, 200, 20, LIGHTGRAY);
