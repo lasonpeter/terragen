@@ -62,13 +62,14 @@ void ChunkGovernor::GenerateChunks(int seed, const char *myEncodedTree2D, const 
 
                     for (int y = 0; y < max_height; ++y)
                     {
+                        /*std::cout<<caveMap[(y * CHUNK_SIZE + z) * CHUNK_SIZE + x]<<std::endl;*/
                         if (((y <= h)&&(caveMap[(y * CHUNK_SIZE + z) * CHUNK_SIZE + x]<0.0f))||y==0)
                             if (y<=h-5) chunk->blocks[(y * CHUNK_SIZE + z) * CHUNK_SIZE + x] = Block(BlockType::STONE);
                             else if (y<=h-1) chunk->blocks[(y * CHUNK_SIZE + z) * CHUNK_SIZE + x] = Block(BlockType::DIRT);
                             else chunk->blocks[(y * CHUNK_SIZE + z) * CHUNK_SIZE + x] = Block(BlockType::GRASS);
                         else{
                             chunk->blocks[(y * CHUNK_SIZE + z) * CHUNK_SIZE + x] = Block(BlockType::AIR);
-                            if (y==h&&(caveMap[(y * CHUNK_SIZE + z) * CHUNK_SIZE + x]<0.0f)) heightPoints[z * CHUNK_SIZE + x] = 0;
+                            if (y==h&&(caveMap[(y * CHUNK_SIZE + z) * CHUNK_SIZE + x]>=0.0f)) heightPoints[z * CHUNK_SIZE + x] = 0;
                         }
                     }
                 }
@@ -79,6 +80,7 @@ void ChunkGovernor::GenerateChunks(int seed, const char *myEncodedTree2D, const 
                 for (int tz = 0; tz < CHUNK_SIZE; ++tz)
                 {
                     auto v = treeMap[tz * CHUNK_SIZE + tx];
+                    /*std::cout<<v<<std::endl;*/
                     v=v*dis(gen);
                     if (v >= 0.04f||tx < 2 || tx > 13 || tz < 2 || tz > 13) continue;
 
