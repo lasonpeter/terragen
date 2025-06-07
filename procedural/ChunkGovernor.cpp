@@ -43,10 +43,10 @@ void ChunkGovernor::GenerateChunks(int seed, const char *myEncodedTree2D, const 
         for (int chunk_y = 0; chunk_y < 16; ++chunk_y) {
             Chunk* chunk = new Chunk({chunk_x, chunk_y});
             float* heightMap = new float[CHUNK_SIZE * CHUNK_SIZE];
-            float* treeMap = new float[TREE_MAP_SIZE * TREE_MAP_SIZE];
+            float* treeMap = new float[CHUNK_SIZE * CHUNK_SIZE];
             float* caveMap = new float[CHUNK_SIZE * CHUNK_SIZE* CHUNK_HEIGHT];
             biome_generation.generateNoise2D(heightMap, CHUNK_SIZE, chunk_x, chunk_y);
-            biome_generation.generateNoise2D(treeMap, TREE_MAP_SIZE, chunk_x-2, chunk_y-2, 0.05f, "HgANAAMAAAAAAABAHgALAAEAAAAAAAAAAQAAAAAAAAABBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAETAFK4nj8IAAAAAAA/AAAAAAABEwBxPQpACAA=");
+            biome_generation.generateNoise2D(treeMap, CHUNK_SIZE, chunk_x, chunk_y, 0.05f, "HgANAAMAAAAAAABAHgALAAEAAAAAAAAAAQAAAAAAAAABBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAETAFK4nj8IAAAAAAA/AAAAAAABEwBxPQpACAA=");
             biome_generation.generateNoise3D(caveMap, CHUNK_SIZE,  CHUNK_HEIGHT, chunk_x, chunk_y);
 
             for (int x = 0; x < CHUNK_SIZE; ++x) {
@@ -62,7 +62,6 @@ void ChunkGovernor::GenerateChunks(int seed, const char *myEncodedTree2D, const 
 
                     for (int y = 0; y < max_height; ++y)
                     {
-                        /*std::cout<<caveMap[(y * CHUNK_SIZE + z) * CHUNK_SIZE + x]<<std::endl;*/
                         if (((y <= h)&&(caveMap[(y * CHUNK_SIZE + z) * CHUNK_SIZE + x]<0.0f))||y==0)
                             if (y<=h-5) chunk->blocks[(y * CHUNK_SIZE + z) * CHUNK_SIZE + x] = Block(BlockType::STONE);
                             else if (y<=h-1) chunk->blocks[(y * CHUNK_SIZE + z) * CHUNK_SIZE + x] = Block(BlockType::DIRT);
@@ -75,44 +74,39 @@ void ChunkGovernor::GenerateChunks(int seed, const char *myEncodedTree2D, const 
                 }
             }
 
-            for (int tx = 0; tx < TREE_MAP_SIZE; ++tx)
+            for (int tx = 0; tx < CHUNK_SIZE; ++tx)
             {
-                for (int tz = 0; tz < TREE_MAP_SIZE; ++tz)
+                for (int tz = 0; tz < CHUNK_SIZE; ++tz)
                 {
-                    auto v = treeMap[tz * TREE_MAP_SIZE + tx];
+                    auto v = treeMap[tz * CHUNK_SIZE + tx];
                     v=v*dis(gen);
-                    if (v >= 0.01f) continue;
-                    /*std::cout<<v<<std::endl;*/
+                    if (v >= 0.04f||tx < 2 || tx > 13 || tz < 2 || tz > 13) continue;
 
-                    if (tx < 2 || tx > CHUNK_SIZE + 1 || tz < 2 || tz > CHUNK_SIZE + 1)
-                        continue;
-
-                    int x_inner = tx - 2;
-                    int z_inner = tz - 2;
-                    int y0 = heightPoints[x_inner + z_inner * CHUNK_SIZE];
+                    int y0 = heightPoints[tx + tz * CHUNK_SIZE];
 
                     if (y0 < 0 || y0 > 100)
                         continue;
 
                     /*generowanie pnia*/
-                    for (int dy = 1; dy <= 10; ++dy) {
+                    for (int dy = 1; dy <= 4; ++dy) {
                         int yy = y0 + dy;
                         if (yy < 0 || yy >= CHUNK_HEIGHT)
                             continue;
-                        int idx = (yy * CHUNK_SIZE + z_inner) * CHUNK_SIZE + x_inner;
+                        int idx = (yy * CHUNK_SIZE + tz) * CHUNK_SIZE + tx;
                         chunk->blocks[idx] = Block(BlockType::WOOD);
                     }
 
-                    /*for (int dx = -2; dx <= 2; ++dx) {
+                    /*generowanie lisci*/
+                    for (int dx = -2; dx <= 2; ++dx) {
                         for (int dy = 3; dy <= 6; ++dy) {
                             for (int dz = -2; dz <= 2; ++dz) {
-                                // Sprawdzenie czy blok jest w kształcie przypominającym kulę
+
                                 if (dx*dx + (dy-4)*(dy-4) + dz*dz > 8)
                                     continue;
 
-                                int xx = x_inner + dx;
+                                int xx = tx + dx;
                                 int yy = y0 + dy;
-                                int zz = z_inner + dz;
+                                int zz = tz + dz;
 
                                 if (xx < 0 || xx >= CHUNK_SIZE ||
                                     yy < 0 || yy >= CHUNK_HEIGHT ||
@@ -120,13 +114,13 @@ void ChunkGovernor::GenerateChunks(int seed, const char *myEncodedTree2D, const 
                                     continue;
 
                                 int idx = (yy * CHUNK_SIZE + zz) * CHUNK_SIZE + xx;
-                                // Sprawdź czy nie nadpisujesz pnia
-                                if (chunk->blocks[idx].blockType != BlockType::WOOD) {
-                                    chunk->blocks[idx] = Block(BlockType::LEAVES);
+
+                                if (chunk->blocks[idx].blockType == BlockType::AIR) {
+                                    chunk->blocks[idx] = Block(BlockType::STONE);
                                 }
                             }
                         }
-                    }*/
+                    }
                 }
             }
 
