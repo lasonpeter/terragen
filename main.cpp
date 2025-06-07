@@ -13,11 +13,14 @@
 #include "raylib.h"
 #include <iostream>
 #include <bitset>
+#include <vector>
 
 #include "utilities/FaceMask.h"
 #include "raymath.h"
 #include "raygui.h"
+#include "netcode/ProtoClient.h"
 #include "FastNoise/FastNoise.h"
+#include "netcode/generated/ChunkTransmitModel.pb.h"
 #include "procedural/ChunkGovernor.h"
 #include "procedural/terrain/BiomeGeneration.h"
 #include "procedural/terrain/TerrainImage.h"
@@ -49,6 +52,79 @@ int main()
     const int seed = 3466;
     const char *myEncodedTree2D = "GQAHAAENAAQAAAAAACBABwAAZmYmPwAAAAA/";
     const char *myEncodedTree3D = "EwCamZk+GgABEQACAAAAAADgQBAAAACIQR8AFgABAAAACwADAAAAAgAAAAMAAAAEAAAAAAAAAD8BFAD//wAAAAAAAD8AAAAAPwAAAAA/AAAAAD8BFwAAAIC/AACAPz0KF0BSuB5AEwAAAKBABgAAj8J1PACamZk+AAAAAAAA4XoUPw==";
+
+    asio::io_context io_context;
+
+    ProtoClient client(io_context);
+
+    static std::vector<Chunk*> chunks;
+
+    client.connectTcp("127.0.0.1", 7777);
+
+    client.startReceiveTcp([](std::unique_ptr<google::protobuf::Message> msg) {
+        // tutaj rzutujemy lub używamy refleksji
+        if (auto login = dynamic_cast<terragen::LoginModel*>(msg.get())) {
+            std::cout<<"Odebrano LOGIN: user="<<login->username()<<"\n";
+        }
+        else if (auto chunk = dynamic_cast<terragen::ChunkTransmitModel*>(msg.get()))
+        {
+
+
+            auto bytes = chunk->data();
+
+            auto chunkId = chunk->id();
+
+            auto pos = chunkId.find('_');
+            int x = std::stoi(chunkId.substr(0, pos));
+            int z = std::stoi(chunkId.substr(pos + 1));
+
+            Int2 chunkPos = {x, z};
+
+            std::vector<uint8_t> data(bytes.begin(), bytes.end());
+            for (unsigned char c: bytes)
+            {
+                data.push_back(static_cast<uint8_t>(c));
+            }
+
+            std::vector<Block> enums;
+            enums.reserve(data.size());
+            for (uint8_t b : data)
+            {
+                enums.push_back(Block(static_cast<BlockType>(b)));
+            }
+
+            Chunk chunka(chunkPos);
+            std::copy(enums.begin(), enums.end(), chunka.blocks);
+
+            chunks.push_back(&chunka);
+
+        }
+        else
+        {
+            std::cout<<"Odebrano coś\n";
+        }
+            //TODO: more models
+        });
+
+    std::thread ioThread([&]{ io_context.run(); });
+
+    terragen::LoginModel login;
+
+    login.set_username("Pixel");
+
+    login.set_version(1);
+
+    login.set_udpaddress("127.0.0.1");
+
+    login.set_udpport(7777);
+
+    client.sendMessageTcp(login, terragen::MessageType::LOGIN);
+
+
+
+    //std::this_thread::sleep_for(std::chrono::seconds(10));
+
+
 
     ChunkGovernor chunkGovernor = ChunkGovernor();
     chunkGovernor.GenerateChunks(seed, myEncodedTree2D, myEncodedTree3D);

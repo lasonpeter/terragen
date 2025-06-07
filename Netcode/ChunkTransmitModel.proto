@@ -1,0 +1,11 @@
+﻿syntax = "proto3";
+
+package terragen;
+
+
+message ChunkTransmitModel {
+
+  string id = 1;
+
+  bytes data = 2;
+}
