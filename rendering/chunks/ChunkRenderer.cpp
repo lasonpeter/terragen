@@ -9,14 +9,14 @@
 
 void ChunkRenderer::addChunksToBeRendered(std::vector<Chunk*> *chunks, int chunkSize) {
     for (int chnk_index_x = 0; chnk_index_x < chunkSize; ++chnk_index_x) {
-        for (int chnk_index_y = 0; chnk_index_y < chunkSize; ++chnk_index_y) {
+        for (int chnk_index_z = 0; chnk_index_z < chunkSize; ++chnk_index_z) {
             ChunkMesh *chunk_mesh = new ChunkMesh{};
             for (int i = 0; i < ChunkGovernor::CHUNK_SIZE; ++i) {
                 int face_count{};
                 SubChunkMesh chunkMesh = SubChunkMesh();
                 int *amount_of_faces = new int;
                 *amount_of_faces = 0;
-                Chunk::generateChunkFaceMasks(chunks->at(chnk_index_x * chunkSize + chnk_index_y), amount_of_faces, i, chunkMesh.chunkFaceMasks,chnk_index_x, chnk_index_x, chunks,16);
+                Chunk::generateChunkFaceMasks(chunks->at(chnk_index_x * chunkSize + chnk_index_z), amount_of_faces, i, chunkMesh.chunkFaceMasks,chnk_index_x, chnk_index_x, chunks,16,chnk_index_x,chnk_index_z);
                 Mesh mesh = {0};
                 mesh.triangleCount = (*amount_of_faces) * 2;
                 mesh.vertexCount = (*amount_of_faces) * 4;
@@ -27,14 +27,14 @@ void ChunkRenderer::addChunksToBeRendered(std::vector<Chunk*> *chunks, int chunk
                 for (int y = 0; y < ChunkGovernor::CHUNK_SIZE; ++y) {
                     for (int x = 0; x < ChunkGovernor::CHUNK_SIZE; ++x) {
                         for (int z = 0; z < ChunkGovernor::CHUNK_SIZE; ++z) {
-                            if (is_transparent(chunks->at(chnk_index_x * chunkSize + chnk_index_y)->blocks[i*ChunkGovernor::SUB_CHUNK_SIZE+  y * ChunkGovernor::CHUNK_SLICE_SIZE + x * ChunkGovernor::CHUNK_SIZE +z].blockType)) {
+                            if (is_transparent(chunks->at(chnk_index_x * chunkSize + chnk_index_z)->blocks[i*ChunkGovernor::SUB_CHUNK_SIZE+  y * ChunkGovernor::CHUNK_SLICE_SIZE + x * ChunkGovernor::CHUNK_SIZE +z].blockType)) {
                                 continue;
                             }
                             //std::cout<<"block type: " << to_string(chunks->at(chnk_index_x * chunkSize + chnk_index_y)->blocks[y * ChunkGovernor::CHUNK_HEIGHT + x * ChunkGovernor::CHUNK_SIZE +z].blockType)<<std::endl;
                             face_count = StaticRenderer::RenderCube(
                                     chunkMesh.chunkFaceMasks[y * ChunkGovernor::CHUNK_HEIGHT +
                                                              x * ChunkGovernor::CHUNK_SIZE + z], mesh.vertices,
-                                    mesh.indices, mesh.texcoords, mesh.normals, new Int3{x, y, z}, face_count, chunks->at(chnk_index_x * chunkSize + chnk_index_y)->blocks[i*ChunkGovernor::SUB_CHUNK_SIZE+  y * ChunkGovernor::CHUNK_SLICE_SIZE + x * ChunkGovernor::CHUNK_SIZE +z].blockType);
+                                    mesh.indices, mesh.texcoords, mesh.normals, new Int3{x, y, z}, face_count, chunks->at(chnk_index_x * chunkSize + chnk_index_z)->blocks[i*ChunkGovernor::SUB_CHUNK_SIZE+  y * ChunkGovernor::CHUNK_SLICE_SIZE + x * ChunkGovernor::CHUNK_SIZE +z].blockType);
                         }
                     }
                 }
@@ -48,7 +48,7 @@ void ChunkRenderer::addChunksToBeRendered(std::vector<Chunk*> *chunks, int chunk
                 chunkMesh.mesh = mesh;
                 chunk_mesh->meshes[i] = chunkMesh;
             }
-            chunk_mesh->chunkPosition = chunks->at(chnk_index_x * chunkSize + chnk_index_y)->position;
+            chunk_mesh->chunkPosition = chunks->at(chnk_index_x * chunkSize + chnk_index_z)->position;
             chunkMeshesCache.push_back(chunk_mesh);
         }
     }
