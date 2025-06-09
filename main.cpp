@@ -80,23 +80,25 @@ int main()
 
             Int2 chunkPos = {x, z};
 
-            std::vector<uint8_t> data(bytes.begin(), bytes.end());
+
+
+            std::vector<uint8_t> data;
             for (unsigned char c: bytes)
             {
                 data.push_back(static_cast<uint8_t>(c));
             }
 
             std::vector<Block> enums;
-            enums.reserve(data.size());
             for (uint8_t b : data)
             {
                 enums.push_back(Block(static_cast<BlockType>(b)));
             }
 
-            Chunk chunka(chunkPos);
-            std::copy(enums.begin(), enums.end(), chunka.blocks);
+            Chunk* chunka = new Chunk(chunkPos);
 
-            chunks.push_back(&chunka);
+            std::copy(enums.begin(), enums.end(), chunka->blocks);
+
+            chunks.push_back(chunka);
 
         }
         else
@@ -122,19 +124,19 @@ int main()
 
 
 
-    //std::this_thread::sleep_for(std::chrono::seconds(10));
+    std::this_thread::sleep_for(std::chrono::seconds(2));
 
 
 
-    ChunkGovernor chunkGovernor = ChunkGovernor();
-    chunkGovernor.GenerateChunks(seed, myEncodedTree2D, myEncodedTree3D);
+    //ChunkGovernor chunkGovernor = ChunkGovernor();
+    //chunkGovernor.GenerateChunks(seed, myEncodedTree2D, myEncodedTree3D);
 
     /*Image checked = GenImageChecked(2, 2, 1, 1, RED, GREEN);
     Texture2D texturechecked = LoadTextureFromImage(checked);
     UnloadImage(checked);*/
 
     ChunkRenderer chunkRenderer= ChunkRenderer{};
-    chunkRenderer.addChunksToBeRendered(&chunkGovernor.chunks_);
+    chunkRenderer.addChunksToBeRendered(&chunks);
     chunkRenderer.uploadMeshes();
 
     // Upload mesh data from CPU (RAM) to GPU (VRAM) memory
@@ -148,6 +150,7 @@ int main()
     // Main game loop
     while (!WindowShouldClose())    // Detect window close button or ESC key
     {
+
         ///
         ///TEMPORARY CAMERA MOVEMENT
         ///
