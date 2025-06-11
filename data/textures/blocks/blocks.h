@@ -13,8 +13,7 @@
 #define BLOCKS_ATLAS_H
 
 #define ATLAS_ATLAS_IMAGE_PATH      "atlas.png"
-#define ATLAS_ATLAS_SPRITE_COUNT    2
-
+#define ATLAS_ATLAS_SPRITE_COUNT
 // Atlas sprite properties
 typedef struct rtpAtlasSprite {
     const char *nameId;
@@ -30,9 +29,12 @@ typedef struct rtpAtlasSprite {
 } rtpAtlasSprite;
 
 // Atlas sprites array
-static rtpAtlasSprite rtpDescAtlas[2] = {
+static rtpAtlasSprite rtpDescAtlas[6] = {
     { "dyrt", "", 0, 0, 0, 0, 32, 32, 0, false, 0, 0, 32, 32, 0, 0, 0, 0, 0 },
     { "ston", "", 0, 0, 32, 0, 32, 32, 0, false, 0, 0, 32, 32, 0, 0, 0, 0, 0 },
+    { "grass_face", "", 0, 0, 64, 0, 32, 32, 0, false, 0, 0, 32, 32, 0, 0, 0, 0, 0 },
+    { "wood", "", 0, 0, 96, 0, 32, 32, 0, false, 0, 0, 32, 32, 0, 0, 0, 0, 0 },
+    { "grass_top", "", 0, 0, 128, 0, 32, 32, 0, false, 0, 0, 32, 32, 0, 0, 0, 0, 0 },
+    { "leafs", "", 0, 0, 160, 0, 32, 32, 0, false, 0, 0, 32, 32, 0, 0, 0, 0, 0 },
 };
-
 #endif // BLOCKS_ATLAS_H

@@ -85,10 +85,10 @@ inline const AtlasTexture uv_coords(BlockType e){
             };
         case BlockType::GRASS:
             return AtlasTexture{
-                static_cast<float>(rtpDescAtlas[0].positionX),
-                static_cast<float>(rtpDescAtlas[0].positionY),
-                static_cast<float>(rtpDescAtlas[0].sourceWidth),
-                static_cast<float>(rtpDescAtlas[0].sourceHeight)
+                static_cast<float>(rtpDescAtlas[4].positionX),
+                static_cast<float>(rtpDescAtlas[4].positionY),
+                static_cast<float>(rtpDescAtlas[4].sourceWidth),
+                static_cast<float>(rtpDescAtlas[4].sourceHeight)
             };
         case BlockType::STONE:
             return AtlasTexture{
