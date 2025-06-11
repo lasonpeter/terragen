@@ -26,6 +26,7 @@
 #include "procedural/terrain/TerrainImage.h"
 #include "rendering/StaticRenderer.h"
 #include "rendering/chunks/ChunkRenderer.h"
+#include "data/textures/blocks/blocks.h"
 //------------------------------------------------------------------------------------
 // Program main entry point
 //------------------------------------------------------------------------------------
@@ -47,9 +48,8 @@ int main()
     float speed = 0.05f;
     float movement_speed = 1.0f;
     Vector3 camera_position = {1, 1, 1};
-
     const int ATLAS_SIZE=256;
-    const int seed = 3466;
+    const int seed = 1337;
     const char *myEncodedTree2D = "GQAHAAENAAQAAAAAACBABwAAZmYmPwAAAAA/";
     const char *myEncodedTree3D = "EwCamZk+GgABEQACAAAAAADgQBAAAACIQR8AFgABAAAACwADAAAAAgAAAAMAAAAEAAAAAAAAAD8BFAD//wAAAAAAAD8AAAAAPwAAAAA/AAAAAD8BFwAAAIC/AACAPz0KF0BSuB5AEwAAAKBABgAAj8J1PACamZk+AAAAAAAA4XoUPw==";
 
@@ -136,7 +136,7 @@ int main()
     UnloadImage(checked);*/
 
     ChunkRenderer chunkRenderer= ChunkRenderer{};
-    chunkRenderer.addChunksToBeRendered(&chunks);
+    chunkRenderer.addChunksToBeRendered(&chunkGovernor.chunks_,16);
     chunkRenderer.uploadMeshes();
 
     // Upload mesh data from CPU (RAM) to GPU (VRAM) memory
@@ -150,7 +150,6 @@ int main()
     // Main game loop
     while (!WindowShouldClose())    // Detect window close button or ESC key
     {
-
         ///
         ///TEMPORARY CAMERA MOVEMENT
         ///

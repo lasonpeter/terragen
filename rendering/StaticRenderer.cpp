@@ -5,6 +5,7 @@
 #include "StaticRenderer.h"
 
 #include <raylib.h>
+#include <iostream>
 
 void StaticRenderer::render(std::vector<Chunk> *chunks) {
     Mesh mesh = { 0 };
@@ -132,23 +133,24 @@ void StaticRenderer::SetVertice(int verticePositionIndex,float x, float y, float
 /// \param indicies_buffer self explanatory
 /// \param texture_buffer self explanatory
 /// \param normals_buffer self explanatory
-/// \param position self explanatory
+/// \param position self explanatoryE
 /// \return number of faces rendered
-int StaticRenderer::RenderCube(uint8_t bit_mask, float *vertex_buffer, unsigned short *indicies_buffer, float *texture_buffer, float *normals_buffer, Int3 *position, int face_count) {
+int StaticRenderer::RenderCube(uint8_t bit_mask, float *vertex_buffer, unsigned short *indicies_buffer, float *texture_buffer, float *normals_buffer, Int3 *position, int face_count, BlockType blockType) {
 
     // Helper lambda for assigning texture coordinates (reused for all faces)
     auto assignTextureCoords = [&](int faceIndex) {
-        texture_buffer[0 + (8 * faceIndex)] = 1; // X
-        texture_buffer[1 + (8 * faceIndex)] = 0; // Y
+        //std::cout << uv_coords(blockType).positionX/StaticRenderer::ATLAS_SIZE + uv_coords(blockType).sourceWidth/StaticRenderer::ATLAS_SIZE << std::endl;
+        texture_buffer[0 + (8 * faceIndex)] = ( uv_coords(blockType).positionX/StaticRenderer::ATLAS_SIZE + uv_coords(blockType).sourceWidth/StaticRenderer::ATLAS_SIZE); // X
+        texture_buffer[1 + (8 * faceIndex)] = (uv_coords(blockType).positionY/StaticRenderer::ATLAS_SIZE); // Y
 
-        texture_buffer[2 + (8 * faceIndex)] = 0; // X
-        texture_buffer[3 + (8 * faceIndex)] = 0; // Y
+        texture_buffer[2 + (8 * faceIndex)] = uv_coords(blockType).positionX/StaticRenderer::ATLAS_SIZE; // X
+        texture_buffer[3 + (8 * faceIndex)] = (uv_coords(blockType).positionY/StaticRenderer::ATLAS_SIZE); // Y
 
-        texture_buffer[4 + (8 * faceIndex)] = 1; // X
-        texture_buffer[5 + (8 * faceIndex)] = 1; // Y
+        texture_buffer[4 + (8 * faceIndex)] = uv_coords(blockType).positionX/StaticRenderer::ATLAS_SIZE + uv_coords(blockType).sourceWidth/StaticRenderer::ATLAS_SIZE; // X
+        texture_buffer[5 + (8 * faceIndex)] = (uv_coords(blockType).positionY/StaticRenderer::ATLAS_SIZE + uv_coords(blockType).sourceHeight/StaticRenderer::ATLAS_SIZE); // Y
 
-        texture_buffer[6 + (8 * faceIndex)] = 0; // X
-        texture_buffer[7 + (8 * faceIndex)] = 1; // Y
+        texture_buffer[6 + (8 * faceIndex)] = ( uv_coords(blockType).positionX/StaticRenderer::ATLAS_SIZE); // X
+        texture_buffer[7 + (8 * faceIndex)] = (uv_coords(blockType).positionY/StaticRenderer::ATLAS_SIZE + uv_coords(blockType).sourceHeight/StaticRenderer::ATLAS_SIZE); // Y
     };
 
     // Top Face

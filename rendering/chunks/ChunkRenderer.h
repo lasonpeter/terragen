@@ -14,11 +14,17 @@ struct ChunkMesh{
     Mesh mesh = {0};
 };
 
+struct SubChunkModel{
+    Model model{};
+    Vector3 position{};
+};
+
 class ChunkRenderer{
+    std::vector<SubChunkModel> modelCache{};
     std::vector<ChunkMesh*> chunkMeshesCache{};
-    Texture2D textureChecked;
+    Texture2D textureAtlas;
 public:
-    void addChunksToBeRendered(std::vector<Chunk*> *chunks);
+    void addChunksToBeRendered(std::vector<Chunk*> *chunks, int chunkSize);
     void uploadMeshes();
     void renderChunks();
 };
