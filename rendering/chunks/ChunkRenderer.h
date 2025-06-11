@@ -19,7 +19,7 @@ constexpr int CHUNK_SIZE = 16;
 
 struct SubChunkMesh{
     uint8_t *chunkFaceMasks = new uint8_t[CHUNK_SIZE*CHUNK_SIZE*CHUNK_SIZE]{};
-    Mesh mesh = {0};
+    Mesh* mesh = {0};
 
     SubChunkMesh() = default;
     
@@ -31,7 +31,7 @@ struct SubChunkMesh{
 
 struct ChunkMesh {
     Int2 chunkPosition;
-    SubChunkMesh meshes[16]{};
+    SubChunkMesh* meshes[16]{};
 };
 
 struct SubChunkModel{

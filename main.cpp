@@ -53,7 +53,6 @@ int main()
     Texture2D texturechecked = LoadTextureFromImage(checked);
     UnloadImage(checked);*/
     ChunkRenderer::uploadMeshes(chunkCache);
-
     // Upload mesh data from CPU (RAM) to GPU (VRAM) memory
 
     SetExitKey(KEY_NULL);

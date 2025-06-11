@@ -27,6 +27,6 @@ public:
 
 
 struct ChunkModel{
-    SubChunkModel chunk_models[16]{};
+    SubChunkModel* chunk_models[16]{};
 };
 #endif //CHUNK_H
