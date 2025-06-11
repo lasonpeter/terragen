@@ -36,6 +36,8 @@ add_executable(terragen main.cpp
         rendering/chunks/ChunkRenderer.h
         procedural/terrain/TerrainImage.cpp
         procedural/terrain/TerrainImage.h
+        utilities/ChunkCache.cpp
+        utilities/ChunkCache.h
 )
 
 target_link_libraries(terragen raylib FastNoise2::FastNoise protobuf::protobuf)

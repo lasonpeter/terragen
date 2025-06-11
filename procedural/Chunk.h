@@ -13,6 +13,7 @@
 
 class Chunk {
 public:
+    long chunkId{};
     Int2 position{};
     Block blocks[65536] = {};
 
@@ -20,8 +21,12 @@ public:
         position = position_t;
     }
 
-    static void
-    generateChunkFaceMasks(const Chunk *chunk, int *face_count, int chunk_index, uint8_t *chunkFaceMasks,
+    explicit Chunk(Int2 position_t,long chunkId_t) {
+        chunkId = chunkId_t;
+        position = position_t;
+    }
+
+    static void generateChunkFaceMasks(const Chunk *chunk, int *face_count, int chunk_index, uint8_t *chunkFaceMasks,
                            int chunk_index_x,
                            int chunk_index_y, std::vector<Chunk *> *chunks, int renderDistance, int chunkPosX,
                            int chunkPosZ);
