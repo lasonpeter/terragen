@@ -6,6 +6,7 @@
 #define TERRAGEN_CHUNKRENDERER_H
 
 #include <cstdint>
+#include <unordered_map>
 #include "../../procedural/ChunkGovernor.h"
 
 struct SubChunkMesh{
@@ -14,22 +15,25 @@ struct SubChunkMesh{
 };
 
 struct ChunkMesh {
-    Int2 chunkPosition;
+    Int2 chunkPosition{};
     SubChunkMesh meshes[16]{};
 };
 
-struct SubChunkModel{
-    Model model{};
-    Vector3 position{};
+struct ChunkModel{
+    Int2 chunkPosition{};
+    Model subChunkModels[16]{};
 };
 
 class ChunkRenderer{
-    std::vector<SubChunkModel> modelCache{};
+    std::unordered_map<Int2, ChunkModel> chunkModelCacheMap;
+    std::vector<ChunkModel> chunkModelCache{};
     std::vector<ChunkMesh*> chunkMeshesCache{};
     Texture2D textureAtlas;
 public:
     void addChunksToBeRendered(std::vector<Chunk*> *chunks, int chunkSize);
     void uploadMeshes();
     void renderChunks();
+
+    void loadTextureAtlas();
 };
 #endif //TERRAGEN_CHUNKRENDERER_H

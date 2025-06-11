@@ -59,7 +59,7 @@ int main()
 
     SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
-
+    chunkRenderer.loadTextureAtlas();
     // Main game loop
     while (!WindowShouldClose())    // Detect window close button or ESC key
     {
