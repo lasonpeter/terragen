@@ -23,10 +23,10 @@ struct SubChunkMesh{
 
     SubChunkMesh() = default;
     
-    ~SubChunkMesh(){
+/*    ~SubChunkMesh(){
         UnloadMesh(mesh);
         delete[] chunkFaceMasks;
-    }
+    }*/
 };
 
 struct ChunkMesh {
@@ -42,13 +42,13 @@ struct SubChunkModel{
 class ChunkRenderer{
     std::vector<SubChunkModel> modelCache{};
 public:
-    static Texture2D textureAtlas;
+    Texture2D textureAtlas{};
     static ChunkMesh *renderMesh(Chunk *chunk);
 
     static void renderChunks(ChunkCache *chunkCache);
 
-    void uploadMeshes(ChunkCache *chunkCache);
+    static void uploadMeshes(ChunkCache *chunkCache);
 
-    void renderChunks2(ChunkCache *chunkCache);
+    void uploadTextureAtlas();
 };
 #endif //TERRAGEN_CHUNKRENDERER_H

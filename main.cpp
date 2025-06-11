@@ -41,17 +41,18 @@ int main()
     const char *myEncodedTree2D = "GQAHAAENAAQAAAAAACBABwAAZmYmPwAAAAA/";
     const char *myEncodedTree3D = "EwCamZk+GgABEQACAAAAAADgQBAAAACIQR8AFgABAAAACwADAAAAAgAAAAMAAAAEAAAAAAAAAD8BFAD//wAAAAAAAD8AAAAAPwAAAAA/AAAAAD8BFwAAAIC/AACAPz0KF0BSuB5AEwAAAKBABgAAj8J1PACamZk+AAAAAAAA4XoUPw==";
 
-    ChunkCache chunkCache{};
+    ChunkRenderer *chunkRenderer= new ChunkRenderer{};
+    chunkRenderer->uploadTextureAtlas();
+    ChunkCache* chunkCache= new ChunkCache{};
     ChunkGovernor chunkGovernor = ChunkGovernor();
     auto chunks= chunkGovernor.GenerateChunks(seed, myEncodedTree2D, myEncodedTree3D);
     for (auto chunk: chunks) {
-        chunkCache.addChunk(chunk);
+        chunkCache->addChunk(chunk,chunkRenderer);
     }
     /*Image checked = GenImageChecked(2, 2, 1, 1, RED, GREEN);
     Texture2D texturechecked = LoadTextureFromImage(checked);
     UnloadImage(checked);*/
-    ChunkRenderer chunkRenderer= ChunkRenderer{};
-    chunkRenderer.uploadMeshes(&chunkCache);
+    ChunkRenderer::uploadMeshes(chunkCache);
 
     // Upload mesh data from CPU (RAM) to GPU (VRAM) memory
 
@@ -117,7 +118,7 @@ int main()
         BeginDrawing();
         ClearBackground(RAYWHITE);
         BeginMode3D(camera);
-        chunkRenderer.renderChunks(&chunkCache);
+        ChunkRenderer::renderChunks(chunkCache);
         /*Model model= LoadModelFromMesh(mesh);
         model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = texturechecked;
         DrawModel(model, Vector3{0, 0, 0}, 1.0f, WHITE);*/

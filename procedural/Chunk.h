@@ -1,4 +1,4 @@
-﻿//
+//
 // Created by lasek on 05.04.25.
 //
 
@@ -10,7 +10,8 @@
 #include "Block.h"
 #include "../utilities/Mathf.h"
 #include "../rendering/chunks/ChunkRenderer.h"
-//
+
+// Forward declaration
 
 class Chunk {
 public:
