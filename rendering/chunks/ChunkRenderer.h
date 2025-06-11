@@ -8,32 +8,23 @@
 #include <cstdint>
 #include <unordered_map>
 #include "../../procedural/ChunkGovernor.h"
+#include "../../utilities/ChunkCache.h"
 
-struct SubChunkMesh{
-    uint8_t *chunkFaceMasks = new uint8_t[ChunkGovernor::CHUNK_SIZE*ChunkGovernor::CHUNK_SIZE*ChunkGovernor::CHUNK_SIZE]{};
-    Mesh mesh = {0};
-};
-
-struct ChunkMesh {
-    Int2 chunkPosition{};
-    SubChunkMesh meshes[16]{};
-};
-
-struct ChunkModel{
-    Int2 chunkPosition{};
-    Model subChunkModels[16]{};
-};
-
+class ChunkModel;
+class ChunkMesh;
+class ChunkCache;
 class ChunkRenderer{
-    std::unordered_map<Int2, ChunkModel> chunkModelCacheMap;
     std::vector<ChunkModel> chunkModelCache{};
     std::vector<ChunkMesh*> chunkMeshesCache{};
-    Texture2D textureAtlas;
+    ChunkCache* chunkCache;
 public:
     void addChunksToBeRendered(std::vector<Chunk*> *chunks, int chunkSize);
     void uploadMeshes();
     void renderChunks();
+    void addChunkCache(ChunkCache* pChunkCache) { this->chunkCache = pChunkCache;}
 
     void loadTextureAtlas();
+
+    Texture2D textureAtlas;
 };
 #endif //TERRAGEN_CHUNKRENDERER_H

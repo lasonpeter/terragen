@@ -48,9 +48,18 @@ int main()
     Texture2D texturechecked = LoadTextureFromImage(checked);
     UnloadImage(checked);*/
 
-    ChunkRenderer chunkRenderer= ChunkRenderer{};
-    chunkRenderer.addChunksToBeRendered(&chunkGovernor.chunks_,16);
-    chunkRenderer.uploadMeshes();
+    ChunkRenderer chunkRenderer= ChunkRenderer();
+    chunkRenderer.loadTextureAtlas();
+    ChunkCache chunkCache = ChunkCache(&chunkRenderer);
+    chunkRenderer.addChunkCache(&chunkCache);
+
+
+    for (auto chunk: chunkGovernor.chunks_) {
+        chunkCache.addChunk(chunk);
+    }
+
+    //chunkRenderer.addChunksToBeRendered(&chunkGovernor.chunks_,16);
+    //chunkRenderer.uploadMeshes();
 
     // Upload mesh data from CPU (RAM) to GPU (VRAM) memory
 
@@ -59,7 +68,6 @@ int main()
 
     SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
-    chunkRenderer.loadTextureAtlas();
     // Main game loop
     while (!WindowShouldClose())    // Detect window close button or ESC key
     {

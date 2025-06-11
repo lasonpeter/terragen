@@ -52,36 +52,15 @@ void ChunkRenderer::addChunksToBeRendered(std::vector<Chunk*> *chunks, int chunk
     }
 }
 void ChunkRenderer::renderChunks() {
-    if(chunkModelCache.empty()) {
-        for (auto chunkMesh: chunkMeshesCache) {
-            ChunkModel chunkModel = ChunkModel();
-            chunkModel.chunkPosition = chunkMesh->chunkPosition;
-            for (int i = 0; i < ChunkGovernor::CHUNK_SIZE; ++i) {
-                // THIS SHOULD NOT BE LOADED EACH TIME FROM MEMORY, LEADS TO A MEMORY LEAK
-                {
-                    Model model =LoadModelFromMesh(chunkMesh->meshes[i].mesh);
-                    model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = textureAtlas;
-                    chunkModel.subChunkModels[i] = model;
-                }
-
-            }
-            chunkModelCache.push_back(chunkModel);
-        }
-    }
-    else{
+    {
         {
-            for (auto chunkModels: chunkModelCache) {
+            for (auto chunkModels: chunkCache->chunkModelCache) {
                     for (int i = 0; i < 16; ++i) {
-                        DrawModel(chunkModels.subChunkModels[i],Vector3{static_cast<float>(chunkModels.chunkPosition.y) * ChunkGovernor::CHUNK_SIZE,static_cast<float>(i * ChunkGovernor::CHUNK_SIZE),static_cast<float>(chunkModels.chunkPosition.x) *ChunkGovernor::CHUNK_SIZE}, 1.0f, WHITE);
+                        DrawModel(chunkModels.second.subChunkModels[i],Vector3{static_cast<float>(chunkModels.second.chunkPosition.y) * ChunkGovernor::CHUNK_SIZE,static_cast<float>(i * ChunkGovernor::CHUNK_SIZE),static_cast<float>(chunkModels.second.chunkPosition.x) *ChunkGovernor::CHUNK_SIZE}, 1.0f, WHITE);
                     }
                 }
             }
         }
-        /*{
-            for (auto modelCache: modelCache) {
-                    DrawModel(modelCache.model, modelCache.position, 1.0f, WHITE);
-                }
-        }*/
     }
 
 
