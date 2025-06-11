@@ -45,7 +45,7 @@ inline const bool is_transparent(BlockType e) {
         case BlockType::DIRT: return false;
         case BlockType::STONE: return false;
         case BlockType::WOOD: return false;
-        case BlockType::LEAVES: return true;
+        case BlockType::LEAVES: return false;
         default: return true;
     }
 }

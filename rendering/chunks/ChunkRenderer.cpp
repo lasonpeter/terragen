@@ -16,7 +16,7 @@ void ChunkRenderer::addChunksToBeRendered(std::vector<Chunk*> *chunks, int chunk
                 SubChunkMesh chunkMesh = SubChunkMesh();
                 int *amount_of_faces = new int;
                 *amount_of_faces = 0;
-                Chunk::generateChunkFaceMasks(chunks->at(chnk_index_x * chunkSize + chnk_index_z), amount_of_faces, i, chunkMesh.chunkFaceMasks,chnk_index_x, chnk_index_x, chunks,16,chnk_index_x,chnk_index_z);
+                Chunk::generateChunkFaceMasks(chunks->at(chnk_index_x * chunkSize + chnk_index_z), amount_of_faces, i, chunkMesh.chunkFaceMasks,chnk_index_x, chnk_index_x, chunks,33,chnk_index_x,chnk_index_z);
                 Mesh mesh = {0};
                 mesh.triangleCount = (*amount_of_faces) * 2;
                 mesh.vertexCount = (*amount_of_faces) * 4;

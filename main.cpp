@@ -124,7 +124,7 @@ int main()
 
 
 
-    std::this_thread::sleep_for(std::chrono::seconds(2));
+    std::this_thread::sleep_for(std::chrono::seconds(30));
 
 
 
@@ -136,7 +136,7 @@ int main()
     UnloadImage(checked);*/
 
     ChunkRenderer chunkRenderer= ChunkRenderer{};
-    chunkRenderer.addChunksToBeRendered(&chunkGovernor.chunks_,16);
+    chunkRenderer.addChunksToBeRendered(&chunks,33);
     chunkRenderer.uploadMeshes();
 
     // Upload mesh data from CPU (RAM) to GPU (VRAM) memory

@@ -4,6 +4,9 @@
 
 #include "Chunk.h"
 
+#include <iostream>
+#include <ostream>
+
 #include "ChunkGovernor.h"
 #include "../utilities/FaceMask.h"
 
@@ -44,10 +47,10 @@ void Chunk::generateChunkFaceMasks(const Chunk *chunk, int *face_count, int chun
                     (*face_count)++;
                 }
 
-
-                // Right face (X+)
-                if(x == ChunkGovernor::CHUNK_SIZE - 1) {
-                    // Check neighboring chunk
+                try
+                {
+                    if(x == ChunkGovernor::CHUNK_SIZE - 1) {
+                        // Check neighboring chunk
                         if( chunkPosX < renderDistance -1 && is_transparent(chunks->at((chunk_index_x + 1) * renderDistance + chunk_index_z)->blocks[chunk_index * ChunkGovernor::SUB_CHUNK_SIZE + i*ChunkGovernor::CHUNK_SLICE_SIZE + (x+1)* ChunkGovernor::CHUNK_SIZE + z].blockType)) {
                             chunkFaceMasks[i*ChunkGovernor::CHUNK_SLICE_SIZE + x * ChunkGovernor::CHUNK_SIZE + z] += FaceMask::Right;
                             (*face_count)++;
@@ -55,10 +58,17 @@ void Chunk::generateChunkFaceMasks(const Chunk *chunk, int *face_count, int chun
                         chunkFaceMasks[i * ChunkGovernor::CHUNK_SLICE_SIZE + x * ChunkGovernor::CHUNK_SIZE +z] += FaceMask::Right;
                         (*face_count)++;
                     }
-                else if(is_transparent(chunk->blocks[chunk_index * ChunkGovernor::SUB_CHUNK_SIZE + i*ChunkGovernor::CHUNK_SLICE_SIZE + (x + 1) * ChunkGovernor::CHUNK_SIZE + z].blockType)) {
-                    chunkFaceMasks[i*ChunkGovernor::CHUNK_SLICE_SIZE + x * ChunkGovernor::CHUNK_SIZE + z] += FaceMask::Right;
-                    (*face_count)++;
+                    else if(is_transparent(chunk->blocks[chunk_index * ChunkGovernor::SUB_CHUNK_SIZE + i*ChunkGovernor::CHUNK_SLICE_SIZE + (x + 1) * ChunkGovernor::CHUNK_SIZE + z].blockType)) {
+                        chunkFaceMasks[i*ChunkGovernor::CHUNK_SLICE_SIZE + x * ChunkGovernor::CHUNK_SIZE + z] += FaceMask::Right;
+                        (*face_count)++;
+                    }
                 }
+                catch (_exception e)
+                {
+                    std::cerr << "Exception!" << std::endl;
+                }
+                // Right face (X+)
+
 
                 // LEFT face (X-)
                 if(x == 0) {
