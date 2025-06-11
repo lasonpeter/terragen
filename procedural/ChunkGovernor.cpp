@@ -11,7 +11,8 @@
 
 #include "terrain/BiomeGeneration.h"
 
-void ChunkGovernor::GenerateChunks(int seed, const char *myEncodedTree2D, const char *myEncodedTree3D) {
+std::vector<Chunk*> ChunkGovernor::GenerateChunks(int seed, const char *myEncodedTree2D, const char *myEncodedTree3D) {
+    std::vector<Chunk*> chunkList{};
     BiomeGeneration biome_generation(seed);
     biome_generation.setEncodedNodeTree(myEncodedTree2D, myEncodedTree3D);
     float globalMin = std::numeric_limits<float>::infinity();
@@ -68,9 +69,10 @@ void ChunkGovernor::GenerateChunks(int seed, const char *myEncodedTree2D, const 
                 }
             }
 
-            chunks_.push_back(chunk);
+            chunkList.push_back(chunk);
             delete[] heightMap;
             delete[] caveMap;
         }
     }
+    return chunkList;
 }

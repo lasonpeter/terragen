@@ -1,4 +1,4 @@
-﻿//
+//
 // Created by xenu on 08/05/2025.
 //
 
@@ -6,11 +6,27 @@
 #define TERRAGEN_CHUNKRENDERER_H
 
 #include <cstdint>
-#include "../../procedural/ChunkGovernor.h"
+#include <raylib.h>
+#include <vector>
+#include "../../utilities/Mathf.h"
+
+// Forward declarations
+class ChunkCache;
+class Chunk;
+
+// Define constants to avoid circular dependency
+constexpr int CHUNK_SIZE = 16;
 
 struct SubChunkMesh{
-    uint8_t *chunkFaceMasks = new uint8_t[ChunkGovernor::CHUNK_SIZE*ChunkGovernor::CHUNK_SIZE*ChunkGovernor::CHUNK_SIZE]{};
+    uint8_t *chunkFaceMasks = new uint8_t[CHUNK_SIZE*CHUNK_SIZE*CHUNK_SIZE]{};
     Mesh mesh = {0};
+
+    SubChunkMesh() = default;
+    
+    ~SubChunkMesh(){
+        UnloadMesh(mesh);
+        delete[] chunkFaceMasks;
+    }
 };
 
 struct ChunkMesh {
@@ -25,11 +41,14 @@ struct SubChunkModel{
 
 class ChunkRenderer{
     std::vector<SubChunkModel> modelCache{};
-    std::vector<ChunkMesh*> chunkMeshesCache{};
-    Texture2D textureAtlas;
 public:
-    void addChunksToBeRendered(std::vector<Chunk*> *chunks, int chunkSize);
-    void uploadMeshes();
-    void renderChunks();
+    static Texture2D textureAtlas;
+    static ChunkMesh *renderMesh(Chunk *chunk);
+
+    static void renderChunks(ChunkCache *chunkCache);
+
+    void uploadMeshes(ChunkCache *chunkCache);
+
+    void renderChunks2(ChunkCache *chunkCache);
 };
 #endif //TERRAGEN_CHUNKRENDERER_H

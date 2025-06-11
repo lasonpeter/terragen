@@ -5,22 +5,23 @@
 #ifndef CHUNKCACHE_H
 #define CHUNKCACHE_H
 #include <vector>
+#include <unordered_map>
+#include <string>
+#include <raylib.h>
+#include "../utilities/Mathf.h"
+#include "../procedural/Chunk.h"
 
-#include "../rendering/chunks/ChunkRenderer.h"
-
-
+// Forward declarations
 class Chunk;
-
+struct ChunkMesh;
+struct ChunkModel;
 class ChunkCache {
-  std::vector<Chunk*> chunk_cache_;
-  std::vector<ChunkMesh*> chunk_mesh_cache_;
   public:
-  void addChunk(Chunk* chunk);
-  void invalidateChunk(Chunk* chunk);
-  void removeChunk(long chunkId);
-  void
+    std::unordered_map<std::string,Chunk*> chunk_cache_;
+    std::unordered_map<std::string,ChunkMesh*> chunk_mesh_cache_;
+    std::unordered_map<std::string,ChunkModel*> chunk_model_cache_;
+    void addChunk(Chunk* chunk);
+    void removeChunk(Int2 chunkId);
 };
-
-
 
 #endif //CHUNKCACHE_H
