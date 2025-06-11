@@ -47,7 +47,7 @@ void ChunkCache::addChunk(Chunk *chunk) {
     chunkMeshesCache.insert({Int2ToString(chunk->position),chunk_mesh});
 
     //UPLOADS MESHES OF A CHUNK TO GPU
-    for (auto mesh: chunkMeshesCache.at(Int2ToString(chunk->position))->meshes) {
+    for (auto& mesh: chunkMeshesCache.at(Int2ToString(chunk->position))->meshes) {
         UploadMesh(&mesh.mesh, true);
     }
 
@@ -58,7 +58,7 @@ void ChunkCache::addChunk(Chunk *chunk) {
         // THIS SHOULD NOT BE LOADED EACH TIME FROM MEMORY, LEADS TO A MEMORY LEAK
         {
             Model model =LoadModelFromMesh(chunkMeshesCache.at(Int2ToString(chunk->position))->meshes[i].mesh);
-            model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = chunkRenderer->textureAtlas;;
+            model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = chunkRenderer->textureAtlas;
             chunkModel.subChunkModels[i] = model;
         }
 
@@ -78,5 +78,5 @@ ChunkModel ChunkCache::getChunkModel(Int2 chunkPosition) {
 }
 
 std::string ChunkCache::Int2ToString(Int2 int2) {
-    return std::string();
+    return std::to_string(int2.x) + "_" + std::to_string(int2.y);
 }

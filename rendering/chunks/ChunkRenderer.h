@@ -18,7 +18,6 @@ class ChunkRenderer{
     std::vector<ChunkMesh*> chunkMeshesCache{};
     ChunkCache* chunkCache;
 public:
-    void addChunksToBeRendered(std::vector<Chunk*> *chunks, int chunkSize);
     void uploadMeshes();
     void renderChunks();
     void addChunkCache(ChunkCache* pChunkCache) { this->chunkCache = pChunkCache;}
