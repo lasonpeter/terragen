@@ -28,39 +28,19 @@ void ChunkCache::addChunk(Chunk *chunk) {
     // In your project, x and z are switched, so adjust accordingly
     // Check for left neighbor (y-1 in your coordinate system)
     Int2 leftPos = {chunk->position.x, chunk->position.y - 1};
-    for (auto& c : chunkGovernor.chunks_) {
-        if (c->position.x == leftPos.x && c->position.y == leftPos.y) {
-            chunkLeft = c;
-            break;
-        }
-    }
+    chunkLeft= getChunk(leftPos);
     
     // Check for right neighbor (y+1 in your coordinate system)
     Int2 rightPos = {chunk->position.x, chunk->position.y + 1};
-    for (auto& c : chunkGovernor.chunks_) {
-        if (c->position.x == rightPos.x && c->position.y == rightPos.y) {
-            chunkRight = c;
-            break;
-        }
-    }
+    chunkRight = getChunk(rightPos);
     
     // Check for back neighbor (x-1 in your coordinate system)
     Int2 backPos = {chunk->position.x - 1, chunk->position.y};
-    for (auto& c : chunkGovernor.chunks_) {
-        if (c->position.x == backPos.x && c->position.y == backPos.y) {
-            chunkBack = c;
-            break;
-        }
-    }
+    chunkBack = getChunk(backPos);
     
     // Check for front neighbor (x+1 in your coordinate system)
     Int2 frontPos = {chunk->position.x + 1, chunk->position.y};
-    for (auto& c : chunkGovernor.chunks_) {
-        if (c->position.x == frontPos.x && c->position.y == frontPos.y) {
-            chunkFront = c;
-            break;
-        }
-    }
+    chunkFront = getChunk(frontPos);
     
     // Debug output to verify neighbors were found
     std::cout << "Chunk at (" << chunk->position.x << "," << chunk->position.y << ") has neighbors: ";
@@ -108,6 +88,9 @@ void ChunkCache::addChunk(Chunk *chunk) {
         chunkMesh.mesh = mesh;
         chunk_mesh->meshes[i] = chunkMesh;
     }
+
+    chunkCache.insert({Int2ToString(chunk->position), chunk});
+
     chunk_mesh->chunkPosition = chunk->position;
     chunkMeshesCache.insert({Int2ToString(chunk->position),chunk_mesh});
 
@@ -145,12 +128,12 @@ void ChunkCache::removeChunk(Int2 chunkPosition) {
                 delete[] chunkMesh->meshes[i].chunkFaceMasks;
             }
         }
-        
-        chunkGovernor.chunks_.erase(std::remove_if(chunkGovernor.chunks_.begin(), chunkGovernor.chunks_.end(),
-                                                    [chunkPosition](Chunk* c) {
-                                                        return c->position.x == chunkPosition.x && c->position.y == chunkPosition.y;
-                                                    }), chunkGovernor.chunks_.end());
-        
+
+        //remove chunk from cache
+        if (chunkCache.find(chunkKey) != chunkCache.end()) {
+            chunkCache.erase(chunkKey);
+        }
+
         // Delete the ChunkMesh object itself
         delete chunkMesh;
         chunkMeshesCache.erase(chunkKey);
@@ -165,4 +148,13 @@ ChunkMesh *ChunkCache::getChunkMesh(Int2 chunkPosition) {
 
 std::string ChunkCache::Int2ToString(Int2 int2) {
     return std::to_string(int2.x) + "_" + std::to_string(int2.y);
+}
+
+Chunk *ChunkCache::getChunk(Int2 chunkPosition) {
+    std::string chunkKey = Int2ToString(chunkPosition);
+    if (chunkCache.find(chunkKey) != chunkCache.end()) {
+        return chunkCache.at(chunkKey);
+    }else{
+        return nullptr;
+    }
 }
