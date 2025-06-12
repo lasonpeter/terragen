@@ -46,12 +46,13 @@ int main()
     SetTargetFPS(60);
     //movement and such
     float speed = 0.05f;
-    float movement_speed = 1.0f;
+    float movement_speed = 0.8f;
     Vector3 camera_position = {1, 1, 1};
     const int ATLAS_SIZE=256;
-    const int seed = 1337;
+    const int seed = 767867547567;
     const char *myEncodedTree2D = "GQAHAAENAAQAAAAAACBABwAAZmYmPwAAAAA/";
     const char *myEncodedTree3D = "EwCamZk+GgABEQACAAAAAADgQBAAAACIQR8AFgABAAAACwADAAAAAgAAAAMAAAAEAAAAAAAAAD8BFAD//wAAAAAAAD8AAAAAPwAAAAA/AAAAAD8BFwAAAIC/AACAPz0KF0BSuB5AEwAAAKBABgAAj8J1PACamZk+AAAAAAAA4XoUPw==";
+    SetTraceLogLevel(LOG_ALL);
 
     asio::io_context io_context;
 
@@ -135,21 +136,35 @@ int main()
     Texture2D texturechecked = LoadTextureFromImage(checked);
     UnloadImage(checked);*/
 
-    ChunkRenderer chunkRenderer= ChunkRenderer{};
-    chunkRenderer.addChunksToBeRendered(&chunks,33);
-    chunkRenderer.uploadMeshes();
+    ChunkRenderer chunkRenderer= ChunkRenderer();
+    chunkRenderer.loadTextureAtlas();
+    ChunkCache chunkCache = ChunkCache(&chunkRenderer);
+    chunkCache.chunkGovernor = chunkGovernor;
+    chunkRenderer.addChunkCache(&chunkCache);
+
+
+    for (auto chunk: chunkGovernor.chunks_) {
+        chunkCache.addChunk(chunk);
+    }
 
     // Upload mesh data from CPU (RAM) to GPU (VRAM) memory
 
-    SetExitKey(KEY_NULL);
+    SetExitKey(KEY_ESCAPE);
     HideCursor();
 
     SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
-
     // Main game loop
+    int x=0;
+    int i=0;
     while (!WindowShouldClose())    // Detect window close button or ESC key
     {
+        x++;
+        if(x>20){
+            x=0;
+            chunkCache.removeChunk(chunkGovernor.chunks_[i]->position);
+            i++;
+        }
         ///
         ///TEMPORARY CAMERA MOVEMENT
         ///

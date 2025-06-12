@@ -21,10 +21,12 @@ public:
     }
 
     static void
-    generateChunkFaceMasks(const Chunk *chunk, int *face_count, int chunk_index, uint8_t *chunkFaceMasks,
-                           int chunk_index_x,
-                           int chunk_index_y, std::vector<Chunk *> *chunks, int renderDistance, int chunkPosX,
-                           int chunkPosZ);
+    generateChunkFaceMasks(const Chunk *chunk, int *face_count, int chunk_index, uint8_t *chunkFaceMasks);
+    
+static void
+    generateChunkFaceMasksWithNeighbors(const Chunk *chunk, int *face_count, int chunk_index, uint8_t *chunkFaceMasks,
+                                        const Chunk *chunkLeft, const Chunk *chunkRight, 
+                                        const Chunk *chunkFront, const Chunk *chunkBack);
 };
 
 #endif //CHUNK_H
