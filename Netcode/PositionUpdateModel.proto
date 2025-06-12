@@ -1,0 +1,10 @@
+﻿syntax = "proto3";
+package terragen;
+
+message PositionUpdateModel {
+  string username = 1;
+  float x = 2;
+  float y = 3;
+  float z = 4;
+  float rotationX = 5;
+}

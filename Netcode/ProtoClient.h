@@ -2,9 +2,7 @@
 
 #define _WIN32_WINNT 0x0601
 
-#define WIN32_LEAN_AND_MEAN
-#define NOMINMAX
-#define ASIO_NO_WINDOWS_H
+
 #include <asio.hpp>
 #include <../include/google/protobuf/message.h>
 

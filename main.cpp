@@ -1,14 +1,4 @@
-﻿#define WIN32_LEAN_AND_MEAN
-#define NOMINMAX
-#define ASIO_NO_WINDOWS_H
-#define NOUSER
-#define NOGDI
-#define NODRAWTEXT
-#define NOMCX
-#define NOSHOWWINDOW
-#define NOCLOSEWINDOW
-#define VC_EXTRALEAN
-
+﻿
 #define RAYGUI_IMPLEMENTATION
 #include "raylib.h"
 #include <iostream>
@@ -18,7 +8,6 @@
 #include "utilities/FaceMask.h"
 #include "raymath.h"
 #include "raygui.h"
-#include "netcode/ProtoClient.h"
 #include "FastNoise/FastNoise.h"
 #include "netcode/generated/ChunkTransmitModel.pb.h"
 #include "procedural/ChunkGovernor.h"
@@ -27,6 +16,7 @@
 #include "rendering/StaticRenderer.h"
 #include "rendering/chunks/ChunkRenderer.h"
 #include "data/textures/blocks/blocks.h"
+#include "Netcode/Netcode.h"
 //------------------------------------------------------------------------------------
 // Program main entry point
 //------------------------------------------------------------------------------------
@@ -54,7 +44,22 @@ int main()
     const char *myEncodedTree3D = "EwCamZk+GgABEQACAAAAAADgQBAAAACIQR8AFgABAAAACwADAAAAAgAAAAMAAAAEAAAAAAAAAD8BFAD//wAAAAAAAD8AAAAAPwAAAAA/AAAAAD8BFwAAAIC/AACAPz0KF0BSuB5AEwAAAKBABgAAj8J1PACamZk+AAAAAAAA4XoUPw==";
     SetTraceLogLevel(LOG_ALL);
 
-    asio::io_context io_context;
+
+    Netcode netcode;
+
+    netcode.connect("127.0.0.1", 7777);
+
+    netcode.Receiver();
+
+    std::thread ioThread([&]{ netcode.io_context.run(); });
+
+    netcode.Login();
+
+    std::this_thread::sleep_for(std::chrono::seconds(10));
+
+    netcode.SendPosition("Pixel", 128, 0, 0, 0);
+
+    /*asio::io_context io_context;
 
     ProtoClient client(io_context);
 
@@ -62,15 +67,14 @@ int main()
 
     client.connectTcp("127.0.0.1", 7777);
 
+
+
     client.startReceiveTcp([](std::unique_ptr<google::protobuf::Message> msg) {
-        // tutaj rzutujemy lub używamy refleksji
         if (auto login = dynamic_cast<terragen::LoginModel*>(msg.get())) {
             std::cout<<"Odebrano LOGIN: user="<<login->username()<<"\n";
         }
         else if (auto chunk = dynamic_cast<terragen::ChunkTransmitModel*>(msg.get()))
         {
-
-
             auto bytes = chunk->data();
 
             auto chunkId = chunk->id();
@@ -80,8 +84,6 @@ int main()
             int z = std::stoi(chunkId.substr(pos + 1));
 
             Int2 chunkPos = {x, z};
-
-
 
             std::vector<uint8_t> data;
             for (unsigned char c: bytes)
@@ -100,7 +102,6 @@ int main()
             std::copy(enums.begin(), enums.end(), chunka->blocks);
 
             chunks.push_back(chunka);
-
         }
         else
         {
@@ -121,16 +122,22 @@ int main()
 
     login.set_udpport(7777);
 
-    client.sendMessageTcp(login, terragen::MessageType::LOGIN);
+    client.sendMessageTcp(login, terragen::MessageType::LOGIN);*/
 
 
 
-    std::this_thread::sleep_for(std::chrono::seconds(30));
+    std::this_thread::sleep_for(std::chrono::seconds(300));
 
 
 
-    //ChunkGovernor chunkGovernor = ChunkGovernor();
-    //chunkGovernor.GenerateChunks(seed, myEncodedTree2D, myEncodedTree3D);
+
+
+
+
+    std::this_thread::sleep_for(std::chrono::seconds(300));
+
+    ChunkGovernor chunkGovernor = ChunkGovernor();
+    chunkGovernor.GenerateChunks(seed, myEncodedTree2D, myEncodedTree3D);
 
     /*Image checked = GenImageChecked(2, 2, 1, 1, RED, GREEN);
     Texture2D texturechecked = LoadTextureFromImage(checked);
