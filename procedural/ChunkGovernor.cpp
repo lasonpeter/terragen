@@ -18,8 +18,8 @@ void ChunkGovernor::GenerateChunks(int seed, const char *myEncodedTree2D, const 
     float globalMin = std::numeric_limits<float>::infinity();
     float globalMax = -std::numeric_limits<float>::infinity();
 
-    for (int chunk_x = 0; chunk_x < 32; ++chunk_x) {
-        for (int chunk_y = 0; chunk_y < 32; ++chunk_y) {
+    for (int chunk_x = 0; chunk_x < 16; ++chunk_x) {
+        for (int chunk_y = 0; chunk_y < 16; ++chunk_y) {
             float tempHeightMap[CHUNK_SIZE * CHUNK_SIZE];
             biome_generation.generateNoise2D(tempHeightMap, CHUNK_SIZE, chunk_x, chunk_y);
 
@@ -34,8 +34,8 @@ void ChunkGovernor::GenerateChunks(int seed, const char *myEncodedTree2D, const 
 
     float invRange = (globalMax != globalMin) ? (1.0f / (globalMax - globalMin)) : 0.0f;
 
-    for (int chunk_x = 0; chunk_x < 32; ++chunk_x) {
-        for (int chunk_y = 0; chunk_y < 32; ++chunk_y) {
+    for (int chunk_x = 0; chunk_x < 16; ++chunk_x) {
+        for (int chunk_y = 0; chunk_y < 16; ++chunk_y) {
             Chunk* chunk = new Chunk({chunk_x, chunk_y});
             float* heightMap = new float[CHUNK_SIZE * CHUNK_SIZE];
             float* caveMap = new float[CHUNK_SIZE * CHUNK_SIZE* CHUNK_HEIGHT];

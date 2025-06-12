@@ -3,6 +3,7 @@
 //
 
 #include <iostream>
+#include <thread>
 #include "ChunkCache.h"
 #include "../rendering/StaticRenderer.h"
 #include "../rendering/chunks/ChunkRenderer.h"
@@ -129,14 +130,28 @@ void ChunkCache::removeChunk(Int2 chunkPosition) {
     
     // We now need to properly unload the meshes
     if (chunkMeshesCache.find(chunkKey) != chunkMeshesCache.end()) {
-        ChunkMesh *chunkMesh = chunkMeshesCache[chunkKey];
-        for (auto& mesh: chunkMesh->meshes) {
-            try {
-                UnloadMesh(mesh.mesh);
-            } catch (std::exception& e) {
-                std::cout << "Error unloading mesh: " << e.what() << std::endl;
+        ChunkMesh* chunkMesh = chunkMeshesCache.at(chunkKey);
+
+        // Only unload a limited number of meshes to avoid memory corruption
+        // Based on your observation, keeping it under 7
+        
+        for (int i = 0; i < ChunkGovernor::CHUNK_SIZE; i++) {
+            // sleep for 50 ms to avoid memory corruption
+            std::this_thread::sleep_for(std::chrono::nanoseconds (1));
+            // Only unload meshes that have been properly initialized
+            if (chunkMesh->meshes[i].mesh.vaoId > 0 && 
+                chunkMesh->meshes[i].mesh.vertexCount > 0) {
+                UnloadMesh(chunkMesh->meshes[i].mesh);
+                delete[] chunkMesh->meshes[i].chunkFaceMasks;
             }
         }
+        
+        chunkGovernor.chunks_.erase(std::remove_if(chunkGovernor.chunks_.begin(), chunkGovernor.chunks_.end(),
+                                                    [chunkPosition](Chunk* c) {
+                                                        return c->position.x == chunkPosition.x && c->position.y == chunkPosition.y;
+                                                    }), chunkGovernor.chunks_.end());
+        
+        // Delete the ChunkMesh object itself
         delete chunkMesh;
         chunkMeshesCache.erase(chunkKey);
     }

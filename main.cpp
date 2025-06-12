@@ -40,6 +40,7 @@ int main()
     const int seed = 767867547567;
     const char *myEncodedTree2D = "GQAHAAENAAQAAAAAACBABwAAZmYmPwAAAAA/";
     const char *myEncodedTree3D = "EwCamZk+GgABEQACAAAAAADgQBAAAACIQR8AFgABAAAACwADAAAAAgAAAAMAAAAEAAAAAAAAAD8BFAD//wAAAAAAAD8AAAAAPwAAAAA/AAAAAD8BFwAAAIC/AACAPz0KF0BSuB5AEwAAAKBABgAAj8J1PACamZk+AAAAAAAA4XoUPw==";
+    SetTraceLogLevel(LOG_ALL);
 
     ChunkGovernor chunkGovernor = ChunkGovernor();
     chunkGovernor.GenerateChunks(seed, myEncodedTree2D, myEncodedTree3D);
@@ -67,9 +68,16 @@ int main()
     SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
     // Main game loop
+    int x=0;
+    int i=0;
     while (!WindowShouldClose())    // Detect window close button or ESC key
     {
-
+        x++;
+        if(x>20){
+            x=0;
+            chunkCache.removeChunk(chunkGovernor.chunks_[i]->position);
+            i++;
+        }
         ///
         ///TEMPORARY CAMERA MOVEMENT
         ///
