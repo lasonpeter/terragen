@@ -13,7 +13,9 @@
 #include "rendering/StaticRenderer.h"
 #include "rendering/chunks/ChunkRenderer.h"
 #include "data/textures/blocks/blocks.h"
-#include "physics/PhysicsGovernor.h"
+#include "physics/PhysiscsGovernor.h"
+#include "scripts/Player.h"
+
 //------------------------------------------------------------------------------------
 // Program main entry point
 //------------------------------------------------------------------------------------
@@ -40,7 +42,6 @@ int main() {
     const char *myEncodedTree2D = "GQAHAAENAAQAAAAAACBABwAAZmYmPwAAAAA/";
     const char *myEncodedTree3D = "EwCamZk+GgABEQACAAAAAADgQBAAAACIQR8AFgABAAAACwADAAAAAgAAAAMAAAAEAAAAAAAAAD8BFAD//wAAAAAAAD8AAAAAPwAAAAA/AAAAAD8BFwAAAIC/AACAPz0KF0BSuB5AEwAAAKBABgAAj8J1PACamZk+AAAAAAAA4XoUPw==";
 
-    physics::PhysicsGovernor::getInstance();
     ChunkGovernor chunkGovernor = ChunkGovernor();
     chunkGovernor.GenerateChunks(seed, myEncodedTree2D, myEncodedTree3D);
 
@@ -54,6 +55,17 @@ int main() {
     chunkCache.chunkGovernor = chunkGovernor;
     chunkRenderer.addChunkCache(&chunkCache);
 
+    PhysiscsGovernor::GetInstance()->Start();
+
+    Player player = Player();
+    Player player2 = Player();
+
+
+// Register physics functions
+
+// Start the physics thread
+
+// Later, when done
 
     // Upload mesh data from CPU (RAM) to GPU (VRAM) memory
 
@@ -116,7 +128,6 @@ int main() {
                                 // Move up-down
                         }, camera_move,
                         GetMouseWheelMove() * 2.0f);
-
         // Update
         //----------------------------------------------------------------------------------
         // TODO: Update your variables here
@@ -144,8 +155,6 @@ int main() {
         DrawCubeWires({0,1,0},0.2f, .2f, .2f,VIOLET);
 
 
-
-
         DrawLine3D({0,0,0},{0,5,0}, BLUE);
         DrawLine3D({0,0,0},{0,0,5}, GREEN);
         DrawLine3D({0,0,0},{5,0,0}, RED);
@@ -164,5 +173,6 @@ int main() {
     CloseWindow();        // Close window and OpenGL context
     //--------------------------------------------------------------------------------------
 
+    PhysiscsGovernor::GetInstance()->Stop();
     return 0;
 }

@@ -38,10 +38,19 @@ add_executable(terragen main.cpp
         procedural/terrain/TerrainImage.h
         utilities/ChunkCache.cpp
         utilities/ChunkCache.h
-        ecbs/GameObject.h
-        physics/PhysicsGovernor.h
-        ecbs/components/RigidBody.cpp
-        ecbs/components/RigidBody.h
+        ECBS/GameObject.h
+        physics/PhysiscsGovernor.cpp
+        physics/PhysiscsGovernor.h
+        scripts/Player.cpp
+        scripts/Player.h
+        ECBS/Component.h
+        ECBS/components/RigidBody.cpp
+        ECBS/components/RigidBody.h
+        utilities/UUID.h
+        utilities/UUID.cpp
+        ECBS/GameObjectGovernor.cpp
+        ECBS/GameObjectGovernor.h
+        utilities/ChunkFaceMaskGenerator.h
 )
 
 target_link_libraries(terragen raylib FastNoise2::FastNoise protobuf::protobuf)
