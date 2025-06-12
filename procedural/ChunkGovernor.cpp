@@ -11,56 +11,83 @@
 #include <random>
 #include <vector>
 
-#include "terrain/BiomeGeneration.h"
+
+#include "terrain/BiomeType.h"
+#include "terrain/NoiseGeneration.h"
+
 
 void ChunkGovernor::GenerateChunks(int seed, const char *myEncodedTree2D, const char *myEncodedTree3D) {
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_real_distribution<> dis(0.0, 8);
     std::vector<int> heightPoints(CHUNK_SIZE*CHUNK_SIZE, 0);
-    BiomeGeneration biome_generation(seed);
+    NoiseGeneration biome_generation(seed);
     biome_generation.setEncodedNodeTree(myEncodedTree2D, myEncodedTree3D);
-    float globalMin = std::numeric_limits<float>::infinity();
-    float globalMax = -std::numeric_limits<float>::infinity();
+    float heightMountainMin = std::numeric_limits<float>::infinity();
+    float heightMountainInvRange{};
+    float heightForestMin = std::numeric_limits<float>::infinity();
+    float heightForestInvRange{};
+    float heightDesertMin = std::numeric_limits<float>::infinity();
+    float heightDesertInvRange{};
+    float tempMin = std::numeric_limits<float>::infinity();
+    float heightTempInvRange{};
+    float humidMin = std::numeric_limits<float>::infinity();
+    float heightHumidInvRange{};
+    /*SetGlobalMinMax(humidMin, heightHumidInvRange, seed, 0.002f, "DQADAAAAzcwMQAoAAAAAAAAAAAAAAACAPwCamRk/AAAAAAA=");*/
+    SetGlobalMinMax(humidMin, heightHumidInvRange, seed, 0.002f, "EwAfhes/BwA=");
+    SetGlobalMinMax(tempMin, heightTempInvRange, seed, 0.0015f, "DQAEAAAAAAAAQAcAAAAAAD8AAAAAAA==");
+    /*SetGlobalMinMax(tempMin, heightTempInvRange, seed, 0.0015f, "EwBxPQo/BwA=");*/
+    SetGlobalMinMax(heightMountainMin, heightMountainInvRange, seed, 0.005f, myEncodedTree2D);
+    SetGlobalMinMax(heightForestMin, heightForestInvRange, seed, 0.01f, "GQANAAIAAAAAAABAEwDNzMw+CAAAAAAAPwAAAAAAARkABAAAAAAAAABAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAETAOxROD4HAA==");
+    SetGlobalMinMax(heightDesertMin, heightDesertInvRange, seed, 0.01f, "GQANAAIAAAAAAABAEwCuR+E+BwAAAAAAPwAAAAAAARkABAAAAAAAAABAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAETAOxROD4HAA==");
 
     for (int chunk_x = 0; chunk_x < 32; ++chunk_x) {
         for (int chunk_y = 0; chunk_y < 32; ++chunk_y) {
-            float tempHeightMap[CHUNK_SIZE * CHUNK_SIZE];
-            biome_generation.generateNoise2D(tempHeightMap, CHUNK_SIZE, chunk_x, chunk_y);
-
-            for (int i = 0; i < CHUNK_SIZE * CHUNK_SIZE; ++i) {
-                globalMin = std::min(globalMin, tempHeightMap[i]);
-                globalMax = std::max(globalMax, tempHeightMap[i]);
-            }
-        }
-    }
-    globalMin = globalMin - (globalMax-globalMin) * 0.1;
-    globalMax = globalMax + (globalMax-globalMin) * 0.1;
-
-    float invRange = (globalMax != globalMin) ? (1.0f / (globalMax - globalMin)) : 0.0f;
-
-    for (int chunk_x = 0; chunk_x < 16; ++chunk_x) {
-        for (int chunk_y = 0; chunk_y < 16; ++chunk_y) {
             Chunk* chunk = new Chunk({chunk_x, chunk_y});
-            float* heightMap = new float[CHUNK_SIZE * CHUNK_SIZE];
+            float* heightMapMountain = new float[CHUNK_SIZE * CHUNK_SIZE];
             float* treeMap = new float[CHUNK_SIZE * CHUNK_SIZE];
+            float* heightMapForest = new float[CHUNK_SIZE * CHUNK_SIZE];
+            float* heightMapDesert = new float[CHUNK_SIZE * CHUNK_SIZE];
             float* caveMap = new float[CHUNK_SIZE * CHUNK_SIZE* CHUNK_HEIGHT];
-            biome_generation.generateNoise2D(heightMap, CHUNK_SIZE, chunk_x, chunk_y);
+            float* tempMap = new float[CHUNK_SIZE * CHUNK_SIZE];
+            float* humidMap = new float[CHUNK_SIZE * CHUNK_SIZE];
+            biome_generation.generateNoise2D(heightMapMountain, CHUNK_SIZE, chunk_x, chunk_y);
+            biome_generation.generateNoise2D(heightMapForest, CHUNK_SIZE, chunk_x, chunk_y, 0.01f, "GQANAAIAAAAAAABAEwDNzMw+CAAAAAAAPwAAAAAAARkABAAAAAAAAABAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAETAOxROD4HAA==");
+            biome_generation.generateNoise2D(heightMapDesert, CHUNK_SIZE, chunk_x, chunk_y, 0.01f, "GQANAAIAAAAAAABAEwCuR+E+BwAAAAAAPwAAAAAAARkABAAAAAAAAABAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAETAOxROD4HAA==");
+            /*biome_generation.generateNoise2D(humidMap, CHUNK_SIZE, chunk_x, chunk_y, 0.002f, "DQADAAAAzcwMQAoAAAAAAAAAAAAAAACAPwCamRk/AAAAAAA=");*/
+            biome_generation.generateNoise2D(humidMap, CHUNK_SIZE, chunk_x, chunk_y, 0.002f, "EwAfhes/BwA=");
+            biome_generation.generateNoise2D(tempMap, CHUNK_SIZE, chunk_x, chunk_y, 0.0015f, "DQAEAAAAAAAAQAcAAAAAAD8AAAAAAA==");
+            /*biome_generation.generateNoise2D(tempMap, CHUNK_SIZE, chunk_x, chunk_y, 0.0015f, "EwBxPQo/BwA=");*/
             biome_generation.generateNoise2D(treeMap, CHUNK_SIZE, chunk_x, chunk_y, 0.05f, "HgANAAMAAAAAAABAHgALAAEAAAAAAAAAAQAAAAAAAAABBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAETAFK4nj8IAAAAAAA/AAAAAAABEwBxPQpACAA=");
             biome_generation.generateNoise3D(caveMap, CHUNK_SIZE,  CHUNK_HEIGHT, chunk_x, chunk_y);
 
             for (int x = 0; x < CHUNK_SIZE; ++x) {
                 for (int z = 0; z < CHUNK_SIZE; ++z) {
-                    constexpr int max_height = 256;
+                    /*std::cout<<"t: "<<tempMap[z * CHUNK_SIZE + x]<<std::endl;
+                    std::cout<<"h: "<<humidMap[z * CHUNK_SIZE + x]<<std::endl;*/
+                    /*biomeDefiner = (heightMap[z * CHUNK_SIZE + x], heightMap[z * CHUNK_SIZE + x], heightMap[z * CHUNK_SIZE + x]);*/
+                    /*auto height = GetNormalizeValue(heightMap[z * CHUNK_SIZE + x], heightMin, heightInvRange);
+                    auto temp = GetNormalizeValue(tempMap[z * CHUNK_SIZE + x]);
+                    auto humid = GetNormalizeValue(humidMap[z * CHUNK_SIZE + x]);*/
+                    float temp  = GetNormalizeValue(tempMap [z * CHUNK_SIZE + x], tempMin, heightTempInvRange);
+                    float humid = GetNormalizeValue(humidMap[z * CHUNK_SIZE + x], humidMin, heightHumidInvRange);
 
-                    float v = heightMap[z * CHUNK_SIZE + x];
-                    float normalized = (v - globalMin) * invRange;
+                    float hM = GetNormalizeValue(heightMapMountain[z * CHUNK_SIZE + x], heightMountainMin, heightMountainInvRange);
+                    float hF = GetNormalizeValue(heightMapForest  [z * CHUNK_SIZE + x], heightForestMin, heightForestInvRange);
+                    float hD = GetNormalizeValue(heightMapDesert  [z * CHUNK_SIZE + x], heightDesertMin, heightDesertInvRange);
 
-                    int h = static_cast<int>(normalized * (max_height - 1));
-                    h = std::clamp(h, 0, max_height - 1) - 100;
+                    float wM, wF, wD;
+                    BiomeAdvantage(temp, humid, wM, wF, wD);
+                    /*std::cout<<wM<<" "<<wF<<" "<<wD<<std::endl;*/
+                    /*std::cout<<biomeDefiner.x<<", "<<biomeDefiner.y<<", "<<biomeDefiner.z<<std::endl;*/
+
+                    float finalH = wM * hM + wF * hF + wD * hD;
+
+                    int h = static_cast<int>( finalH * (CHUNK_HEIGHT - 1) );
+                    h = std::clamp(h, 0, CHUNK_HEIGHT - 1) - 100;
                     heightPoints[z * CHUNK_SIZE + x] = h;
 
-                    for (int y = 0; y < max_height; ++y)
+                    for (int y = 0; y < CHUNK_HEIGHT; ++y)
                     {
                         /*std::cout<<caveMap[(y * CHUNK_SIZE + z) * CHUNK_SIZE + x]<<std::endl;*/
                         if (((y <= h)&&(caveMap[(y * CHUNK_SIZE + z) * CHUNK_SIZE + x]<0.0f))||y==0)
@@ -129,8 +156,74 @@ void ChunkGovernor::GenerateChunks(int seed, const char *myEncodedTree2D, const 
 
             chunks_.push_back(chunk);
             delete[] treeMap;
-            delete[] heightMap;
+            delete[] heightMapMountain;
+            delete[] heightMapDesert;
+            delete[] heightMapForest;
             delete[] caveMap;
+            delete[] tempMap;
+            delete[] humidMap;
         }
     }
 }
+
+
+void ChunkGovernor::SetGlobalMinMax(float& Min, float& invRange, int seed, float frequency, const char* code)
+{
+    NoiseGeneration biome_generation(seed);
+    float Max = -std::numeric_limits<float>::infinity();
+    for (int chunk_x = 0; chunk_x < 32; ++chunk_x) {
+        for (int chunk_y = 0; chunk_y < 32; ++chunk_y) {
+            float tempHeightMap[CHUNK_SIZE * CHUNK_SIZE];
+            biome_generation.generateNoise2D(tempHeightMap, CHUNK_SIZE, chunk_x, chunk_y, frequency, code);
+
+            for (int i = 0; i < CHUNK_SIZE * CHUNK_SIZE; ++i) {
+                Min = std::min(Min, tempHeightMap[i]);
+                Max = std::max(Max, tempHeightMap[i]);
+            }
+        }
+    }
+    Min = Min - (Max-Min) * 0.1;
+    Max = Max + (Max-Min) * 0.1;
+    invRange = (Max != Min) ? (1.0f / (Max - Min)) : 0.0f;
+}
+
+float ChunkGovernor::GetNormalizeValue(float& value, float& Min, float& invRange)
+{
+    float norm = (value - Min) * invRange;
+    norm = std::clamp(norm, 0.0f, 1.0f);
+    /*int h = static_cast<int>(normalized * (CHUNK_HEIGHT - 1));*/
+    /*h = std::clamp(h, 0, CHUNK_HEIGHT - 1) - 100;*/
+    return norm;
+}
+
+float ChunkGovernor::GetNormalizeValue(float& value)
+{
+    float norm = value * 0.5f + 0.5f;
+    norm = std::clamp(norm, 0.0f, 1.0f);
+    return norm;
+}
+
+void ChunkGovernor::BiomeAdvantage(float temp, float humid, float& wMountain, float& wForest, float& wDesert)
+{
+    BiomeGeneration biomValues;
+    float Mountain = sqrt(pow(temp-biomValues.mountains.x,2)+pow( humid-biomValues.mountains.y,2))+ 1e-5f;
+    float Forest = sqrt(pow(temp-biomValues.forest.x,2)+pow(humid-biomValues.forest.y,2))+ 1e-5f;
+    float Desert = sqrt(pow(temp-biomValues.desert.x,2)+pow(humid-biomValues.desert.y,2))+ 1e-5f;
+    float iM = 1/Mountain;
+    float iF = 1/Forest;
+    float iD = 1/Desert;
+    float sum = iM + iF + iD;
+    wMountain = iM/sum;
+    wForest = iF/sum;
+    wDesert = iD/sum;
+}
+
+world::Biome ChunkGovernor::pickBiome(float wM, float wF, float wD)
+{
+    if (wM > wF && wM > wD) return world::Biome::Mountains;
+    if (wF > wM && wF > wD) return world::Biome::Forest;
+    return world::Biome::Desert;
+}
+
+
+
