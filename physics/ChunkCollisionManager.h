@@ -29,6 +29,12 @@ public:
     
     // Update collisions for player's current and adjacent chunks
     void UpdateCollisions(float deltaTime);
+    
+    // Check collisions with blocks in a chunk
+    void CheckBlockCollisions(Chunk* chunk, ECBS::Collider* collider, const Vector3& playerPos);
+    
+    // Handle collision response
+    void HandleCollision(ECBS::Collider* collider, const BoundingBox& blockBox);
 };
 
 #endif //TERRAGEN_CHUNKCOLLISIONMANAGER_H

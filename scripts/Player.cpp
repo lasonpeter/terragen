@@ -8,8 +8,10 @@
 #include "../ECBS/components/Collider.h"
 
 void Player::fixedDeltaTime(float delta_t) {
-    std::cout<<"delta_t: "<<delta_t<<"ID:" << GetId()<<std::endl;
-    
+    //std::cout<<"delta_t: "<<delta_t<<"ID:" << GetId()<<std::endl;
+
+    GetComponent<ECBS::RigidBody>()->position = camera.position;
+
     // Update player position for collision detection
     auto* rigidBody = GetComponent<ECBS::RigidBody>();
     auto* collider = GetComponent<ECBS::Collider>();
@@ -21,5 +23,11 @@ void Player::fixedDeltaTime(float delta_t) {
         Vector3 position = {camera.position.x, camera.position.y, camera.position.z};
         collider->boundingBox.min = Vector3{position.x - 0.5f, position.y - 1.0f, position.z - 0.5f};
         collider->boundingBox.max = Vector3{position.x + 0.5f, position.y + 1.0f, position.z + 0.5f};
+    }
+
+    //display player position
+    auto* transform = GetComponent<ECBS::RigidBody>();
+    if (transform) {
+        std::cout << "Player Position: " << transform->position.x << ", " << transform->position.y << ", " << transform->position.z << std::endl;
     }
 }

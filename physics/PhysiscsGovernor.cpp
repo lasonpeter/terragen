@@ -88,7 +88,7 @@ void PhysiscsGovernor::PhysicsThreadFunction() {
         
         // Fixed timestep update
         while (accumulator >= fixedTimeStep) {
-            std::cout<<"FixedUpdate"<<std::endl;
+            //std::cout<<"FixedUpdate"<<std::endl;
             FixedUpdate(1.0f/30.0f);
             accumulator -= fixedTimeStep;
         }

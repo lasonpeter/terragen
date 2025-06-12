@@ -12,13 +12,13 @@ namespace ECBS {
 
     class RigidBody : public Component{
     private:
+        public:
+            RigidBody() = default;
+            ~RigidBody() override = default;
         float mass;
         Vector3 position{};
         Vector3 velocity{};
         Vector3 acceleration{};
-        public:
-            RigidBody() = default;
-            ~RigidBody() override = default;
     };
 
 } // ECBS

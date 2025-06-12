@@ -7,17 +7,19 @@
 
 #include "uuid.h"
 #include "../utilities/UUID.h"
+#include "GameObject.h"
 
 namespace ECBS {
 
     class Component {
         public:
+            GameObject* parent{};
             virtual ~Component() = default;
             Component(){
                 UUID uuid = UUID();
                 id= uuid.GetValue();
             }
-            uint64_t id;
+            uint64_t id{};
     };
 
 } // ECBS

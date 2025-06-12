@@ -44,7 +44,6 @@ add_executable(terragen main.cpp
         scripts/Player.cpp
         scripts/Player.h
         ECBS/Component.h
-        ECBS/components/RigidBody.cpp
         ECBS/components/RigidBody.h
         utilities/UUID.h
         utilities/UUID.cpp
