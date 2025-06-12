@@ -115,31 +115,38 @@ void ChunkCache::addChunk(Chunk *chunk) {
         UploadMesh(&mesh.mesh, true);
     }
 
-    //MODEL PRE RENDERING
-    ChunkModel chunkModel = ChunkModel();
-    chunkModel.chunkPosition = chunkMeshesCache.at(Int2ToString(chunk->position))->chunkPosition;
+    // We no longer need to create models since we'll be using DrawMesh directly
+    // Just ensure the meshes are properly uploaded to GPU
     for (int i = 0; i < ChunkGovernor::CHUNK_SIZE; ++i) {
-        // THIS SHOULD NOT BE LOADED EACH TIME FROM MEMORY, LEADS TO A MEMORY LEAK
-        {
-            Model model =LoadModelFromMesh(chunkMeshesCache.at(Int2ToString(chunk->position))->meshes[i].mesh);
-            model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = chunkRenderer->textureAtlas;
-            chunkModel.subChunkModels[i] = model;
+        // Make sure the mesh is uploaded to GPU
+        if (!chunkMeshesCache.at(Int2ToString(chunk->position))->meshes[i].mesh.vaoId) {
+            UploadMesh(&chunkMeshesCache.at(Int2ToString(chunk->position))->meshes[i].mesh, true);
         }
-
     }
-    chunkModelCache.insert({Int2ToString(chunk->position),chunkModel});
 }
 void ChunkCache::removeChunk(Int2 chunkPosition) {
-
+    std::string chunkKey = Int2ToString(chunkPosition);
+    
+    // We now need to properly unload the meshes
+    if (chunkMeshesCache.find(chunkKey) != chunkMeshesCache.end()) {
+        ChunkMesh *chunkMesh = chunkMeshesCache[chunkKey];
+        for (auto& mesh: chunkMesh->meshes) {
+            try {
+                UnloadMesh(mesh.mesh);
+            } catch (std::exception& e) {
+                std::cout << "Error unloading mesh: " << e.what() << std::endl;
+            }
+        }
+        delete chunkMesh;
+        chunkMeshesCache.erase(chunkKey);
+    }
 }
 
 ChunkMesh *ChunkCache::getChunkMesh(Int2 chunkPosition) {
     return nullptr;
 }
 
-ChunkModel ChunkCache::getChunkModel(Int2 chunkPosition) {
-    return ChunkModel();
-}
+// ChunkModel method removed as we no longer use Models
 
 std::string ChunkCache::Int2ToString(Int2 int2) {
     return std::to_string(int2.x) + "_" + std::to_string(int2.y);

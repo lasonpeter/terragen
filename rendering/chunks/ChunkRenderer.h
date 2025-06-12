@@ -4,7 +4,7 @@
 
 #ifndef TERRAGEN_CHUNKRENDERER_H
 #define TERRAGEN_CHUNKRENDERER_H
-
+#pragma once
 #include <cstdint>
 #include <unordered_map>
 #include "../../procedural/ChunkGovernor.h"
@@ -14,9 +14,9 @@ class ChunkModel;
 class ChunkMesh;
 class ChunkCache;
 class ChunkRenderer{
-    std::vector<ChunkModel> chunkModelCache{};
     std::vector<ChunkMesh*> chunkMeshesCache{};
     ChunkCache* chunkCache;
+    Material material;  // Material to use with DrawMesh
 public:
     void uploadMeshes();
     void renderChunks();

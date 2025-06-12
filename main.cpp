@@ -55,7 +55,9 @@ int main()
     chunkRenderer.addChunkCache(&chunkCache);
 
 
-
+    for (auto chunk: chunkGovernor.chunks_) {
+        chunkCache.addChunk(chunk);
+    }
 
     // Upload mesh data from CPU (RAM) to GPU (VRAM) memory
 
@@ -65,17 +67,9 @@ int main()
     SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
     // Main game loop
-    int x=0;
-    int i=0;
-    int max=chunkGovernor.chunks_.size();
     while (!WindowShouldClose())    // Detect window close button or ESC key
     {
-        if(i<=max && x==5){
-            chunkCache.addChunk(chunkGovernor.chunks_[i]);
-            i++;
-            x=0;
-        }
-        x++;
+
         ///
         ///TEMPORARY CAMERA MOVEMENT
         ///

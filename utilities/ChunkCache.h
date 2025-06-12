@@ -23,10 +23,7 @@ struct ChunkMesh {
     SubChunkMesh meshes[16]{};
 };
 
-struct ChunkModel{
-    Int2 chunkPosition{};
-    Model subChunkModels[16]{};
-};
+// No longer need ChunkModel struct since we're using DrawMesh directly
 
 class ChunkCache {
 private:
@@ -34,12 +31,10 @@ private:
     std::string Int2ToString(Int2 int2);
 public:
     ChunkGovernor chunkGovernor{};
-    std::unordered_map<std::string, ChunkModel> chunkModelCache{};
     std::unordered_map<std::string, ChunkMesh*> chunkMeshesCache{};
     explicit ChunkCache(ChunkRenderer* chunkRenderer_t) : chunkRenderer(chunkRenderer_t) {}
     void addChunk(Chunk* chunk);
     void removeChunk(Int2 chunkPosition);
-    ChunkModel getChunkModel(Int2 chunkPosition);
     ChunkMesh* getChunkMesh(Int2 chunkPosition);
 };
 
