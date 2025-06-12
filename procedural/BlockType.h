@@ -15,6 +15,9 @@ enum class BlockType : uint8_t{
     STONE =3,
     WOOD =4,
     LEAVES =5,
+    BEDROCK =6,
+    SNOW =7,
+    SAND =8
 };
 
 inline const char *to_string(BlockType e) {
@@ -25,6 +28,9 @@ inline const char *to_string(BlockType e) {
         case BlockType::STONE: return "STONE";
         case BlockType::WOOD: return "WOOD";
         case BlockType::LEAVES: return "LEAVES";
+        case BlockType::BEDROCK: return "BEDROCK";
+        case BlockType::SNOW: return "SNOW";
+        case BlockType::SAND: return "SAND";
         default: return "unknown";
     }
 }
@@ -36,6 +42,9 @@ inline const bool is_transparent(BlockType e) {
         case BlockType::STONE: return false;
         case BlockType::WOOD: return false;
         case BlockType::LEAVES: return true;
+        case BlockType::BEDROCK: return false;
+        case BlockType::SNOW: return false;
+        case BlockType::SAND: return false;
         default: return true;
     }
 }

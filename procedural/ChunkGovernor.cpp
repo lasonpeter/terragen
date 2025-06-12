@@ -63,12 +63,7 @@ void ChunkGovernor::GenerateChunks(int seed, const char *myEncodedTree2D, const 
 
             for (int x = 0; x < CHUNK_SIZE; ++x) {
                 for (int z = 0; z < CHUNK_SIZE; ++z) {
-                    /*std::cout<<"t: "<<tempMap[z * CHUNK_SIZE + x]<<std::endl;
-                    std::cout<<"h: "<<humidMap[z * CHUNK_SIZE + x]<<std::endl;*/
-                    /*biomeDefiner = (heightMap[z * CHUNK_SIZE + x], heightMap[z * CHUNK_SIZE + x], heightMap[z * CHUNK_SIZE + x]);*/
-                    /*auto height = GetNormalizeValue(heightMap[z * CHUNK_SIZE + x], heightMin, heightInvRange);
-                    auto temp = GetNormalizeValue(tempMap[z * CHUNK_SIZE + x]);
-                    auto humid = GetNormalizeValue(humidMap[z * CHUNK_SIZE + x]);*/
+
                     float temp  = GetNormalizeValue(tempMap [z * CHUNK_SIZE + x], tempMin, heightTempInvRange);
                     float humid = GetNormalizeValue(humidMap[z * CHUNK_SIZE + x], humidMin, heightHumidInvRange);
 
@@ -78,8 +73,7 @@ void ChunkGovernor::GenerateChunks(int seed, const char *myEncodedTree2D, const 
 
                     float wM, wF, wD;
                     BiomeAdvantage(temp, humid, wM, wF, wD);
-                    /*std::cout<<wM<<" "<<wF<<" "<<wD<<std::endl;*/
-                    /*std::cout<<biomeDefiner.x<<", "<<biomeDefiner.y<<", "<<biomeDefiner.z<<std::endl;*/
+                    world::Biome biome = pickBiome(wM, wF, wD);
 
                     float finalH = wM * hM + wF * hF + wD * hD;
 
@@ -87,27 +81,164 @@ void ChunkGovernor::GenerateChunks(int seed, const char *myEncodedTree2D, const 
                     h = std::clamp(h, 0, CHUNK_HEIGHT - 1) - 100;
                     heightPoints[z * CHUNK_SIZE + x] = h;
 
-                    for (int y = 0; y < CHUNK_HEIGHT; ++y)
-                    {
-                        /*std::cout<<caveMap[(y * CHUNK_SIZE + z) * CHUNK_SIZE + x]<<std::endl;*/
-                        if (((y <= h)&&(caveMap[(y * CHUNK_SIZE + z) * CHUNK_SIZE + x]<0.0f))||y==0)
-                            if (y<=h-5) chunk->blocks[(y * CHUNK_SIZE + z) * CHUNK_SIZE + x] = Block(BlockType::STONE);
-                            else if (y<=h-1) chunk->blocks[(y * CHUNK_SIZE + z) * CHUNK_SIZE + x] = Block(BlockType::DIRT);
-                            else chunk->blocks[(y * CHUNK_SIZE + z) * CHUNK_SIZE + x] = Block(BlockType::GRASS);
-                        else{
-                            chunk->blocks[(y * CHUNK_SIZE + z) * CHUNK_SIZE + x] = Block(BlockType::AIR);
-                            if (y==h&&(caveMap[(y * CHUNK_SIZE + z) * CHUNK_SIZE + x]>=0.0f)) heightPoints[z * CHUNK_SIZE + x] = 0;
+                    switch (biome) {
+                    case world::Biome::Mountains:
+                        for (int y = 0; y < CHUNK_HEIGHT; ++y)
+                        {
+                            if (y==0) chunk->blocks[(y * CHUNK_SIZE + z) * CHUNK_SIZE + x] = Block(BlockType::BEDROCK);
+                            else if ((y <= h)&&(caveMap[(y * CHUNK_SIZE + z) * CHUNK_SIZE + x]<0.0f))
+                            {
+                                if (y>200&&y<=230) chunk->blocks[(y * CHUNK_SIZE + z) * CHUNK_SIZE + x] = Block(BlockType::STONE);
+                                else if (y>230) chunk->blocks[(y * CHUNK_SIZE + z) * CHUNK_SIZE + x] = Block(BlockType::SNOW);
+                                else if (y<=h-5) chunk->blocks[(y * CHUNK_SIZE + z) * CHUNK_SIZE + x] = Block(BlockType::STONE);
+                                else if (y<=h-1) chunk->blocks[(y * CHUNK_SIZE + z) * CHUNK_SIZE + x] = Block(BlockType::DIRT);
+                                else chunk->blocks[(y * CHUNK_SIZE + z) * CHUNK_SIZE + x] = Block(BlockType::GRASS);
+                            }
+                            else
+                            {
+                                chunk->blocks[(y * CHUNK_SIZE + z) * CHUNK_SIZE + x] = Block(BlockType::AIR);
+                                if (y==h&&(caveMap[(y * CHUNK_SIZE + z) * CHUNK_SIZE + x]>=0.0f)) heightPoints[z * CHUNK_SIZE + x] = 0;
+                            }
                         }
+                        for (int tx = 0; tx < CHUNK_SIZE; ++tx)
+                        {
+                            for (int tz = 0; tz < CHUNK_SIZE; ++tz)
+                            {
+                                auto v = treeMap[tz * CHUNK_SIZE + tx];
+                                /*std::cout<<v<<std::endl;*/
+                                v=v*dis(gen);
+                                if (v >= 0.01f||tx < 2 || tx > 13 || tz < 2 || tz > 13) continue;
+
+                                int y0 = heightPoints[tx + tz * CHUNK_SIZE];
+
+                                if (y0 < 0 || y0 > 190)
+                                    continue;
+
+                                /*generowanie pnia*/
+                                for (int dy = 1; dy <= 4; ++dy) {
+                                    int yy = y0 + dy;
+                                    if (yy < 0 || yy >= CHUNK_HEIGHT)
+                                        continue;
+                                    int idx = (yy * CHUNK_SIZE + tz) * CHUNK_SIZE + tx;
+                                    chunk->blocks[idx] = Block(BlockType::WOOD);
+                                }
+
+                                /*generowanie lisci*/
+                                for (int dx = -2; dx <= 2; ++dx) {
+                                    for (int dy = 3; dy <= 6; ++dy) {
+                                        for (int dz = -2; dz <= 2; ++dz) {
+
+                                            if (dx*dx + (dy-4)*(dy-4) + dz*dz > 8)
+                                                continue;
+
+                                            int xx = tx + dx;
+                                            int yy = y0 + dy;
+                                            int zz = tz + dz;
+
+                                            if (xx < 0 || xx >= CHUNK_SIZE ||
+                                                yy < 0 || yy >= CHUNK_HEIGHT ||
+                                                zz < 0 || zz >= CHUNK_SIZE)
+                                                continue;
+
+                                            int idx = (yy * CHUNK_SIZE + zz) * CHUNK_SIZE + xx;
+
+                                            if (chunk->blocks[idx].blockType == BlockType::AIR) {
+                                                chunk->blocks[idx] = Block(BlockType::STONE);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        break;
+                    case world::Biome::Forest:
+                        for (int y = 0; y < CHUNK_HEIGHT; ++y)
+                        {
+                            if (y==0) chunk->blocks[(y * CHUNK_SIZE + z) * CHUNK_SIZE + x] = Block(BlockType::BEDROCK);
+                            else if ((y <= h)&&(caveMap[(y * CHUNK_SIZE + z) * CHUNK_SIZE + x]<0.0f))
+                                if (y<=h-5) chunk->blocks[(y * CHUNK_SIZE + z) * CHUNK_SIZE + x] = Block(BlockType::STONE);
+                                else if (y<=h-1) chunk->blocks[(y * CHUNK_SIZE + z) * CHUNK_SIZE + x] = Block(BlockType::DIRT);
+                                else chunk->blocks[(y * CHUNK_SIZE + z) * CHUNK_SIZE + x] = Block(BlockType::GRASS);
+                            else{
+                                chunk->blocks[(y * CHUNK_SIZE + z) * CHUNK_SIZE + x] = Block(BlockType::AIR);
+                                if (y==h&&(caveMap[(y * CHUNK_SIZE + z) * CHUNK_SIZE + x]>=0.0f)) heightPoints[z * CHUNK_SIZE + x] = 0;
+                            }
+                        }
+                        for (int tx = 0; tx < CHUNK_SIZE; ++tx)
+                        {
+                            for (int tz = 0; tz < CHUNK_SIZE; ++tz)
+                            {
+                                auto v = treeMap[tz * CHUNK_SIZE + tx];
+                                /*std::cout<<v<<std::endl;*/
+                                v=v*dis(gen);
+                                if (v >= 0.04f||tx < 2 || tx > 13 || tz < 2 || tz > 13) continue;
+
+                                int y0 = heightPoints[tx + tz * CHUNK_SIZE];
+
+                                if (y0 < 0 || y0 > 100)
+                                    continue;
+
+                                /*generowanie pnia*/
+                                for (int dy = 1; dy <= 4; ++dy) {
+                                    int yy = y0 + dy;
+                                    if (yy < 0 || yy >= CHUNK_HEIGHT)
+                                        continue;
+                                    int idx = (yy * CHUNK_SIZE + tz) * CHUNK_SIZE + tx;
+                                    chunk->blocks[idx] = Block(BlockType::WOOD);
+                                }
+
+                                /*generowanie lisci*/
+                                for (int dx = -2; dx <= 2; ++dx) {
+                                    for (int dy = 3; dy <= 6; ++dy) {
+                                        for (int dz = -2; dz <= 2; ++dz) {
+
+                                            if (dx*dx + (dy-4)*(dy-4) + dz*dz > 8)
+                                                continue;
+
+                                            int xx = tx + dx;
+                                            int yy = y0 + dy;
+                                            int zz = tz + dz;
+
+                                            if (xx < 0 || xx >= CHUNK_SIZE ||
+                                                yy < 0 || yy >= CHUNK_HEIGHT ||
+                                                zz < 0 || zz >= CHUNK_SIZE)
+                                                continue;
+
+                                            int idx = (yy * CHUNK_SIZE + zz) * CHUNK_SIZE + xx;
+
+                                            if (chunk->blocks[idx].blockType == BlockType::AIR) {
+                                                chunk->blocks[idx] = Block(BlockType::STONE);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        break;
+                    case world::Biome::Desert:
+                        for (int y = 0; y < CHUNK_HEIGHT; ++y)
+                        {
+                            if (y==0) chunk->blocks[(y * CHUNK_SIZE + z) * CHUNK_SIZE + x] = Block(BlockType::BEDROCK);
+                            else if ((y <= h)&&(caveMap[(y * CHUNK_SIZE + z) * CHUNK_SIZE + x]<0.0f))
+                                if (y<=h-5) chunk->blocks[(y * CHUNK_SIZE + z) * CHUNK_SIZE + x] = Block(BlockType::STONE);
+                                else chunk->blocks[(y * CHUNK_SIZE + z) * CHUNK_SIZE + x] = Block(BlockType::SAND);
+                            else{
+                                chunk->blocks[(y * CHUNK_SIZE + z) * CHUNK_SIZE + x] = Block(BlockType::AIR);
+                                if (y==h&&(caveMap[(y * CHUNK_SIZE + z) * CHUNK_SIZE + x]>=0.0f)) heightPoints[z * CHUNK_SIZE + x] = 0;
+                            }
+                        }
+                        break;
                     }
+
                 }
             }
 
-            for (int tx = 0; tx < CHUNK_SIZE; ++tx)
+            /*for (int tx = 0; tx < CHUNK_SIZE; ++tx)
             {
                 for (int tz = 0; tz < CHUNK_SIZE; ++tz)
                 {
                     auto v = treeMap[tz * CHUNK_SIZE + tx];
-                    /*std::cout<<v<<std::endl;*/
+                    /*std::cout<<v<<std::endl;#1#
                     v=v*dis(gen);
                     if (v >= 0.04f||tx < 2 || tx > 13 || tz < 2 || tz > 13) continue;
 
@@ -116,7 +247,7 @@ void ChunkGovernor::GenerateChunks(int seed, const char *myEncodedTree2D, const 
                     if (y0 < 0 || y0 > 100)
                         continue;
 
-                    /*generowanie pnia*/
+                    /*generowanie pnia#1#
                     for (int dy = 1; dy <= 4; ++dy) {
                         int yy = y0 + dy;
                         if (yy < 0 || yy >= CHUNK_HEIGHT)
@@ -125,7 +256,7 @@ void ChunkGovernor::GenerateChunks(int seed, const char *myEncodedTree2D, const 
                         chunk->blocks[idx] = Block(BlockType::WOOD);
                     }
 
-                    /*generowanie lisci*/
+                    /*generowanie lisci#1#
                     for (int dx = -2; dx <= 2; ++dx) {
                         for (int dy = 3; dy <= 6; ++dy) {
                             for (int dz = -2; dz <= 2; ++dz) {
@@ -151,7 +282,7 @@ void ChunkGovernor::GenerateChunks(int seed, const char *myEncodedTree2D, const 
                         }
                     }
                 }
-            }
+            }*/
 
 
             chunks_.push_back(chunk);
@@ -224,6 +355,7 @@ world::Biome ChunkGovernor::pickBiome(float wM, float wF, float wD)
     if (wF > wM && wF > wD) return world::Biome::Forest;
     return world::Biome::Desert;
 }
+
 
 
 
