@@ -18,7 +18,6 @@ namespace ECBS {
                 id= uuid.GetValue();
             }
             uint64_t id;
-            virtual void init() = 0;
     };
 
 } // ECBS

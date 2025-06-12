@@ -51,6 +51,8 @@ add_executable(terragen main.cpp
         ECBS/GameObjectGovernor.cpp
         ECBS/GameObjectGovernor.h
         utilities/ChunkFaceMaskGenerator.h
+        ECBS/components/Collider.h
+        physics/ChunkCollisionManager.cpp
 )
 
 target_link_libraries(terragen raylib FastNoise2::FastNoise protobuf::protobuf)

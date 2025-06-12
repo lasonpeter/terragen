@@ -6,8 +6,11 @@
 #define TERRAGEN_PLAYER_H
 
 #include "../ECBS/GameObject.h"
+#include <raylib.h>
 
-class Player : ECBS::GameObject {
+class Player : public ECBS::GameObject {
+public:
+    Camera3D camera{}; // Reference to the camera for position updates
     void fixedDeltaTime(float delta_t) override;
 };
 

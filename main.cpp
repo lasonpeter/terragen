@@ -14,7 +14,10 @@
 #include "rendering/chunks/ChunkRenderer.h"
 #include "data/textures/blocks/blocks.h"
 #include "physics/PhysiscsGovernor.h"
+#include "physics/ChunkCollisionManager.h"
 #include "scripts/Player.h"
+#include "ECBS/components/RigidBody.h"
+#include "ECBS/components/Collider.h"
 
 //------------------------------------------------------------------------------------
 // Program main entry point
@@ -58,7 +61,24 @@ int main() {
     PhysiscsGovernor::GetInstance()->Start();
 
     Player player = Player();
-    Player player2 = Player();
+    player.camera = camera; // Set the camera reference
+    player.AddComponent<ECBS::RigidBody>();
+    player.AddComponent<ECBS::Collider>();
+    player.GetComponent<ECBS::Collider>()->boundingBox = BoundingBox{Vector3{0,0,0}, Vector3{1,1,1}};
+
+    // Create chunk collision manager
+    ChunkCollisionManager chunkCollisionManager(&chunkGovernor, &player);
+    
+    // Register collision update function with physics governor
+    PhysiscsGovernor::GetInstance()->AddPhysicsFunction([&chunkCollisionManager](float deltaTime) {
+        chunkCollisionManager.UpdateCollisions(deltaTime);
+    });
+    
+    // Register player update function
+    PhysiscsGovernor::GetInstance()->AddPhysicsFunction([&player, &camera](float deltaTime) {
+        player.camera = camera; // Update camera reference each physics tick
+        player.fixedDeltaTime(deltaTime);
+    });
 
 
 // Register physics functions

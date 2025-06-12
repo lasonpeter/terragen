@@ -116,6 +116,10 @@ void ChunkCache::loadChunk(Chunk* chunk) {
 }
 
 void ChunkCache::addChunk(Chunk *chunk) {
+    auto chunkKey = Int2ToString(chunk->position);
+    if (chunkCache.contains(chunkKey)) {
+        throw std::invalid_argument("Chunk already exist");
+    }
     loadChunk(chunk);
     loadMesh(chunk);
 
@@ -149,8 +153,6 @@ void ChunkCache::addChunk(Chunk *chunk) {
         regenerateChunkMesh(chunkFront);
     if (chunkBack != nullptr)
         regenerateChunkMesh(chunkBack);
-
-
 }
 
 void ChunkCache::regenerateChunkMesh(Chunk* chunk) {
