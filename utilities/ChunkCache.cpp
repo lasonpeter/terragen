@@ -2,18 +2,82 @@
 // Created by xenu on 12/06/2025.
 //
 
+#include <iostream>
 #include "ChunkCache.h"
 #include "../rendering/StaticRenderer.h"
 #include "../rendering/chunks/ChunkRenderer.h"
+#include "../procedural/ChunkGovernor.h"
+
+
+
 
 void ChunkCache::addChunk(Chunk *chunk) {
+    // Check if we already have this chunk
+    std::string chunkKey = Int2ToString(chunk->position);
+    if (chunkMeshesCache.find(chunkKey) != chunkMeshesCache.end()) {
+        return; // Already have this chunk
+    }
+    
+    // Find neighboring chunks if they exist
+    Chunk* chunkLeft = nullptr;
+    Chunk* chunkRight = nullptr;
+    Chunk* chunkFront = nullptr;
+    Chunk* chunkBack = nullptr;
+    
+    // In your project, x and z are switched, so adjust accordingly
+    // Check for left neighbor (y-1 in your coordinate system)
+    Int2 leftPos = {chunk->position.x, chunk->position.y - 1};
+    for (auto& c : chunkGovernor.chunks_) {
+        if (c->position.x == leftPos.x && c->position.y == leftPos.y) {
+            chunkLeft = c;
+            break;
+        }
+    }
+    
+    // Check for right neighbor (y+1 in your coordinate system)
+    Int2 rightPos = {chunk->position.x, chunk->position.y + 1};
+    for (auto& c : chunkGovernor.chunks_) {
+        if (c->position.x == rightPos.x && c->position.y == rightPos.y) {
+            chunkRight = c;
+            break;
+        }
+    }
+    
+    // Check for back neighbor (x-1 in your coordinate system)
+    Int2 backPos = {chunk->position.x - 1, chunk->position.y};
+    for (auto& c : chunkGovernor.chunks_) {
+        if (c->position.x == backPos.x && c->position.y == backPos.y) {
+            chunkBack = c;
+            break;
+        }
+    }
+    
+    // Check for front neighbor (x+1 in your coordinate system)
+    Int2 frontPos = {chunk->position.x + 1, chunk->position.y};
+    for (auto& c : chunkGovernor.chunks_) {
+        if (c->position.x == frontPos.x && c->position.y == frontPos.y) {
+            chunkFront = c;
+            break;
+        }
+    }
+    
+    // Debug output to verify neighbors were found
+    std::cout << "Chunk at (" << chunk->position.x << "," << chunk->position.y << ") has neighbors: ";
+    std::cout << "Left: " << (chunkLeft ? "Yes" : "No") << ", ";
+    std::cout << "Right: " << (chunkRight ? "Yes" : "No") << ", ";
+    std::cout << "Front: " << (chunkFront ? "Yes" : "No") << ", ";
+    std::cout << "Back: " << (chunkBack ? "Yes" : "No") << std::endl;
+    
     ChunkMesh *chunk_mesh = new ChunkMesh{};
     for (int i = 0; i < ChunkGovernor::CHUNK_SIZE; ++i) {
         int face_count{};
         SubChunkMesh chunkMesh = SubChunkMesh();
         int *amount_of_faces = new int;
         *amount_of_faces = 0;
-        Chunk::generateChunkFaceMasks(chunk, amount_of_faces, i, chunkMesh.chunkFaceMasks);
+        
+        // Generate face masks considering neighboring chunks
+        Chunk::generateChunkFaceMasksWithNeighbors(chunk, amount_of_faces, i, chunkMesh.chunkFaceMasks,
+                                                  chunkLeft, chunkRight, chunkFront, chunkBack);
         Mesh mesh = {0};
         mesh.triangleCount = (*amount_of_faces) * 2;
         mesh.vertexCount = (*amount_of_faces) * 4;

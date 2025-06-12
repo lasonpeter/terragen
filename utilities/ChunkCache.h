@@ -33,6 +33,7 @@ private:
     ChunkRenderer* chunkRenderer{};
     std::string Int2ToString(Int2 int2);
 public:
+    ChunkGovernor chunkGovernor{};
     std::unordered_map<std::string, ChunkModel> chunkModelCache{};
     std::unordered_map<std::string, ChunkMesh*> chunkMeshesCache{};
     explicit ChunkCache(ChunkRenderer* chunkRenderer_t) : chunkRenderer(chunkRenderer_t) {}

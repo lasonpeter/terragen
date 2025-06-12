@@ -51,6 +51,7 @@ int main()
     ChunkRenderer chunkRenderer= ChunkRenderer();
     chunkRenderer.loadTextureAtlas();
     ChunkCache chunkCache = ChunkCache(&chunkRenderer);
+    chunkCache.chunkGovernor = chunkGovernor;
     chunkRenderer.addChunkCache(&chunkCache);
 
 

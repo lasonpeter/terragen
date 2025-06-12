@@ -10,6 +10,7 @@
 #include <ostream>
 
 #include "terrain/BiomeGeneration.h"
+extern ChunkGovernor chunkGovernor;
 
 void ChunkGovernor::GenerateChunks(int seed, const char *myEncodedTree2D, const char *myEncodedTree3D) {
     BiomeGeneration biome_generation(seed);
