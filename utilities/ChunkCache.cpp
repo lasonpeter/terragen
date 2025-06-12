@@ -12,50 +12,50 @@
 
 
 
-void ChunkCache::addChunk(Chunk *chunk) {
-    // Check if we already have this chunk
+void ChunkCache::loadMesh(Chunk* chunk) {
+ // Check if we already have this chunk
     std::string chunkKey = Int2ToString(chunk->position);
-    if (chunkMeshesCache.find(chunkKey) != chunkMeshesCache.end()) {
+    if (chunkMeshesCache.contains(chunkKey)) {
         return; // Already have this chunk
     }
-    
+
     // Find neighboring chunks if they exist
     Chunk* chunkLeft = nullptr;
     Chunk* chunkRight = nullptr;
     Chunk* chunkFront = nullptr;
     Chunk* chunkBack = nullptr;
-    
+
     // In your project, x and z are switched, so adjust accordingly
     // Check for left neighbor (y-1 in your coordinate system)
     Int2 leftPos = {chunk->position.x, chunk->position.y - 1};
     chunkLeft= getChunk(leftPos);
-    
+
     // Check for right neighbor (y+1 in your coordinate system)
     Int2 rightPos = {chunk->position.x, chunk->position.y + 1};
     chunkRight = getChunk(rightPos);
-    
+
     // Check for back neighbor (x-1 in your coordinate system)
     Int2 backPos = {chunk->position.x - 1, chunk->position.y};
     chunkBack = getChunk(backPos);
-    
+
     // Check for front neighbor (x+1 in your coordinate system)
     Int2 frontPos = {chunk->position.x + 1, chunk->position.y};
     chunkFront = getChunk(frontPos);
-    
+
     // Debug output to verify neighbors were found
     std::cout << "Chunk at (" << chunk->position.x << "," << chunk->position.y << ") has neighbors: ";
     std::cout << "Left: " << (chunkLeft ? "Yes" : "No") << ", ";
     std::cout << "Right: " << (chunkRight ? "Yes" : "No") << ", ";
     std::cout << "Front: " << (chunkFront ? "Yes" : "No") << ", ";
     std::cout << "Back: " << (chunkBack ? "Yes" : "No") << std::endl;
-    
+
     ChunkMesh *chunk_mesh = new ChunkMesh{};
     for (int i = 0; i < ChunkGovernor::CHUNK_SIZE; ++i) {
         int face_count{};
         SubChunkMesh chunkMesh = SubChunkMesh();
         int *amount_of_faces = new int;
         *amount_of_faces = 0;
-        
+
         // Generate face masks considering neighboring chunks
         Chunk::generateChunkFaceMasksWithNeighbors(chunk, amount_of_faces, i, chunkMesh.chunkFaceMasks,
                                                   chunkLeft, chunkRight, chunkFront, chunkBack);
@@ -89,8 +89,6 @@ void ChunkCache::addChunk(Chunk *chunk) {
         chunk_mesh->meshes[i] = chunkMesh;
     }
 
-    chunkCache.insert({Int2ToString(chunk->position), chunk});
-
     chunk_mesh->chunkPosition = chunk->position;
     chunkMeshesCache.insert({Int2ToString(chunk->position),chunk_mesh});
 
@@ -108,32 +106,95 @@ void ChunkCache::addChunk(Chunk *chunk) {
         }
     }
 }
+
+void ChunkCache::loadChunk(Chunk* chunk) {
+    auto chunkKey = Int2ToString(chunk->position);
+    if (!chunkCache.contains(chunkKey)) {
+        //throw std::invalid_argument("Chunk does not exist");
+    }
+    chunkCache.insert({Int2ToString(chunk->position), chunk});
+}
+
+void ChunkCache::addChunk(Chunk *chunk) {
+    loadChunk(chunk);
+    loadMesh(chunk);
+
+    // Find neighboring chunks if they exist
+    Chunk* chunkLeft = nullptr;
+    Chunk* chunkRight = nullptr;
+    Chunk* chunkFront = nullptr;
+    Chunk* chunkBack = nullptr;
+
+    // In your project, x and z are switched, so adjust accordingly
+    // Check for left neighbor (y-1 in your coordinate system)
+    Int2 leftPos = {chunk->position.x, chunk->position.y - 1};
+    chunkLeft= getChunk(leftPos);
+
+    // Check for right neighbor (y+1 in your coordinate system)
+    Int2 rightPos = {chunk->position.x, chunk->position.y + 1};
+    chunkRight = getChunk(rightPos);
+
+    // Check for back neighbor (x-1 in your coordinate system)
+    Int2 backPos = {chunk->position.x - 1, chunk->position.y};
+    chunkBack = getChunk(backPos);
+
+    // Check for front neighbor (x+1 in your coordinate system)
+    Int2 frontPos = {chunk->position.x + 1, chunk->position.y};
+    chunkFront = getChunk(frontPos);
+    if (chunkLeft != nullptr)
+        regenerateChunkMesh(chunkLeft);
+    if (chunkRight != nullptr)
+        regenerateChunkMesh(chunkRight);
+    if (chunkFront != nullptr)
+        regenerateChunkMesh(chunkFront);
+    if (chunkBack != nullptr)
+        regenerateChunkMesh(chunkBack);
+
+
+}
+
+void ChunkCache::regenerateChunkMesh(Chunk* chunk) {
+    auto chunkKey = Int2ToString(chunk->position);
+    if (!chunkCache.contains(chunkKey)) {
+        //throw std::invalid_argument("Chunk does not exist");
+    }
+    unloadMesh(chunk->position);
+
+    loadMesh(chunk);
+}
+
 void ChunkCache::removeChunk(Int2 chunkPosition) {
+    unloadChunk(chunkPosition);
+    unloadMesh(chunkPosition);
+}
+
+void ChunkCache::unloadChunk(Int2 chunkPosition) {
     std::string chunkKey = Int2ToString(chunkPosition);
-    
+    if (chunkCache.find(chunkKey) != chunkCache.end()) {
+        delete chunkCache.at(chunkKey);
+    }
+}
+
+void ChunkCache::unloadMesh(Int2 chunkPosition) {
+    std::string chunkKey = Int2ToString(chunkPosition);
+
     // We now need to properly unload the meshes
     if (chunkMeshesCache.find(chunkKey) != chunkMeshesCache.end()) {
         ChunkMesh* chunkMesh = chunkMeshesCache.at(chunkKey);
 
         // Only unload a limited number of meshes to avoid memory corruption
         // Based on your observation, keeping it under 7
-        
-        for (int i = 0; i < ChunkGovernor::CHUNK_SIZE; i++) {
+
+        for (auto & mesh : chunkMesh->meshes) {
             // sleep for 50 ms to avoid memory corruption
             std::this_thread::sleep_for(std::chrono::nanoseconds (1));
             // Only unload meshes that have been properly initialized
-            if (chunkMesh->meshes[i].mesh.vaoId > 0 && 
-                chunkMesh->meshes[i].mesh.vertexCount > 0) {
-                UnloadMesh(chunkMesh->meshes[i].mesh);
-                delete[] chunkMesh->meshes[i].chunkFaceMasks;
-            }
+            if (mesh.mesh.vaoId > 0 &&
+                mesh.mesh.vertexCount > 0) {
+                UnloadMesh(mesh.mesh);
+                delete[] mesh.chunkFaceMasks;
+                }
         }
-
-        //remove chunk from cache
-        if (chunkCache.find(chunkKey) != chunkCache.end()) {
-            chunkCache.erase(chunkKey);
-        }
-
         // Delete the ChunkMesh object itself
         delete chunkMesh;
         chunkMeshesCache.erase(chunkKey);

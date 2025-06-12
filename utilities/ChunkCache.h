@@ -34,8 +34,21 @@ public:
     std::unordered_map<std::string, ChunkMesh*> chunkMeshesCache{};
     std::unordered_map<std::string, Chunk*> chunkCache{};
     explicit ChunkCache(ChunkRenderer* chunkRenderer_t) : chunkRenderer(chunkRenderer_t) {}
+
+    void loadMesh(Chunk *chunk);
+
+    void loadChunk(Chunk *chunk);
+
     void addChunk(Chunk* chunk);
+
+    void regenerateChunkMesh(Chunk *chunk);
+
     void removeChunk(Int2 chunkPosition);
+
+    void unloadChunk(Int2 chunkPosition);
+
+    void unloadMesh(Int2 chunkPosition);
+
     ChunkMesh* getChunkMesh(Int2 chunkPosition);
     Chunk* getChunk(Int2 chunkPosition);
 };
