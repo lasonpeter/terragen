@@ -13,13 +13,11 @@
 #include "rendering/StaticRenderer.h"
 #include "rendering/chunks/ChunkRenderer.h"
 #include "data/textures/blocks/blocks.h"
+#include "physics/PhysicsGovernor.h"
 //------------------------------------------------------------------------------------
 // Program main entry point
 //------------------------------------------------------------------------------------
-int main()
-{
-
-
+int main() {
     // Initialization
     //--------------------------------------------------------------------------------------
     const int screenWidth = 800*1.5;
@@ -32,6 +30,7 @@ int main()
     camera.fovy = 70.0f; // Camera field-of-view Y
     camera.projection = CAMERA_PERSPECTIVE;
     SetTargetFPS(60);
+    SetTraceLogLevel(LOG_ERROR);
     //movement and such
     float speed = 0.05f;
     float movement_speed = 0.8f;
@@ -40,8 +39,8 @@ int main()
     const int seed = 767867547567;
     const char *myEncodedTree2D = "GQAHAAENAAQAAAAAACBABwAAZmYmPwAAAAA/";
     const char *myEncodedTree3D = "EwCamZk+GgABEQACAAAAAADgQBAAAACIQR8AFgABAAAACwADAAAAAgAAAAMAAAAEAAAAAAAAAD8BFAD//wAAAAAAAD8AAAAAPwAAAAA/AAAAAD8BFwAAAIC/AACAPz0KF0BSuB5AEwAAAKBABgAAj8J1PACamZk+AAAAAAAA4XoUPw==";
-    SetTraceLogLevel(LOG_ALL);
 
+    physics::PhysicsGovernor::getInstance();
     ChunkGovernor chunkGovernor = ChunkGovernor();
     chunkGovernor.GenerateChunks(seed, myEncodedTree2D, myEncodedTree3D);
 
@@ -56,10 +55,6 @@ int main()
     chunkRenderer.addChunkCache(&chunkCache);
 
 
-    for (auto chunk: chunkGovernor.chunks_) {
-        chunkCache.addChunk(chunk);
-    }
-
     // Upload mesh data from CPU (RAM) to GPU (VRAM) memory
 
     SetExitKey(KEY_ESCAPE);
@@ -70,12 +65,13 @@ int main()
     // Main game loop
     int x=0;
     int i=0;
+    int max=chunkGovernor.chunks_.size();
     while (!WindowShouldClose())    // Detect window close button or ESC key
     {
         x++;
-        if(x>20){
+        if(max > i &&x>1){
             x=0;
-            chunkCache.removeChunk(chunkGovernor.chunks_[i]->position);
+            chunkCache.addChunk(chunkGovernor.chunks_[i]);
             i++;
         }
         ///
@@ -102,10 +98,10 @@ int main()
         Vector3 camera_move = {0, 0, 0};
 
         camera_move = {
-                GetMouseDelta().x * speed, // Rotation: yaw
-                GetMouseDelta().y * speed, // Rotation: pitch
-                0.0f // Rotation: roll
-        };
+            GetMouseDelta().x * speed, // Rotation: yaw
+            GetMouseDelta().y * speed, // Rotation: pitch
+            0.0f // Rotation: roll
+    };
         SetMousePosition(GetRenderWidth() / 2, GetRenderHeight() / 2);
         ClearBackground(WHITE);
         Vector3Scale(camera_change, speed);

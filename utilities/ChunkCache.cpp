@@ -109,8 +109,8 @@ void ChunkCache::loadMesh(Chunk* chunk) {
 
 void ChunkCache::loadChunk(Chunk* chunk) {
     auto chunkKey = Int2ToString(chunk->position);
-    if (!chunkCache.contains(chunkKey)) {
-        //throw std::invalid_argument("Chunk does not exist");
+    if (chunkCache.contains(chunkKey)) {
+        throw std::invalid_argument("Chunk already exist");
     }
     chunkCache.insert({Int2ToString(chunk->position), chunk});
 }
@@ -156,7 +156,7 @@ void ChunkCache::addChunk(Chunk *chunk) {
 void ChunkCache::regenerateChunkMesh(Chunk* chunk) {
     auto chunkKey = Int2ToString(chunk->position);
     if (!chunkCache.contains(chunkKey)) {
-        //throw std::invalid_argument("Chunk does not exist");
+        throw std::invalid_argument("Chunk does not exist");
     }
     unloadMesh(chunk->position);
 
@@ -181,10 +181,7 @@ void ChunkCache::unloadMesh(Int2 chunkPosition) {
     // We now need to properly unload the meshes
     if (chunkMeshesCache.find(chunkKey) != chunkMeshesCache.end()) {
         ChunkMesh* chunkMesh = chunkMeshesCache.at(chunkKey);
-
-        // Only unload a limited number of meshes to avoid memory corruption
-        // Based on your observation, keeping it under 7
-
+        
         for (auto & mesh : chunkMesh->meshes) {
             // sleep for 50 ms to avoid memory corruption
             std::this_thread::sleep_for(std::chrono::nanoseconds (1));

@@ -28,7 +28,7 @@ struct ChunkMesh {
 class ChunkCache {
 private:
     ChunkRenderer* chunkRenderer{};
-    std::string Int2ToString(Int2 int2);
+    static std::string Int2ToString(Int2 int2);
 public:
     ChunkGovernor chunkGovernor{};
     std::unordered_map<std::string, ChunkMesh*> chunkMeshesCache{};

@@ -38,6 +38,10 @@ add_executable(terragen main.cpp
         procedural/terrain/TerrainImage.h
         utilities/ChunkCache.cpp
         utilities/ChunkCache.h
+        ecbs/GameObject.h
+        physics/PhysicsGovernor.h
+        ecbs/components/RigidBody.cpp
+        ecbs/components/RigidBody.h
 )
 
 target_link_libraries(terragen raylib FastNoise2::FastNoise protobuf::protobuf)
