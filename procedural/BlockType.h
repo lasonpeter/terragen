@@ -75,6 +75,13 @@ inline const Vector4 texture_coords(BlockType e){
                 static_cast<float>(rtpDescAtlas[0].sourceWidth),
                 static_cast<float>(rtpDescAtlas[0].sourceHeight)
             };
+        case BlockType::WOOD:
+            return Vector4{
+                static_cast<float>(rtpDescAtlas[3].positionX),
+                static_cast<float>(rtpDescAtlas[3].positionY),
+                static_cast<float>(rtpDescAtlas[3].sourceWidth),
+                static_cast<float>(rtpDescAtlas[3].sourceHeight)
+            };
         default:
             return Vector4{0.0f, 0.0f, 0.0f, 0.0f};
     }
@@ -102,6 +109,20 @@ inline const AtlasTexture uv_coords(BlockType e){
                 static_cast<float>(rtpDescAtlas[1].positionY),
                 static_cast<float>(rtpDescAtlas[1].sourceWidth),
                 static_cast<float>(rtpDescAtlas[1].sourceHeight)
+            };
+        case BlockType::WOOD:
+            return AtlasTexture{
+                static_cast<float>(rtpDescAtlas[3].positionX),
+                static_cast<float>(rtpDescAtlas[3].positionY),
+                static_cast<float>(rtpDescAtlas[3].sourceWidth),
+                static_cast<float>(rtpDescAtlas[3].sourceHeight)
+            };
+        case BlockType::LEAVES:
+            return AtlasTexture{
+                static_cast<float>(rtpDescAtlas[5].positionX),
+                static_cast<float>(rtpDescAtlas[5].positionY),
+                static_cast<float>(rtpDescAtlas[5].sourceWidth),
+                static_cast<float>(rtpDescAtlas[5].sourceHeight)
             };
         case BlockType::AIR:
         default:

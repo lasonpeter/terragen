@@ -9,7 +9,7 @@
 #include "raymath.h"
 #include "raygui.h"
 #include "FastNoise/FastNoise.h"
-#include "netcode/generated/ChunkTransmitModel.pb.h"
+#include "Netcode/generated/ChunkTransmitModel.pb.h"
 #include "procedural/ChunkGovernor.h"
 #include "procedural/terrain/BiomeGeneration.h"
 #include "procedural/terrain/TerrainImage.h"
@@ -52,7 +52,7 @@ int main() {
 
     Netcode netcode;
 
-    netcode.connect("127.0.0.1", 7777);
+    netcode.connect("192.168.3.218", 7777);
 
     netcode.Receiver();
 
@@ -60,15 +60,15 @@ int main() {
 
     netcode.Login();
 
-    std::this_thread::sleep_for(std::chrono::seconds(10));
+    std::this_thread::sleep_for(std::chrono::seconds(2));
 
-    netcode.SendPosition("Pixel", 128, 0, 0, 0);
-
-
+    //netcode.SendPosition("Pixel", 128, 0, 0, 0);
 
 
-    std::this_thread::sleep_for(std::chrono::seconds(300));
 
+
+    //std::this_thread::sleep_for(std::chrono::seconds(5));
+    std::cout<<"We"<<std::endl;
     ChunkGovernor chunkGovernor = ChunkGovernor();
     chunkGovernor.GenerateChunks(seed, myEncodedTree2D, myEncodedTree3D);
 
@@ -120,16 +120,23 @@ int main() {
     //--------------------------------------------------------------------------------------
     // Main game loop
     int x=0;
+    int z=0;
     int i=0;
     int max=chunkGovernor.chunks_.size();
+    Vector3 lastPos=camera.position;
     while (!WindowShouldClose())    // Detect window close button or ESC key
     {
         x++;
-        if(max > i && x>1){
+        z++;
+        if (netcode.chunks.size()!=0  && x>1) {
+            chunkCache.addChunk(netcode.chunks[0]);
+            netcode.chunks.erase(netcode.chunks.begin());
             x=0;
-            // Only add one chunk per frame to reduce stuttering
-            chunkCache.addChunk(chunkGovernor.chunks_[i]);
-            i++;
+        }
+        if (z>2 && lastPos != camera.position) {
+            lastPos=camera.position;
+            z=0;
+            netcode.SendPosition("Pixel",camera.position.z,camera.position.y,camera.position.x,0);
         }
         ///
         ///TEMPORARY CAMERA MOVEMENT
