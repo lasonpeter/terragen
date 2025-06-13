@@ -101,9 +101,8 @@ int main() {
     int max=chunkGovernor.chunks_.size();
     while (!WindowShouldClose())    // Detect window close button or ESC key
     {
-        x++;
-        if(max > i && x>1){
-            x=0;
+        if(max > i){
+
             // Only add one chunk per frame to reduce stuttering
             chunkCache.addChunk(chunkGovernor.chunks_[i]);
             i++;
