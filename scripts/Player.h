@@ -11,7 +11,6 @@
 class Player : public ECBS::GameObject {
 public:
     Camera3D camera{}; // Reference to the camera for position updates
-    std::string username{};
     void fixedDeltaTime(float delta_t) override;
 };
 

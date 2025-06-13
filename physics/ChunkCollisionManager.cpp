@@ -136,36 +136,30 @@ void ChunkCollisionManager::HandleCollision(ECBS::Collider* collider, const Boun
         collider->boundingBox.max.z - blockBox.min.z,
         blockBox.max.z - collider->boundingBox.min.z
     );
-    auto parent= collider->parent->GetComponent<ECBS::RigidBody>();
+    
     // Find minimum penetration axis (for simplest resolution)
     if (penetrationX <= penetrationY && penetrationX <= penetrationZ) {
         // X-axis resolution
         float direction = (collider->boundingBox.min.x + collider->boundingBox.max.x) / 2.0f < 
                          (blockBox.min.x + blockBox.max.x) / 2.0f ? -1.0f : 1.0f;
-        /*
+        
         collider->boundingBox.min.x += direction * penetrationX;
         collider->boundingBox.max.x += direction * penetrationX;
-*/
-        parent->position.x += direction * penetrationX;
     } 
     else if (penetrationY <= penetrationX && penetrationY <= penetrationZ) {
         // Y-axis resolution (usually up/down)
         float direction = (collider->boundingBox.min.y + collider->boundingBox.max.y) / 2.0f < 
                          (blockBox.min.y + blockBox.max.y) / 2.0f ? -1.0f : 1.0f;
-
-        parent->position.y += direction * penetrationY;
-
-        /* collider->boundingBox.min.y += direction * penetrationY;
-         collider->boundingBox.max.y += direction * penetrationY;*/
+        
+        collider->boundingBox.min.y += direction * penetrationY;
+        collider->boundingBox.max.y += direction * penetrationY;
     } 
     else {
         // Z-axis resolution
         float direction = (collider->boundingBox.min.z + collider->boundingBox.max.z) / 2.0f < 
                          (blockBox.min.z + blockBox.max.z) / 2.0f ? -1.0f : 1.0f;
-
-        parent->position.z += direction * penetrationZ;
-
-        /*collider->boundingBox.min.z += direction * penetrationZ;
-        collider->boundingBox.max.z += direction * penetrationZ;*/
+        
+        collider->boundingBox.min.z += direction * penetrationZ;
+        collider->boundingBox.max.z += direction * penetrationZ;
     }
 }
