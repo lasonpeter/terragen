@@ -11,6 +11,10 @@
 #include "../StaticRenderer.h"
 
 void ChunkRenderer::renderChunks() {
+    // Check for completed mesh generations
+    checkPendingMeshes();
+    
+    // Render all available meshes
     for (auto& chunkMeshPair: chunkCache->chunkMeshesCache) {
         ChunkMesh* chunkMesh = chunkMeshPair.second;
         for (int i = 0; i < 16; ++i) {
@@ -23,6 +27,11 @@ void ChunkRenderer::renderChunks() {
             DrawMesh(chunkMesh->meshes[i].mesh, material, MatrixTranslate(posX, posY, posZ));
         }
     }
+}
+
+void ChunkRenderer::checkPendingMeshes() {
+    // Update any pending mesh generations
+    chunkCache->updatePendingMeshes();
 }
 
 void ChunkRenderer::loadTextureAtlas() {

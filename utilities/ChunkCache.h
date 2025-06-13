@@ -8,7 +8,9 @@
 #include <cstdint>
 #include <string>
 #include <unordered_map>
+#include <future>
 #include "../procedural/ChunkGovernor.h"
+#include "ThreadPool.h"
 
 // Forward declarations
 class ChunkRenderer;
@@ -28,6 +30,8 @@ struct ChunkMesh {
 class ChunkCache {
 private:
     ChunkRenderer* chunkRenderer{};
+    ThreadPool meshThreadPool{2}; // Create a thread pool with 2 worker threads
+    std::unordered_map<std::string, std::future<ChunkMesh*>> pendingMeshes{};
     static std::string Int2ToString(Int2 int2);
 public:
     ChunkGovernor chunkGovernor{};
@@ -36,6 +40,13 @@ public:
     explicit ChunkCache(ChunkRenderer* chunkRenderer_t) : chunkRenderer(chunkRenderer_t) {}
 
     void loadMesh(Chunk *chunk);
+    
+    // Generate mesh in a worker thread
+    ChunkMesh* generateMeshAsync(Chunk* chunk, const Chunk* chunkLeft, const Chunk* chunkRight, 
+                               const Chunk* chunkFront, const Chunk* chunkBack);
+    
+    // Check for completed mesh generations
+    void updatePendingMeshes();
 
     void loadChunk(Chunk *chunk);
 

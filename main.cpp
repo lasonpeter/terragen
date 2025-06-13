@@ -105,6 +105,18 @@ int main() {
             x=0;
             chunkCache.addChunk(chunkGovernor.chunks_[i]);
             i++;
+            if(i<max){
+                chunkCache.addChunk(chunkGovernor.chunks_[i]);
+                i++;
+            }
+            if(i<max){
+                chunkCache.addChunk(chunkGovernor.chunks_[i]);
+                i++;
+            }
+            if(i<max){
+                chunkCache.addChunk(chunkGovernor.chunks_[i]);
+                i++;
+            }
         }
         ///
         ///TEMPORARY CAMERA MOVEMENT
