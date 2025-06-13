@@ -62,7 +62,7 @@ int main() {
 
     Player player = Player();
     player.camera = camera; // Set the camera reference
-    player.AddComponent<ECBS::RigidBody>();
+    player.AddComponent<ECBS::RigidBody>()->position={-10,200,-10};
     player.AddComponent<ECBS::Collider>();
     player.GetComponent<ECBS::Collider>()->boundingBox = BoundingBox{Vector3{0,0,0}, Vector3{1,1,1}};
 
@@ -148,6 +148,11 @@ int main() {
                                 // Move up-down
                         }, camera_move,
                         GetMouseWheelMove() * 2.0f);
+
+        //Movement
+
+        camera.position=player.GetComponent<ECBS::RigidBody>()->position;
+
         // Update
         //----------------------------------------------------------------------------------
         // TODO: Update your variables here

@@ -7,9 +7,10 @@
 
 #include "uuid.h"
 #include "../utilities/UUID.h"
-#include "GameObject.h"
 
 namespace ECBS {
+    // Forward declaration
+    class GameObject;
 
     class Component {
         public:

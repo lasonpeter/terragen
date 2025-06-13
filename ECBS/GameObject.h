@@ -34,10 +34,13 @@ namespace ECBS {
         template<typename T>
         T* AddComponent() {
             static_assert(std::is_base_of<Component, T>::value, "T must derive from Component");
-            auto component = new T();
+            T* component = new T();
+            //God left this world after this
+            Component *comp= ((Component*) component );
+            comp->parent=this;
             components[std::type_index(typeid(T))].push_back(component);
             return component;
-        }
+    }
 
         template<typename T>
         T* GetComponent() {
