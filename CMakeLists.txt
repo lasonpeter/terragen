@@ -49,6 +49,20 @@ add_executable(terragen main.cpp
         Netcode/generated/PositionUpdateModel.pb.cc
         utilities/ChunkCache.cpp
         utilities/ChunkCache.h
+        ECBS/GameObject.h
+        physics/PhysiscsGovernor.cpp
+        physics/PhysiscsGovernor.h
+        scripts/Player.cpp
+        scripts/Player.h
+        ECBS/Component.h
+        ECBS/components/RigidBody.h
+        utilities/UUID.h
+        utilities/UUID.cpp
+        ECBS/GameObjectGovernor.cpp
+        ECBS/GameObjectGovernor.h
+        utilities/ChunkFaceMaskGenerator.h
+        ECBS/components/Collider.h
+        physics/ChunkCollisionManager.cpp
         Netcode/Netcode.cpp
         Netcode/Netcode.h
 )

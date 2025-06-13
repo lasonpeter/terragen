@@ -19,6 +19,7 @@ class ChunkRenderer{
     Material material;  // Material to use with DrawMesh
 public:
     void uploadMeshes();
+    void checkPendingMeshes();
     void renderChunks();
     void addChunkCache(ChunkCache* pChunkCache) { this->chunkCache = pChunkCache;}
 
