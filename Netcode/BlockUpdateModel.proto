@@ -1,0 +1,12 @@
+﻿syntax = "proto3";
+
+package terragen;
+
+message BlockUpdateModel {
+  int32 chunkX = 1;
+  int32 chunkZ = 2;
+  int32 blockX = 3;
+  int32 blockY = 4;
+  int32 blockZ = 5;
+  uint32 blockId = 6;
+}

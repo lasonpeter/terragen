@@ -65,12 +65,14 @@ enum MessageType : int {
   POSITION_UPDATE = 6,
   POSITION_UPDATE_BROADCAST = 7,
   BLOCK_UPDATE = 8,
+  BLOCK_UPDATE_BROADCAST = 9,
+  CHUNK_TRANSMIT = 10,
   MessageType_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<int32_t>::min(),
   MessageType_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<int32_t>::max()
 };
 bool MessageType_IsValid(int value);
 constexpr MessageType MessageType_MIN = UNDEFINED;
-constexpr MessageType MessageType_MAX = BLOCK_UPDATE;
+constexpr MessageType MessageType_MAX = CHUNK_TRANSMIT;
 constexpr int MessageType_ARRAYSIZE = MessageType_MAX + 1;
 
 const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* MessageType_descriptor();

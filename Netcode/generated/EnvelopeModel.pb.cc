@@ -68,16 +68,17 @@ const char descriptor_table_protodef_EnvelopeModel_2eproto[] PROTOBUF_SECTION_VA
   "\n\023EnvelopeModel.proto\022\010terragen\"y\n\rEnvel"
   "opeModel\022\n\n\002Id\030\001 \001(\t\022\020\n\010PocketId\030\002 \001(\005\022\024"
   "\n\014PocketsCount\030\003 \001(\005\022#\n\004Type\030\004 \001(\0162\025.ter"
-  "ragen.MessageType\022\017\n\007PayLoad\030\005 \001(\014*\257\001\n\013M"
+  "ragen.MessageType\022\017\n\007PayLoad\030\005 \001(\014*\337\001\n\013M"
   "essageType\022\r\n\tUNDEFINED\020\000\022\t\n\005LOGIN\020\001\022\022\n\016"
   "LOGIN_RESPONSE\020\002\022\016\n\nDISCONNECT\020\003\022\010\n\004CHAT"
   "\020\004\022\022\n\016CHAT_BROADCAST\020\005\022\023\n\017POSITION_UPDAT"
   "E\020\006\022\035\n\031POSITION_UPDATE_BROADCAST\020\007\022\020\n\014BL"
-  "OCK_UPDATE\020\010b\006proto3"
+  "OCK_UPDATE\020\010\022\032\n\026BLOCK_UPDATE_BROADCAST\020\t"
+  "\022\022\n\016CHUNK_TRANSMIT\020\nb\006proto3"
   ;
 static ::_pbi::once_flag descriptor_table_EnvelopeModel_2eproto_once;
 const ::_pbi::DescriptorTable descriptor_table_EnvelopeModel_2eproto = {
-    false, false, 340, descriptor_table_protodef_EnvelopeModel_2eproto,
+    false, false, 388, descriptor_table_protodef_EnvelopeModel_2eproto,
     "EnvelopeModel.proto",
     &descriptor_table_EnvelopeModel_2eproto_once, nullptr, 0, 1,
     schemas, file_default_instances, TableStruct_EnvelopeModel_2eproto::offsets,
@@ -106,6 +107,8 @@ bool MessageType_IsValid(int value) {
     case 6:
     case 7:
     case 8:
+    case 9:
+    case 10:
       return true;
     default:
       return false;

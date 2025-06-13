@@ -4,22 +4,27 @@
 
 #ifndef TERRAGEN_CHUNKRENDERER_H
 #define TERRAGEN_CHUNKRENDERER_H
-
+#pragma once
 #include <cstdint>
+#include <unordered_map>
 #include "../../procedural/ChunkGovernor.h"
+#include "../../utilities/ChunkCache.h"
 
-struct ChunkMesh{
-    Int2 chunkPosition;
-    uint8_t chunkFaceMasks[ChunkGovernor::CHUNK_HEIGHT*ChunkGovernor::CHUNK_SIZE*ChunkGovernor::CHUNK_SIZE];
-    Mesh mesh = {0};
-};
-
+class ChunkModel;
+class ChunkMesh;
+class ChunkCache;
 class ChunkRenderer{
     std::vector<ChunkMesh*> chunkMeshesCache{};
-    Texture2D textureChecked;
+    ChunkCache* chunkCache;
+    Material material;  // Material to use with DrawMesh
 public:
-    void addChunksToBeRendered(std::vector<Chunk*> *chunks);
     void uploadMeshes();
+    void checkPendingMeshes();
     void renderChunks();
+    void addChunkCache(ChunkCache* pChunkCache) { this->chunkCache = pChunkCache;}
+
+    void loadTextureAtlas();
+
+    Texture2D textureAtlas;
 };
 #endif //TERRAGEN_CHUNKRENDERER_H

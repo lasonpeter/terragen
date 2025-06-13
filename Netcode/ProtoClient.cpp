@@ -1,6 +1,8 @@
 ﻿#include "ProtoClient.h"
 #include <iostream>
 
+#include "generated/ChunkTransmitModel.pb.h"
+
 // ---------------------------------------------------------------------------------
 //                KONSTRUKTOR I INICJALIZACJA SOCKETÓW
 // ---------------------------------------------------------------------------------
@@ -258,5 +260,16 @@ std::unique_ptr<google::protobuf::Message> ProtoClient::dispatchPayload(const te
             std::cerr << "[ProtoClient] Nieznany typ wiadomości: " << env.type() << "\n";
             break;
     }*/
+    switch (env.type())
+    {
+    case terragen::MessageType::CHUNK_TRANSMIT: {
+            auto msg = std::make_unique<terragen::ChunkTransmitModel>();
+            if (msg->ParseFromArray(payload.data(), static_cast<int>(payload.size()))) {
+                return msg;
+            }
+            break;
+        }
+    }
+
     return nullptr;
 }

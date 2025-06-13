@@ -41,6 +41,30 @@ add_executable(terragen main.cpp
         Netcode/ProtoClient.h
         Netcode/generated/EnvelopeModel.pb.cc
         Netcode/generated/LoginModel.pb.cc
+        Netcode/generated/ChunkTransmitModel.pb.cc
+        Netcode/generated/BlockUpdateBroadcastModel.pb.cc
+        Netcode/generated/BlockUpdateModel.pb.cc
+        Netcode/generated/LoginRespondModel.pb.cc
+        Netcode/generated/PositionUpdateBroadcastModel.pb.cc
+        Netcode/generated/PositionUpdateModel.pb.cc
+        utilities/ChunkCache.cpp
+        utilities/ChunkCache.h
+        ECBS/GameObject.h
+        physics/PhysiscsGovernor.cpp
+        physics/PhysiscsGovernor.h
+        scripts/Player.cpp
+        scripts/Player.h
+        ECBS/Component.h
+        ECBS/components/RigidBody.h
+        utilities/UUID.h
+        utilities/UUID.cpp
+        ECBS/GameObjectGovernor.cpp
+        ECBS/GameObjectGovernor.h
+        utilities/ChunkFaceMaskGenerator.h
+        ECBS/components/Collider.h
+        physics/ChunkCollisionManager.cpp
+        Netcode/Netcode.cpp
+        Netcode/Netcode.h
 )
 
 target_link_libraries(terragen raylib FastNoise2::FastNoise protobuf::libprotobuf asio::asio)
