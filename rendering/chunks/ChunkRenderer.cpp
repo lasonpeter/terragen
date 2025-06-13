@@ -5,6 +5,7 @@
 #include <iostream>
 #include <bitset>
 
+#include "chrono"
 #include "raymath.h"
 #include "raygui.h"
 #include "ChunkRenderer.h"

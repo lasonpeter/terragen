@@ -30,7 +30,7 @@ struct ChunkMesh {
 class ChunkCache {
 private:
     ChunkRenderer* chunkRenderer{};
-    ThreadPool meshThreadPool{2}; // Create a thread pool with 2 worker threads
+    ThreadPool meshThreadPool{4}; // Increase thread pool size for better parallelism
     std::unordered_map<std::string, std::future<ChunkMesh*>> pendingMeshes{};
     static std::string Int2ToString(Int2 int2);
 public:

@@ -4,6 +4,8 @@
 
 #include <iostream>
 #include <thread>
+#include <chrono>
+#include <iomanip> // For std::setprecision
 #include "ChunkCache.h"
 #include "../rendering/StaticRenderer.h"
 #include "../rendering/chunks/ChunkRenderer.h"
@@ -64,17 +66,25 @@ void ChunkCache::loadMesh(Chunk* chunk) {
 
 ChunkMesh* ChunkCache::generateMeshAsync(Chunk* chunk, const Chunk* chunkLeft, const Chunk* chunkRight, 
                                        const Chunk* chunkFront, const Chunk* chunkBack) {
+    auto start = std::chrono::high_resolution_clock::now();
+    std::string chunkKey = Int2ToString(chunk->position);
+    
     ChunkMesh *chunk_mesh = new ChunkMesh{};
     
     for (int i = 0; i < ChunkGovernor::CHUNK_SIZE; ++i) {
+        auto subchunkStart = std::chrono::high_resolution_clock::now();
         int face_count{};
         SubChunkMesh chunkMesh = SubChunkMesh();
         int *amount_of_faces = new int;
         *amount_of_faces = 0;
 
         // Generate face masks considering neighboring chunks
+        auto faceMaskStart = std::chrono::high_resolution_clock::now();
         Chunk::generateChunkFaceMasksWithNeighbors(chunk, amount_of_faces, i, chunkMesh.chunkFaceMasks,
                                                   chunkLeft, chunkRight, chunkFront, chunkBack);
+        auto faceMaskEnd = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<double, std::milli> faceMaskTime = faceMaskEnd - faceMaskStart;
+        
         Mesh mesh = {0};
         mesh.triangleCount = (*amount_of_faces) * 2;
         mesh.vertexCount = (*amount_of_faces) * 4;
@@ -83,6 +93,7 @@ ChunkMesh* ChunkCache::generateMeshAsync(Chunk* chunk, const Chunk* chunkLeft, c
         mesh.normals = new float[mesh.vertexCount * 3];     // 3 vertices, 3 coordinates each (x, y, z)
         mesh.indices = new unsigned short[mesh.triangleCount * 3];
         
+        auto renderStart = std::chrono::high_resolution_clock::now();
         for (int y = 0; y < ChunkGovernor::CHUNK_SIZE; ++y) {
             for (int x = 0; x < ChunkGovernor::CHUNK_SIZE; ++x) {
                 for (int z = 0; z < ChunkGovernor::CHUNK_SIZE; ++z) {
@@ -96,6 +107,8 @@ ChunkMesh* ChunkCache::generateMeshAsync(Chunk* chunk, const Chunk* chunkLeft, c
                 }
             }
         }
+        auto renderEnd = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<double, std::milli> renderTime = renderEnd - renderStart;
 
         for (int z = 0; z <= mesh.vertexCount; z = z + 3) {
             mesh.normals[z] = 0;
@@ -105,19 +118,39 @@ ChunkMesh* ChunkCache::generateMeshAsync(Chunk* chunk, const Chunk* chunkLeft, c
         
         chunkMesh.mesh = mesh;
         chunk_mesh->meshes[i] = chunkMesh;
+        
+        auto subchunkEnd = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<double, std::milli> subchunkTime = subchunkEnd - subchunkStart;
+        
+        if (i == 0) { // Only log for the first subchunk to avoid spam
+            std::cout << "Chunk " << chunkKey << " subchunk " << i << " times:" << std::endl;
+            std::cout << "  Face mask generation: " << faceMaskTime.count() << "ms" << std::endl;
+            std::cout << "  Cube rendering: " << renderTime.count() << "ms" << std::endl;
+            std::cout << "  Total subchunk time: " << subchunkTime.count() << "ms" << std::endl;
+        }
     }
 
     chunk_mesh->chunkPosition = chunk->position;
+    
+    auto end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double, std::milli> totalTime = end - start;
+    std::cout << "Total mesh generation time for chunk " << chunkKey << ": " << totalTime.count() << "ms" << std::endl;
+    
     return chunk_mesh;
 }
 
 void ChunkCache::updatePendingMeshes() {
     std::vector<std::string> completedMeshes;
+    int uploadedCount = 0;
+    
+    // Limit the number of meshes processed per frame to avoid stuttering
+    const int MAX_MESHES_PER_FRAME = 4;
+    int processedCount = 0;
     
     // Check for completed mesh generations
     for (auto& [chunkKey, future] : pendingMeshes) {
         // Check if the future is ready without blocking
-        if (future.wait_for(std::chrono::seconds(0)) == std::future_status::ready) {
+        if (future.wait_for(std::chrono::nanoseconds(1)) == std::future_status::ready) {
             // Get the completed mesh
             ChunkMesh* chunkMesh = future.get();
             
@@ -127,10 +160,17 @@ void ChunkCache::updatePendingMeshes() {
             // Upload meshes to GPU (must be done on main thread)
             for (auto& mesh : chunkMesh->meshes) {
                 UploadMesh(&mesh.mesh, true);
+                uploadedCount++;
             }
             
             // Mark this mesh as completed
             completedMeshes.push_back(chunkKey);
+            
+            // Limit processing to avoid frame stuttering
+            processedCount++;
+            if (processedCount >= MAX_MESHES_PER_FRAME) {
+                break;
+            }
         }
     }
     
@@ -153,6 +193,7 @@ void ChunkCache::addChunk(Chunk *chunk) {
     if (chunkCache.contains(chunkKey)) {
         throw std::invalid_argument("Chunk already exist");
     }
+    
     loadChunk(chunk);
     loadMesh(chunk);
 
@@ -165,7 +206,7 @@ void ChunkCache::addChunk(Chunk *chunk) {
     // In your project, x and z are switched, so adjust accordingly
     // Check for left neighbor (y-1 in your coordinate system)
     Int2 leftPos = {chunk->position.x, chunk->position.y - 1};
-    chunkLeft= getChunk(leftPos);
+    chunkLeft = getChunk(leftPos);
 
     // Check for right neighbor (y+1 in your coordinate system)
     Int2 rightPos = {chunk->position.x, chunk->position.y + 1};
@@ -178,14 +219,17 @@ void ChunkCache::addChunk(Chunk *chunk) {
     // Check for front neighbor (x+1 in your coordinate system)
     Int2 frontPos = {chunk->position.x + 1, chunk->position.y};
     chunkFront = getChunk(frontPos);
+    
+    // Instead of regenerating all neighbors immediately, queue them for later regeneration
+    // This spreads out the work across multiple frames
     if (chunkLeft != nullptr)
-        regenerateChunkMesh(chunkLeft);
+        loadMesh(chunkLeft);
     if (chunkRight != nullptr)
-        regenerateChunkMesh(chunkRight);
+        loadMesh(chunkRight);
     if (chunkFront != nullptr)
-        regenerateChunkMesh(chunkFront);
+        loadMesh(chunkFront);
     if (chunkBack != nullptr)
-        regenerateChunkMesh(chunkBack);
+        loadMesh(chunkBack);
 }
 
 void ChunkCache::regenerateChunkMesh(Chunk* chunk) {
@@ -194,10 +238,9 @@ void ChunkCache::regenerateChunkMesh(Chunk* chunk) {
         throw std::invalid_argument("Chunk does not exist");
     }
     
-    // If there's a pending mesh generation for this chunk, wait for it to complete
+    // If there's a pending mesh generation for this chunk, cancel it instead of waiting
     if (pendingMeshes.contains(chunkKey)) {
-        pendingMeshes[chunkKey].wait(); // Wait for the current task to finish
-        pendingMeshes.erase(chunkKey);  // Remove it from pending
+        pendingMeshes.erase(chunkKey);  // Remove it from pending without waiting
     }
     
     unloadMesh(chunk->position);
@@ -228,8 +271,6 @@ void ChunkCache::unloadMesh(Int2 chunkPosition) {
 
     // Check if there's a pending mesh generation for this chunk
     if (pendingMeshes.find(chunkKey) != pendingMeshes.end()) {
-        // Cancel the pending mesh generation by removing it from the map
-        // Note: The task will still complete in the thread pool, but we'll ignore the result
         pendingMeshes.erase(chunkKey);
     }
 
@@ -238,15 +279,15 @@ void ChunkCache::unloadMesh(Int2 chunkPosition) {
         ChunkMesh* chunkMesh = chunkMeshesCache.at(chunkKey);
         
         for (auto & mesh : chunkMesh->meshes) {
-            // sleep for 50 ms to avoid memory corruption
-            std::this_thread::sleep_for(std::chrono::nanoseconds (1));
+            // Remove the sleep that was causing stuttering
+            
             // Only unload meshes that have been properly initialized
-            if (mesh.mesh.vaoId > 0 &&
-                mesh.mesh.vertexCount > 0) {
+            if (mesh.mesh.vaoId > 0 && mesh.mesh.vertexCount > 0) {
                 UnloadMesh(mesh.mesh);
                 delete[] mesh.chunkFaceMasks;
-                }
+            }
         }
+        
         // Delete the ChunkMesh object itself
         delete chunkMesh;
         chunkMeshesCache.erase(chunkKey);

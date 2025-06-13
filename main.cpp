@@ -2,6 +2,7 @@
 #include "raylib.h"
 #include <iostream>
 #include <bitset>
+#include <chrono>
 
 #include "utilities/FaceMask.h"
 #include "raymath.h"
@@ -101,22 +102,11 @@ int main() {
     while (!WindowShouldClose())    // Detect window close button or ESC key
     {
         x++;
-        if(max > i &&x>1){
+        if(max > i && x>1){
             x=0;
+            // Only add one chunk per frame to reduce stuttering
             chunkCache.addChunk(chunkGovernor.chunks_[i]);
             i++;
-            if(i<max){
-                chunkCache.addChunk(chunkGovernor.chunks_[i]);
-                i++;
-            }
-            if(i<max){
-                chunkCache.addChunk(chunkGovernor.chunks_[i]);
-                i++;
-            }
-            if(i<max){
-                chunkCache.addChunk(chunkGovernor.chunks_[i]);
-                i++;
-            }
         }
         ///
         ///TEMPORARY CAMERA MOVEMENT
@@ -170,7 +160,14 @@ int main() {
         BeginDrawing();
         ClearBackground(RAYWHITE);
         BeginMode3D(camera);
+        
+        auto renderStart = std::chrono::high_resolution_clock::now();
         chunkRenderer.renderChunks();
+        auto renderEnd = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<double, std::milli> renderTime = renderEnd - renderStart;
+        if (renderTime.count() > 16.0) { // Only log if rendering takes more than 16ms (60fps threshold)
+            std::cout << "Chunk rendering time: " << renderTime.count() << "ms" << std::endl;
+        }
         /*Model model= LoadModelFromMesh(mesh);
         model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = texturechecked;
         DrawModel(model, Vector3{0, 0, 0}, 1.0f, WHITE);*/
