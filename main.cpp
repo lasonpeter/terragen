@@ -28,6 +28,7 @@ int main() {
     //--------------------------------------------------------------------------------------
     const int screenWidth = 800*1.5;
     const int screenHeight = 450*1.5;
+
     InitWindow(screenWidth, screenHeight, "terragen");
     Camera3D camera = {0};
     camera.position = Vector3{1.0f, 150.0f, 1.0f}; // Camera position

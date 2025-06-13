@@ -4,6 +4,7 @@
 #include "raylib.h"
 #include <iostream>
 #include <bitset>
+#include <array>
 
 #include "chrono"
 #include "raymath.h"
@@ -38,9 +39,10 @@ void ChunkRenderer::checkPendingMeshes() {
 void ChunkRenderer::loadTextureAtlas() {
     Image atlasImage = LoadImage("data/textures/blocks/blocks.png");
     textureAtlas = LoadTextureFromImage(atlasImage);
-    textureAtlas.format = PixelFormat::PIXELFORMAT_UNCOMPRESSED_R16G16B16;
+    // Using default texture format instead of forcing R16G16B16
     UnloadImage(atlasImage);
-    
+
+
     // Initialize the material for DrawMesh
     material = LoadMaterialDefault();
     material.maps[MATERIAL_MAP_DIFFUSE].texture = textureAtlas;

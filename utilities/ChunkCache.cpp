@@ -6,6 +6,7 @@
 #include <thread>
 #include <chrono>
 #include <iomanip> // For std::setprecision
+#include <algorithm> // For std::max
 #include "ChunkCache.h"
 #include "../rendering/StaticRenderer.h"
 #include "../rendering/chunks/ChunkRenderer.h"
@@ -220,16 +221,15 @@ void ChunkCache::addChunk(Chunk *chunk) {
     Int2 frontPos = {chunk->position.x + 1, chunk->position.y};
     chunkFront = getChunk(frontPos);
     
-    // Instead of regenerating all neighbors immediately, queue them for later regeneration
-    // This spreads out the work across multiple frames
+    // Regenerate neighboring chunks to ensure proper face culling at boundaries
     if (chunkLeft != nullptr)
-        loadMesh(chunkLeft);
+        regenerateChunkMesh(chunkLeft);
     if (chunkRight != nullptr)
-        loadMesh(chunkRight);
+        regenerateChunkMesh(chunkRight);
     if (chunkFront != nullptr)
-        loadMesh(chunkFront);
+        regenerateChunkMesh(chunkFront);
     if (chunkBack != nullptr)
-        loadMesh(chunkBack);
+        regenerateChunkMesh(chunkBack);
 }
 
 void ChunkCache::regenerateChunkMesh(Chunk* chunk) {
