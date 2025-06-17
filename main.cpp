@@ -1,32 +1,35 @@
-﻿#define RAYGUI_IMPLEMENTATION
+﻿
+#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
+#define ASIO_NO_WINDOWS_H
+#define NOUSER
+#define NOGDI
+#define NODRAWTEXT
+#define NOMCX
+#define NOSHOWWINDOW
+#define NOCLOSEWINDOW
+#define VC_EXTRALEAN
+
+
+#define RAYGUI_IMPLEMENTATION
 #include "raylib.h"
 #include <iostream>
 #include <bitset>
-#include <vector>
-#include <chrono>
 
 #include "utilities/FaceMask.h"
 #include "raymath.h"
 #include "raygui.h"
 #include "FastNoise/FastNoise.h"
-#include "Netcode/generated/ChunkTransmitModel.pb.h"
 #include "procedural/ChunkGovernor.h"
 #include "procedural/terrain/BiomeGeneration.h"
 #include "procedural/terrain/TerrainImage.h"
 #include "rendering/StaticRenderer.h"
 #include "rendering/chunks/ChunkRenderer.h"
-#include "data/textures/blocks/blocks.h"
-#include "physics/PhysiscsGovernor.h"
-#include "physics/ChunkCollisionManager.h"
-#include "scripts/Player.h"
-#include "ECBS/components/RigidBody.h"
-#include "ECBS/components/Collider.h"
-
-#include "Netcode/Netcode.h"
 //------------------------------------------------------------------------------------
 // Program main entry point
 //------------------------------------------------------------------------------------
-int main() {
+int main()
+{
     // Initialization
     //--------------------------------------------------------------------------------------
     const int screenWidth = 800*1.5;
@@ -39,36 +42,16 @@ int main() {
     camera.fovy = 70.0f; // Camera field-of-view Y
     camera.projection = CAMERA_PERSPECTIVE;
     SetTargetFPS(60);
-    SetTraceLogLevel(LOG_ERROR);
     //movement and such
     float speed = 0.05f;
-    float movement_speed = 0.8f;
+    float movement_speed = 1.0f;
     Vector3 camera_position = {1, 1, 1};
+
     const int ATLAS_SIZE=256;
-    const int seed = 767867547567;
+    const int seed = 3466;
     const char *myEncodedTree2D = "GQAHAAENAAQAAAAAACBABwAAZmYmPwAAAAA/";
     const char *myEncodedTree3D = "EwCamZk+GgABEQACAAAAAADgQBAAAACIQR8AFgABAAAACwADAAAAAgAAAAMAAAAEAAAAAAAAAD8BFAD//wAAAAAAAD8AAAAAPwAAAAA/AAAAAD8BFwAAAIC/AACAPz0KF0BSuB5AEwAAAKBABgAAj8J1PACamZk+AAAAAAAA4XoUPw==";
 
-
-    Netcode netcode;
-
-    netcode.connect("192.168.3.218", 7777);
-
-    netcode.Receiver();
-
-    std::thread ioThread([&]{ netcode.io_context.run(); });
-
-    netcode.Login();
-
-    std::this_thread::sleep_for(std::chrono::seconds(2));
-
-    //netcode.SendPosition("Pixel", 128, 0, 0, 0);
-
-
-
-
-    //std::this_thread::sleep_for(std::chrono::seconds(5));
-    std::cout<<"We"<<std::endl;
     ChunkGovernor chunkGovernor = ChunkGovernor();
     chunkGovernor.GenerateChunks(seed, myEncodedTree2D, myEncodedTree3D);
 
@@ -76,68 +59,21 @@ int main() {
     Texture2D texturechecked = LoadTextureFromImage(checked);
     UnloadImage(checked);*/
 
-    ChunkRenderer chunkRenderer= ChunkRenderer();
-    chunkRenderer.loadTextureAtlas();
-    ChunkCache chunkCache = ChunkCache(&chunkRenderer);
-    chunkCache.chunkGovernor = chunkGovernor;
-    chunkRenderer.addChunkCache(&chunkCache);
-
-    PhysiscsGovernor::GetInstance()->Start();
-
-    Player player = Player();
-    player.camera = camera; // Set the camera reference
-    player.AddComponent<ECBS::RigidBody>();
-    player.AddComponent<ECBS::Collider>();
-    player.GetComponent<ECBS::Collider>()->boundingBox = BoundingBox{Vector3{0,0,0}, Vector3{1,1,1}};
-
-    // Create chunk collision manager
-    ChunkCollisionManager chunkCollisionManager(&chunkGovernor, &player);
-
-    // Register collision update function with physics governor
-    PhysiscsGovernor::GetInstance()->AddPhysicsFunction([&chunkCollisionManager](float deltaTime) {
-        chunkCollisionManager.UpdateCollisions(deltaTime);
-    });
-
-    // Register player update function
-    PhysiscsGovernor::GetInstance()->AddPhysicsFunction([&player, &camera](float deltaTime) {
-        player.camera = camera; // Update camera reference each physics tick
-        player.fixedDeltaTime(deltaTime);
-    });
-
-
-// Register physics functions
-
-// Start the physics thread
-
-// Later, when done
+    ChunkRenderer chunkRenderer= ChunkRenderer{};
+    chunkRenderer.addChunksToBeRendered(&chunkGovernor.chunks_);
+    chunkRenderer.uploadMeshes();
 
     // Upload mesh data from CPU (RAM) to GPU (VRAM) memory
 
-    SetExitKey(KEY_ESCAPE);
+    SetExitKey(KEY_NULL);
     HideCursor();
 
     SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
+
     // Main game loop
-    int x=0;
-    int z=0;
-    int i=0;
-    int max=chunkGovernor.chunks_.size();
-    Vector3 lastPos=camera.position;
     while (!WindowShouldClose())    // Detect window close button or ESC key
     {
-        x++;
-        z++;
-        if (netcode.chunks.size()!=0  && x>1) {
-            chunkCache.addChunk(netcode.chunks[0]);
-            netcode.chunks.erase(netcode.chunks.begin());
-            x=0;
-        }
-        if (z>2 && lastPos != camera.position) {
-            lastPos=camera.position;
-            z=0;
-            netcode.SendPosition("Pixel",camera.position.z,camera.position.y,camera.position.x,0);
-        }
         ///
         ///TEMPORARY CAMERA MOVEMENT
         ///
@@ -162,10 +98,10 @@ int main() {
         Vector3 camera_move = {0, 0, 0};
 
         camera_move = {
-            GetMouseDelta().x * speed, // Rotation: yaw
-            GetMouseDelta().y * speed, // Rotation: pitch
-            0.0f // Rotation: roll
-    };
+                GetMouseDelta().x * speed, // Rotation: yaw
+                GetMouseDelta().y * speed, // Rotation: pitch
+                0.0f // Rotation: roll
+        };
         SetMousePosition(GetRenderWidth() / 2, GetRenderHeight() / 2);
         ClearBackground(WHITE);
         Vector3Scale(camera_change, speed);
@@ -180,6 +116,7 @@ int main() {
                                 // Move up-down
                         }, camera_move,
                         GetMouseWheelMove() * 2.0f);
+
         // Update
         //----------------------------------------------------------------------------------
         // TODO: Update your variables here
@@ -190,14 +127,7 @@ int main() {
         BeginDrawing();
         ClearBackground(RAYWHITE);
         BeginMode3D(camera);
-
-        auto renderStart = std::chrono::high_resolution_clock::now();
         chunkRenderer.renderChunks();
-        auto renderEnd = std::chrono::high_resolution_clock::now();
-        std::chrono::duration<double, std::milli> renderTime = renderEnd - renderStart;
-        if (renderTime.count() > 16.0) { // Only log if rendering takes more than 16ms (60fps threshold)
-            std::cout << "Chunk rendering time: " << renderTime.count() << "ms" << std::endl;
-        }
         /*Model model= LoadModelFromMesh(mesh);
         model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = texturechecked;
         DrawModel(model, Vector3{0, 0, 0}, 1.0f, WHITE);*/
@@ -212,6 +142,8 @@ int main() {
         DrawCubeWires({0,0,1},0.2f, .2f, .2f,RED);
 
         DrawCubeWires({0,1,0},0.2f, .2f, .2f,VIOLET);
+
+
 
 
         DrawLine3D({0,0,0},{0,5,0}, BLUE);
@@ -232,6 +164,5 @@ int main() {
     CloseWindow();        // Close window and OpenGL context
     //--------------------------------------------------------------------------------------
 
-    PhysiscsGovernor::GetInstance()->Stop();
     return 0;
 }

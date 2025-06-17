@@ -2,7 +2,7 @@
 // Created by xenu on 03/04/2025.
 //
 
-#include "BiomeGeneration.h"
+#include "NoiseGeneration.h"
 
 #include <stdexcept>
 #include <FastNoise/FastNoise_Config.h>
@@ -13,13 +13,13 @@
 
 
 
-BiomeGeneration::BiomeGeneration(int seed_)
+NoiseGeneration::NoiseGeneration(int seed_)
 {
     seed = seed_;
 }
 
 
-void BiomeGeneration::generateNoise2D(float *buffer, int size, int x, int y)
+void NoiseGeneration::generateNoise2D(float *buffer, int size, int x, int y)
 {
     auto fn = FastNoise::NewFromEncodedNodeTree(encodedNodeTree2D);
 
@@ -33,7 +33,7 @@ void BiomeGeneration::generateNoise2D(float *buffer, int size, int x, int y)
     }
 }
 
-void BiomeGeneration::generateNoise2D(float* buffer, int size, int x, int y, float frequency, const char* encodedTree)
+void NoiseGeneration::generateNoise2D(float* buffer, int size, int x, int y, float frequency, const char* encodedTree)
 {
     auto fn = FastNoise::NewFromEncodedNodeTree(encodedTree);
     if (fn)
@@ -46,7 +46,7 @@ void BiomeGeneration::generateNoise2D(float* buffer, int size, int x, int y, flo
     }
 }
 
-void BiomeGeneration::generateNoise3D(float* buffer, int size, int size_height, int x, int y)
+void NoiseGeneration::generateNoise3D(float* buffer, int size, int size_height, int x, int y)
 {
     auto fn = FastNoise::NewFromEncodedNodeTree(encodedNodeTree3D);
 

@@ -7,17 +7,17 @@
 #include <vector>
 
 
-class BiomeGeneration {
+class NoiseGeneration {
 
     const float BIOME_JITTER = 0.980f;
     const float FREQUENCY = 0.005f;
-    int seed = 0;
+    int seed = 1010;
     float frequency = FREQUENCY;
 
 public:
     void setEncodedNodeTree(const char* tree2D, const char* tree3D) { encodedNodeTree2D = tree2D; encodedNodeTree3D = tree3D; }
     void setSeed(int seed_) { seed = seed_; }
-    explicit BiomeGeneration(int seed_);
+    explicit NoiseGeneration(int seed_);
     ///
     /// \param buffer
     /// \param size size of chunk being rendered ( will be made constant)
