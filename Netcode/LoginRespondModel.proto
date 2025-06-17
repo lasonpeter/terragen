@@ -1,7 +1,0 @@
-﻿syntax = "proto3";
-package terragen;
-
-message LoginRespondModel {
-  bool success = 1;
-  int32 udpPort = 2;
-}

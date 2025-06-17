@@ -2,7 +2,3 @@
 # To keep your changes, remove these comment lines, but the plugin won't be able to modify your requirements
 
 requirements:
-  - "raylib/5.5"
-  - "fastnoise2/0.10.0-alpha"
-  - "protobuf/3.21.12"
-  - "asio/1.34.2"
