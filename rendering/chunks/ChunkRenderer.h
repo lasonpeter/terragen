@@ -1,30 +1,54 @@
-﻿//
+//
 // Created by xenu on 08/05/2025.
 //
 
 #ifndef TERRAGEN_CHUNKRENDERER_H
 #define TERRAGEN_CHUNKRENDERER_H
-#pragma once
+
 #include <cstdint>
-#include <unordered_map>
-#include "../../procedural/ChunkGovernor.h"
-#include "../../utilities/ChunkCache.h"
+#include <raylib.h>
+#include <vector>
+#include "../../utilities/Mathf.h"
 
-class ChunkModel;
-class ChunkMesh;
+// Forward declarations
 class ChunkCache;
+class Chunk;
+
+// Define constants to avoid circular dependency
+constexpr int CHUNK_SIZE = 16;
+
+struct SubChunkMesh{
+    uint8_t *chunkFaceMasks = new uint8_t[CHUNK_SIZE*CHUNK_SIZE*CHUNK_SIZE]{};
+    Mesh* mesh = {0};
+
+    SubChunkMesh() = default;
+    
+/*    ~SubChunkMesh(){
+        UnloadMesh(mesh);
+        delete[] chunkFaceMasks;
+    }*/
+};
+
+struct ChunkMesh {
+    Int2 chunkPosition;
+    SubChunkMesh* meshes[16]{};
+};
+
+struct SubChunkModel{
+    Model model{};
+    Vector3 position{};
+};
+
 class ChunkRenderer{
-    std::vector<ChunkMesh*> chunkMeshesCache{};
-    ChunkCache* chunkCache;
-    Material material;  // Material to use with DrawMesh
+    std::vector<SubChunkModel> modelCache{};
 public:
-    void uploadMeshes();
-    void checkPendingMeshes();
-    void renderChunks();
-    void addChunkCache(ChunkCache* pChunkCache) { this->chunkCache = pChunkCache;}
+    Texture2D textureAtlas{};
+    static ChunkMesh *renderMesh(Chunk *chunk);
 
-    void loadTextureAtlas();
+    static void renderChunks(ChunkCache *chunkCache);
 
-    Texture2D textureAtlas;
+    static void uploadMeshes(ChunkCache *chunkCache);
+
+    void uploadTextureAtlas();
 };
 #endif //TERRAGEN_CHUNKRENDERER_H

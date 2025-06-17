@@ -1,17 +1,4 @@
-﻿
-#define WIN32_LEAN_AND_MEAN
-#define NOMINMAX
-#define ASIO_NO_WINDOWS_H
-#define NOUSER
-#define NOGDI
-#define NODRAWTEXT
-#define NOMCX
-#define NOSHOWWINDOW
-#define NOCLOSEWINDOW
-#define VC_EXTRALEAN
-
-
-#define RAYGUI_IMPLEMENTATION
+﻿#define RAYGUI_IMPLEMENTATION
 #include "raylib.h"
 #include <iostream>
 #include <bitset>
@@ -25,11 +12,14 @@
 #include "procedural/terrain/TerrainImage.h"
 #include "rendering/StaticRenderer.h"
 #include "rendering/chunks/ChunkRenderer.h"
+#include "data/textures/blocks/blocks.h"
 //------------------------------------------------------------------------------------
 // Program main entry point
 //------------------------------------------------------------------------------------
 int main()
 {
+
+
     // Initialization
     //--------------------------------------------------------------------------------------
     const int screenWidth = 800*1.5;
@@ -44,25 +34,25 @@ int main()
     SetTargetFPS(60);
     //movement and such
     float speed = 0.05f;
-    float movement_speed = 1.0f;
+    float movement_speed = 0.8f;
     Vector3 camera_position = {1, 1, 1};
-
     const int ATLAS_SIZE=256;
-    const int seed = 3466;
+    const int seed = 767867547567;
     const char *myEncodedTree2D = "GQAHAAENAAQAAAAAACBABwAAZmYmPwAAAAA/";
     const char *myEncodedTree3D = "EwCamZk+GgABEQACAAAAAADgQBAAAACIQR8AFgABAAAACwADAAAAAgAAAAMAAAAEAAAAAAAAAD8BFAD//wAAAAAAAD8AAAAAPwAAAAA/AAAAAD8BFwAAAIC/AACAPz0KF0BSuB5AEwAAAKBABgAAj8J1PACamZk+AAAAAAAA4XoUPw==";
 
+    ChunkRenderer *chunkRenderer= new ChunkRenderer{};
+    chunkRenderer->uploadTextureAtlas();
+    ChunkCache* chunkCache= new ChunkCache{};
     ChunkGovernor chunkGovernor = ChunkGovernor();
-    chunkGovernor.GenerateChunks(seed, myEncodedTree2D, myEncodedTree3D);
-
+    auto chunks= chunkGovernor.GenerateChunks(seed, myEncodedTree2D, myEncodedTree3D);
+    for (auto chunk: chunks) {
+        chunkCache->addChunk(chunk,chunkRenderer);
+    }
     /*Image checked = GenImageChecked(2, 2, 1, 1, RED, GREEN);
     Texture2D texturechecked = LoadTextureFromImage(checked);
     UnloadImage(checked);*/
-
-    ChunkRenderer chunkRenderer= ChunkRenderer{};
-    chunkRenderer.addChunksToBeRendered(&chunkGovernor.chunks_);
-    chunkRenderer.uploadMeshes();
-
+    ChunkRenderer::uploadMeshes(chunkCache);
     // Upload mesh data from CPU (RAM) to GPU (VRAM) memory
 
     SetExitKey(KEY_NULL);
@@ -127,7 +117,7 @@ int main()
         BeginDrawing();
         ClearBackground(RAYWHITE);
         BeginMode3D(camera);
-        chunkRenderer.renderChunks();
+        ChunkRenderer::renderChunks(chunkCache);
         /*Model model= LoadModelFromMesh(mesh);
         model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = texturechecked;
         DrawModel(model, Vector3{0, 0, 0}, 1.0f, WHITE);*/
